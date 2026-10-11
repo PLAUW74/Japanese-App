@@ -1,0 +1,12 @@
+{
+  "name": "Kotoba · Japanese dictionary and vocab trainer",
+  "short_name": "Kotoba",
+  "description": "Look up Japanese words, collect them, and quiz yourself with spaced repetition.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#faf7f2",
+  "theme_color": "#c8402f",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

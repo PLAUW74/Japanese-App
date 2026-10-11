@@ -1,0 +1,2 @@
+# Raw dictionary downloads; tools/build-data.ps1 fetches them again when missing.
+data-src/

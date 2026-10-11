@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>Kotoba · Japanese dictionary and vocab trainer</title>
+  <meta name="description" content="Look up Japanese words, collect the ones you want to learn, and quiz yourself with spaced repetition.">
+  <meta name="theme-color" content="#c8402f">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#/dictionary">
+      <span class="brand-mark" lang="ja" aria-hidden="true">言</span>
+      <span>Kotoba</span>
+    </a>
+    <nav class="tabs" id="tabs" aria-label="Sections">
+      <a href="#/dictionary" data-tab="dictionary">Dictionary</a>
+      <a href="#/words" data-tab="words">My Words</a>
+      <a href="#/quiz" data-tab="quiz">Quiz <span class="tab-badge" id="due-badge" hidden></span></a>
+      <a href="#/stats" data-tab="stats">Stats</a>
+    </nav>
+  </header>
+  <main id="view"></main>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <noscript>Kotoba needs JavaScript to run.</noscript>
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
