@@ -51,7 +51,8 @@ export function onStatus(fn) {
 
 export const search = (query) => call('search', { query });
 export const random = (count, exclude = []) => call('random', { count, exclude });
-export const get = (ids) => call('get', { ids });
+export const verbs = (count, minLevel) => call('verbs', { count, minLevel });
+export const get =(ids) => call('get', { ids });
 
 // { char: { meanings, on, kun, strokes, grade, freq } } for the kanji found in `text`.
 export async function kanjiInfo(text) {

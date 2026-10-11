@@ -103,7 +103,7 @@ const CLASSES = [
   [/^adj-na$/, 'な-adjective', naAdjective],
 ];
 
-// Returns { title, rows: [{ label, written, reading }] } or null when the word
+// Returns { title, rows: [{ key, label, written, reading }] } or null when the word
 // doesn't conjugate. `reading` is '' when the word is written in kana already.
 export function conjugations(entry, written, reading) {
   const tags = entry.senses.flatMap((sense) => sense.pos);
@@ -116,6 +116,7 @@ export function conjugations(entry, written, reading) {
     return {
       title,
       rows: LABELS.filter(([key]) => forms[key]).map(([key, label]) => ({
+        key,
         label,
         written: forms[key],
         reading: readings ? readings[key] : '',

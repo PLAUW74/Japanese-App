@@ -212,7 +212,19 @@ function random(count, exclude = []) {
   return out;
 }
 
+// Common verbs at JLPT level `minLevel` or easier (5 = N5), for the verb form quiz.
+const VERB = /(^|,)(v1|v5|vk|vs-i)/;
+function verbs(count, minLevel) {
+  const pool = quizPool.filter((row) => rows[row][5] >= minLevel && VERB.test(rows[row][3][0][0]));
+  const out = [];
+  while (out.length < count && pool.length) {
+    out.push(decode(pool.splice(Math.floor(Math.random() * pool.length), 1)[0]));
+  }
+  return out;
+}
+
 const handlers = {
+  verbs: ({ count, minLevel }) => verbs(count, minLevel),
   search: ({ query }) => search(query),
   random: ({ count, exclude }) => random(count, exclude),
   get: ({ ids }) => ids.filter((id) => idToRow.has(id)).map((id) => decode(idToRow.get(id))),

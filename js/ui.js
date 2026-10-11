@@ -278,10 +278,10 @@ export function segmented(name, options, value, onChange) {
   }, label)));
 }
 
-// Switches the Quiz tab between the saved-words quiz and the kana test.
+// Switches the Quiz tab between the saved-words quiz, the kana test and the verb form quiz.
 export function quizSwitch(active) {
   return h('nav', { class: 'segmented', 'aria-label': 'Quiz type' },
-    [['quiz', 'My words'], ['kana', 'Hiragana & katakana']].map(([route, label]) => h('a', {
+    [['quiz', 'My words'], ['kana', 'Hiragana & katakana'], ['verbs', 'Verb forms']].map(([route, label]) => h('a', {
       href: `#/${route}`,
       class: route === active ? 'on' : '',
       'aria-current': route === active ? 'page' : null,

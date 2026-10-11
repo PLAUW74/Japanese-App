@@ -6,6 +6,7 @@ A Japanese dictionary and vocab trainer that runs entirely in the browser.
 - **My Words**: save words, sort them into your own lists and add notes.
 - **Quiz**: multiple choice and typing questions on your saved words, scheduled with spaced repetition.
 - **Kana test**: hiragana and katakana drills (under the Quiz tab) with a chart of which characters you know.
+- **Verb form quiz**: see a verb in its ます form and give the て-form or た-form (under the Quiz tab).
 - **Stats**: study streak, accuracy, word progress and upcoming reviews.
 
 ## Run it

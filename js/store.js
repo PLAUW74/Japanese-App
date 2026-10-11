@@ -13,6 +13,7 @@ const blank = () => ({
   settings: {
     source: 'due', mode: 'mixed', direction: 'mixed', count: 10,
     kanaScript: 'hiragana', kanaGroups: ['basic'], kanaMode: 'read', kanaCount: 20,
+    verbSource: 'n5', verbTarget: 'te', verbMode: 'type', verbCount: 10,
   },
 });
 
@@ -204,6 +205,12 @@ export function streak(now = Date.now()) {
     day.setDate(day.getDate() - 1);
   }
   return days;
+}
+
+// Verb form answers only feed the streak and daily totals.
+export function recordDrill(correct) {
+  logAnswer(Date.now(), correct);
+  commit(true);
 }
 
 // ---- settings and backup ----

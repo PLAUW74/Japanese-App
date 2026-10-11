@@ -3,6 +3,7 @@ import { createDictionaryView } from './views/dictionary.js';
 import { createVocabView } from './views/vocab.js';
 import { createQuizView } from './views/quiz.js';
 import { createKanaView } from './views/kana.js';
+import { createVerbsView } from './views/verbs.js';
 import { createStatsView } from './views/stats.js';
 
 const factories = {
@@ -10,10 +11,11 @@ const factories = {
   words: createVocabView,
   quiz: createQuizView,
   kana: createKanaView,
+  verbs: createVerbsView,
   stats: createStatsView,
 };
-// The kana test lives under the Quiz tab.
-const TAB_FOR = { kana: 'quiz' };
+// The kana test and the verb form quiz live under the Quiz tab.
+const TAB_FOR = { kana: 'quiz', verbs: 'quiz' };
 const views = {};
 const main = document.getElementById('view');
 const tabs = [...document.querySelectorAll('#tabs a')];
