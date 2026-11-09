@@ -135,6 +135,24 @@ export function furigana(written, wordReading, cls) {
   return el;
 }
 
+// Text written with readings inline, 勉強{べんきょう}します, rendered with each reading
+// above its kanji.
+const MARKED = /([㐀-鿿々〆ヶ]+)\{([^}]+)\}/g;
+
+export function rubyMarkup(text, cls) {
+  const el = h('span', { lang: 'ja', class: cls });
+  let at = 0;
+  for (const match of text.matchAll(MARKED)) {
+    el.append(text.slice(at, match.index), h('ruby', null, match[1], h('rt', null, match[2])));
+    at = match.index + match[0].length;
+  }
+  el.append(text.slice(at));
+  return el;
+}
+
+// The same text as kana only, for reading aloud: 勉強{べんきょう} → べんきょう.
+export const markupReading = (text) => text.replace(MARKED, '$2');
+
 // A word's headline: the headword with furigana.
 export const wordTitle = (word) => furigana(headword(word), reading(word), 'entry-headword');
 
@@ -281,7 +299,7 @@ export function segmented(name, options, value, onChange) {
 // Switches the Quiz tab between the saved-words quiz, the kana test and the verb form quiz.
 export function quizSwitch(active) {
   return h('nav', { class: 'segmented', 'aria-label': 'Quiz type' },
-    [['quiz', 'My words'], ['kana', 'Hiragana & katakana'], ['verbs', 'Verb forms']].map(([route, label]) => h('a', {
+    [['quiz', 'My words'], ['kana', 'Hiragana & katakana'], ['verbs', 'Verb forms'], ['grammar', 'Grammar']].map(([route, label]) => h('a', {
       href: `#/${route}`,
       class: route === active ? 'on' : '',
       'aria-current': route === active ? 'page' : null,

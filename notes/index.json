@@ -6,5 +6,12 @@
     "added": "2026-11-09",
     "tags": ["verbs", "dictionary form", "grammar"],
     "image": "img/dictionary-form-p108.jpg"
+  },
+  {
+    "id": "particles",
+    "title": "Particles: what each one does",
+    "source": "Reference",
+    "added": "2026-11-09",
+    "tags": ["particles", "grammar", "reference"]
   }
 ]

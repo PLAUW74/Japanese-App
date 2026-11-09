@@ -19,6 +19,7 @@ const blank = () => ({
     source: 'due', mode: 'mixed', direction: 'mixed', count: 10,
     kanaScript: 'hiragana', kanaGroups: ['basic'], kanaMode: 'read', kanaCount: 20,
     verbSource: 'n5', verbTarget: 'te', verbMode: 'type', verbCount: 10,
+    grammarLevel: 'both', grammarTopic: 'all', grammarCount: 10,
   },
 });
 

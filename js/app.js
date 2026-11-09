@@ -5,6 +5,7 @@ import { createVocabView } from './views/vocab.js';
 import { createQuizView } from './views/quiz.js';
 import { createKanaView } from './views/kana.js';
 import { createVerbsView } from './views/verbs.js';
+import { createGrammarView } from './views/grammar.js';
 import { createNotesView } from './views/notes.js';
 import { createStatsView } from './views/stats.js';
 
@@ -14,11 +15,12 @@ const factories = {
   quiz: createQuizView,
   kana: createKanaView,
   verbs: createVerbsView,
+  grammar: createGrammarView,
   notes: createNotesView,
   stats: createStatsView,
 };
-// The kana test and the verb form quiz live under the Quiz tab.
-const TAB_FOR = { kana: 'quiz', verbs: 'quiz' };
+// The kana test, verb form quiz and grammar quiz live under the Quiz tab.
+const TAB_FOR = { kana: 'quiz', verbs: 'quiz', grammar: 'quiz' };
 const views = {};
 const main = document.getElementById('view');
 const tabs = [...document.querySelectorAll('#tabs a')];

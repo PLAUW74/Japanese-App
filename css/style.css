@@ -379,6 +379,24 @@ rt { font-size: 0.5em; font-weight: 400; color: var(--muted); user-select: none;
 .segmented button, .segmented a { padding: 6px 12px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font-size: 0.9rem; font-weight: 600; text-decoration: none; cursor: pointer; }
 .segmented .on { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
 
+.grammar-question { font-size: 1.5rem; line-height: 2.2; font-weight: 500; }
+.grammar-sentence { font-size: 1.2rem; line-height: 2; }
+.grammar-question rt, .grammar-sentence rt { font-size: 0.5em; }
+.gap {
+  display: inline-block;
+  min-width: 2.6em;
+  margin: 0 3px;
+  border-bottom: 2px solid var(--accent);
+  text-align: center;
+  line-height: 1.2;
+}
+.gap.star { color: var(--accent); font-weight: 700; }
+.grammar-sentence b { color: var(--good); }
+.feedback.wrong .grammar-sentence b { color: var(--bad); }
+.missed-sentence { display: flex; flex-direction: column; gap: 2px; padding: 8px 0; border-top: 1px solid var(--line); }
+.missed-sentence:first-of-type { border-top: 0; }
+.choice rt { font-size: 0.5em; }
+
 .prompt-line { display: flex; align-items: center; justify-content: center; gap: 8px; }
 .prompt-line .icon-btn { width: 44px; height: 44px; font-size: 1.3rem; }
 .prompt-kana { font-size: 5rem; line-height: 1.1; }
