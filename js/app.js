@@ -1,4 +1,5 @@
 import * as store from './store.js';
+import * as sync from './sync.js';
 import { createDictionaryView } from './views/dictionary.js';
 import { createVocabView } from './views/vocab.js';
 import { createQuizView } from './views/quiz.js';
@@ -49,11 +50,21 @@ store.subscribe(() => {
   if (views[current]) views[current].onStore();
 });
 window.addEventListener('hashchange', route);
+// Stats shows live sync status. Other views only care about signing in or out, and
+// re-rendering them on every save would knock the cursor out of a note being typed.
+let signedInAs = null;
+sync.onStatus((status) => {
+  const account = `${status.state === 'signed-out'}|${status.email}`;
+  if (!views[current] || (current !== 'stats' && account === signedInAs)) return;
+  signedInAs = account;
+  views[current].onStore();
+});
 // Words become due as time passes, not only when the data changes.
 setInterval(updateBadge, 60000);
 
 updateBadge();
 route();
+sync.init();
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});

@@ -1,4 +1,5 @@
 import * as store from '../store.js';
+import * as sync from '../sync.js';
 import { h, ja, headword, reading, meaningText, setChildren } from '../ui.js';
 
 const ACTIVITY_DAYS = 14;
@@ -25,6 +26,44 @@ function barChart(items, emptyText) {
     )));
 }
 
+const SYNC_TEXT = {
+  loading: 'Connecting…',
+  connecting: 'Connecting…',
+  saving: 'Saving…',
+  synced: 'Up to date',
+  offline: 'Offline: changes will sync when you reconnect',
+  error: 'Sync problem',
+};
+
+function accountCard() {
+  const { state, email, error } = sync.status;
+  let body;
+  if (state === 'unconfigured') {
+    body = h('p', { class: 'muted' }, 'Syncing between devices isn’t set up yet. See “Syncing between devices” in the README.');
+  } else if (state === 'signed-out') {
+    body = [
+      h('p', { class: 'muted' }, 'Sign in to keep your words, lists and progress the same on every device. Without signing in, everything stays on this device only.'),
+      h('button', { type: 'button', class: 'btn btn-primary', onclick: () => sync.signIn() }, 'Sign in with Google'),
+    ];
+  } else if (state === 'loading') {
+    body = h('p', { class: 'muted' }, SYNC_TEXT.loading);
+  } else {
+    body = [
+      h('p', null, 'Signed in as ', h('strong', null, email || 'your Google account'), '. Your words sync automatically.'),
+      h('div', { class: 'sync-row' },
+        h('span', { class: `sync-dot sync-${state}` }),
+        h('span', { class: 'muted' }, SYNC_TEXT[state] || ''),
+        h('button', { type: 'button', class: 'btn btn-quiet', onclick: () => sync.signOut() }, 'Sign out'),
+      ),
+    ];
+  }
+  return h('div', { class: 'card' },
+    h('h2', null, 'Sync between devices'),
+    body,
+    error && h('p', { class: 'error' }, error),
+  );
+}
+
 export function createStatsView() {
   const el = h('section', { class: 'view' });
 
@@ -37,7 +76,7 @@ export function createStatsView() {
   }
 
   function render() {
-    const { log } = store.getState();
+    const log = store.combinedLog();
     const words = store.allWords();
     const now = Date.now();
     const today = log[store.dayKey()] || { reviews: 0, correct: 0 };
@@ -118,6 +157,7 @@ export function createStatsView() {
           h('span', { class: 'muted small' }, `${word.stats.wrong} wrong · ${word.stats.correct} right`),
         )),
       ),
+      accountCard(),
     );
   }
 

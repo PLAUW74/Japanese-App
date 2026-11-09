@@ -1,4 +1,5 @@
 import * as store from '../store.js';
+import * as sync from '../sync.js';
 import { kataToHira, toHiragana } from '../kana.js';
 import {
   h, ja, icon, toast, speakButton, badges, statusBadge, sensesList, headword, reading, meaningText,
@@ -126,7 +127,11 @@ export function createVocabView() {
       },
     });
     return h('div', { class: 'backup' },
-      h('span', { class: 'muted' }, 'Your words are stored in this browser only.'),
+      h('span', { class: 'muted' }, sync.status.email
+        ? `Your words sync to ${sync.status.email}.`
+        : sync.status.state === 'signed-out'
+          ? h('span', null, 'Your words are stored in this browser only. ', h('a', { href: '#/stats' }, 'Sign in on Stats'), ' to sync them between devices.')
+          : 'Your words are stored in this browser only.'),
       h('button', {
         type: 'button',
         class: 'btn btn-quiet',

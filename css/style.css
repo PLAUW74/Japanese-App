@@ -489,6 +489,13 @@ kbd {
 .bar-label { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
 .bar-col.today .bar-label { color: var(--ink); font-weight: 600; }
 
+.sync-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.sync-row .btn { margin-left: auto; }
+.sync-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); }
+.sync-synced { background: var(--good); }
+.sync-saving, .sync-connecting { background: var(--amber); }
+.sync-error { background: var(--bad); }
+
 /* ---- small screens: navigation moves to the bottom ---- */
 
 @media (max-width: 640px) {

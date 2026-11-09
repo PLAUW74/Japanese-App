@@ -1,15 +1,20 @@
 // Everything the learner owns (saved words, lists, review history) lives in localStorage.
+// Changes are also tracked so js/sync.js can copy them to the learner's account.
 
 const KEY = 'kotoba:v1';
+const DEVICE_KEY = 'kotoba:device';
 export const DAY = 86400000;
 const MAX_SENSES = 8;
 
 const blank = () => ({
   version: 1,
-  words: {},   // id -> saved word
-  lists: [],   // [{ id, name }]
-  log: {},     // 'YYYY-MM-DD' -> { reviews, correct }
-  kana: {},    // kana character -> [right, wrong] from the kana test
+  words: {},     // id -> saved word
+  lists: [],     // [{ id, name }]
+  listsAt: 0,    // when the lists last changed, for syncing
+  deleted: {},   // id -> when a word was removed, so sync doesn't bring it back
+  log: {},       // this device's 'YYYY-MM-DD' -> { reviews, correct }
+  kana: {},      // this device's kana character -> [right, wrong] from the kana test
+  others: {},    // the same log and kana tallies from the learner's other devices
   settings: {
     source: 'due', mode: 'mixed', direction: 'mixed', count: 10,
     kanaScript: 'hiragana', kanaGroups: ['basic'], kanaMode: 'read', kanaCount: 20,
@@ -30,8 +35,27 @@ function read() {
   return blank();
 }
 
+function readDeviceId() {
+  try {
+    let id = localStorage.getItem(DEVICE_KEY);
+    if (!id) {
+      id = `d${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`;
+      localStorage.setItem(DEVICE_KEY, id);
+    }
+    return id;
+  } catch (err) {
+    return 'unknown';
+  }
+}
+
 let state = read();
+export const deviceId = readDeviceId();
 const subscribers = new Set();
+
+// What has changed locally since sync last took it.
+const dirty = { words: new Set(), lists: false, device: false };
+const dirtyListeners = new Set();
+const isDirty = () => dirty.words.size > 0 || dirty.lists || dirty.device;
 
 function commit(silent = false) {
   try {
@@ -40,6 +64,7 @@ function commit(silent = false) {
     console.error('Could not save data', err);
   }
   if (!silent) subscribers.forEach((fn) => fn(state));
+  if (isDirty()) dirtyListeners.forEach((fn) => fn());
 }
 
 export const getState = () => state;
@@ -63,6 +88,16 @@ export function startOfDay(ts = Date.now()) {
 
 const freshSrs = (now) => ({ due: now, interval: 0, ease: 2.5, reps: 0, lapses: 0 });
 
+function touch(word) {
+  word.updatedAt = Date.now();
+  dirty.words.add(String(word.id));
+}
+
+function touchLists() {
+  state.listsAt = Date.now();
+  dirty.lists = true;
+}
+
 // ---- words ----
 
 export const hasWord = (id) => id in state.words;
@@ -71,7 +106,7 @@ export const allWords = () => Object.values(state.words);
 export function addWord(entry, listId = null) {
   if (state.words[entry.id]) return;
   const now = Date.now();
-  state.words[entry.id] = {
+  const word = {
     id: entry.id,
     kanji: entry.kanji,
     kana: entry.kana,
@@ -84,17 +119,24 @@ export function addWord(entry, listId = null) {
     srs: freshSrs(now),
     stats: { correct: 0, wrong: 0, last: 0 },
   };
+  state.words[entry.id] = word;
+  delete state.deleted[entry.id];
+  touch(word);
   commit();
 }
 
 export function removeWord(id) {
   delete state.words[id];
+  state.deleted[id] = Date.now();
+  dirty.words.add(String(id));
   commit();
 }
 
 export function updateWord(id, patch, { silent = false } = {}) {
-  if (!state.words[id]) return;
-  Object.assign(state.words[id], patch);
+  const word = state.words[id];
+  if (!word) return;
+  Object.assign(word, patch);
+  touch(word);
   commit(silent);
 }
 
@@ -103,6 +145,7 @@ export function resetProgress(id) {
   if (!word) return;
   word.srs = freshSrs(Date.now());
   word.stats = { correct: 0, wrong: 0, last: 0 };
+  touch(word);
   commit();
 }
 
@@ -111,6 +154,7 @@ export function resetProgress(id) {
 export function createList(name) {
   const list = { id: `l${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`, name };
   state.lists.push(list);
+  touchLists();
   commit();
   return list;
 }
@@ -119,12 +163,18 @@ export function renameList(id, name) {
   const list = state.lists.find((l) => l.id === id);
   if (!list) return;
   list.name = name;
+  touchLists();
   commit();
 }
 
 export function deleteList(id) {
   state.lists = state.lists.filter((l) => l.id !== id);
-  for (const word of allWords()) word.listIds = word.listIds.filter((l) => l !== id);
+  for (const word of allWords()) {
+    if (!word.listIds.includes(id)) continue;
+    word.listIds = word.listIds.filter((l) => l !== id);
+    touch(word);
+  }
+  touchLists();
   commit();
 }
 
@@ -134,6 +184,7 @@ export function toggleWordList(wordId, listId) {
   word.listIds = word.listIds.includes(listId)
     ? word.listIds.filter((l) => l !== listId)
     : [...word.listIds, listId];
+  touch(word);
   commit();
 }
 
@@ -177,6 +228,7 @@ export function recordAnswer(id, correct) {
     srs.due = startOfDay(now) + srs.interval * DAY;
   }
 
+  touch(word);
   logAnswer(now, correct);
   commit();
 }
@@ -185,6 +237,7 @@ function logAnswer(now, correct) {
   const day = state.log[dayKey(now)] || (state.log[dayKey(now)] = { reviews: 0, correct: 0 });
   day.reviews += 1;
   if (correct) day.correct += 1;
+  dirty.device = true;
 }
 
 // Kana test answers count towards the streak and daily totals like word reviews do.
@@ -195,22 +248,46 @@ export function recordKana(char, correct) {
   commit(true);
 }
 
-export function streak(now = Date.now()) {
-  // A streak survives until the end of the day after the last review.
-  const day = new Date(startOfDay(now));
-  if (!state.log[dayKey(day)]) day.setDate(day.getDate() - 1);
-  let days = 0;
-  while (state.log[dayKey(day)]) {
-    days += 1;
-    day.setDate(day.getDate() - 1);
-  }
-  return days;
-}
-
 // Verb form answers only feed the streak and daily totals.
 export function recordDrill(correct) {
   logAnswer(Date.now(), correct);
   commit(true);
+}
+
+// Each device keeps its own log and kana tallies; these add up every device's.
+export function combinedLog() {
+  const out = {};
+  for (const log of [state.log, ...Object.values(state.others).map((d) => d.log || {})]) {
+    for (const [day, entry] of Object.entries(log)) {
+      const sum = out[day] || (out[day] = { reviews: 0, correct: 0 });
+      sum.reviews += entry.reviews || 0;
+      sum.correct += entry.correct || 0;
+    }
+  }
+  return out;
+}
+
+export function kanaTally(char) {
+  let right = 0;
+  let wrong = 0;
+  for (const kana of [state.kana, ...Object.values(state.others).map((d) => d.kana || {})]) {
+    const tally = kana[char];
+    if (tally) { right += tally[0]; wrong += tally[1]; }
+  }
+  return [right, wrong];
+}
+
+export function streak(now = Date.now()) {
+  const log = combinedLog();
+  // A streak survives until the end of the day after the last review.
+  const day = new Date(startOfDay(now));
+  if (!log[dayKey(day)]) day.setDate(day.getDate() - 1);
+  let days = 0;
+  while (log[dayKey(day)]) {
+    days += 1;
+    day.setDate(day.getDate() - 1);
+  }
+  return days;
 }
 
 // ---- settings and backup ----
@@ -230,7 +307,10 @@ export function importData(json) {
   }
   let added = 0;
   for (const list of incoming.lists) {
-    if (list && list.id && list.name && !state.lists.some((l) => l.id === list.id)) state.lists.push(list);
+    if (list && list.id && list.name && !state.lists.some((l) => l.id === list.id)) {
+      state.lists.push(list);
+      touchLists();
+    }
   }
   const listIds = new Set(state.lists.map((l) => l.id));
   for (const word of Object.values(incoming.words)) {
@@ -243,14 +323,100 @@ export function importData(json) {
       srs: { ...freshSrs(now), ...word.srs },
       stats: { correct: 0, wrong: 0, last: 0, ...word.stats },
     };
+    delete state.deleted[word.id];
+    touch(state.words[word.id]);
     added += 1;
   }
   for (const [char, tally] of Object.entries(incoming.kana || {})) {
-    if (!state.kana[char] && Array.isArray(tally) && tally.length === 2) state.kana[char] = tally;
+    if (!state.kana[char] && Array.isArray(tally) && tally.length === 2) {
+      state.kana[char] = tally;
+      dirty.device = true;
+    }
   }
   for (const [day, entry] of Object.entries(incoming.log || {})) {
-    if (!state.log[day] && entry && typeof entry.reviews === 'number') state.log[day] = entry;
+    if (!state.log[day] && entry && typeof entry.reviews === 'number') {
+      state.log[day] = entry;
+      dirty.device = true;
+    }
   }
   commit();
   return added;
+}
+
+// ---- sync hooks (used by js/sync.js) ----
+
+const wordTime = (id) => {
+  const word = state.words[id];
+  return word ? word.updatedAt || word.addedAt || 0 : state.deleted[id] || 0;
+};
+
+export function onDirty(fn) {
+  dirtyListeners.add(fn);
+  return () => dirtyListeners.delete(fn);
+}
+
+// Hands over (and clears) everything changed since the last call, ready to upload.
+export function takeDirty() {
+  const out = {
+    words: [...dirty.words].map((id) => state.words[id]
+      ? { ...state.words[id] }
+      : { id: Number(id) || id, deleted: true, updatedAt: state.deleted[id] || Date.now() }),
+    lists: dirty.lists ? { lists: state.lists, updatedAt: state.listsAt } : null,
+    device: dirty.device ? { log: state.log, kana: state.kana, updatedAt: Date.now() } : null,
+  };
+  dirty.words.clear();
+  dirty.lists = false;
+  dirty.device = false;
+  return out;
+}
+
+// Puts back changes an upload failed to save.
+export function restoreDirty(taken) {
+  for (const word of taken.words) dirty.words.add(String(word.id));
+  if (taken.lists) dirty.lists = true;
+  if (taken.device) dirty.device = true;
+}
+
+// After first connecting, queue whatever this device has that the account lacks
+// or holds an older copy of. `remote` maps word id -> updatedAt.
+export function queueNewerThan(remoteWords, remoteListsAt) {
+  for (const id of Object.keys(state.words)) {
+    if (wordTime(id) > (remoteWords[id] ?? -1)) dirty.words.add(id);
+  }
+  for (const [id, at] of Object.entries(state.deleted)) {
+    if (id in remoteWords && at > remoteWords[id]) dirty.words.add(id);
+  }
+  if (state.listsAt > (remoteListsAt ?? -1) && (state.lists.length || remoteListsAt != null)) dirty.lists = true;
+  dirty.device = true;
+  commit(true);
+}
+
+// Applies changes from the account. The newer copy of each word wins.
+export function applyRemote({ words = [], lists = null, others = null }) {
+  let changed = false;
+  for (const doc of words) {
+    const id = String(doc.id);
+    if ((doc.updatedAt || 0) <= wordTime(id)) continue;
+    if (doc.deleted) {
+      delete state.words[id];
+      state.deleted[id] = doc.updatedAt;
+    } else {
+      const { deleted, ...word } = doc;
+      state.words[id] = word;
+      delete state.deleted[id];
+    }
+    changed = true;
+  }
+  if (lists && (lists.updatedAt || 0) > state.listsAt) {
+    state.lists = lists.lists || [];
+    state.listsAt = lists.updatedAt;
+    const known = new Set(state.lists.map((l) => l.id));
+    for (const word of allWords()) word.listIds = word.listIds.filter((l) => known.has(l));
+    changed = true;
+  }
+  if (others) {
+    state.others = others;
+    changed = true;
+  }
+  if (changed) commit();
 }

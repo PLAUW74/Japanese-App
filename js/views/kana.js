@@ -40,7 +40,7 @@ function isRightReading(item, answer) {
 }
 
 function mastery(item) {
-  const [right, wrong] = store.getState().kana[item.kana] || [0, 0];
+  const [right, wrong] = store.kanaTally(item.kana);
   if (right + wrong === 0) return 'unseen';
   return right / (right + wrong) >= 0.8 ? 'good' : 'weak';
 }
@@ -102,7 +102,7 @@ export function createKanaView() {
 
     // Unseen and often-missed kana come first when the test is shorter than the set.
     const need = (item) => {
-      const [right, wrong] = store.getState().kana[item.kana] || [0, 0];
+      const [right, wrong] = store.kanaTally(item.kana);
       return (right + wrong === 0 ? 0.5 : right / (right + wrong)) + Math.random() * 0.5;
     };
     let chosen = items.map((item) => [need(item), item]).sort((a, b) => a[0] - b[0]).map(([, item]) => item);
