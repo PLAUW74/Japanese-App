@@ -1,6 +1,6 @@
 // Makes the app work offline once it has been opened online.
 // Bump DATA after rebuilding data/ so browsers fetch the new dictionary.
-const SHELL = 'kotoba-shell-v1';
+const SHELL = 'kotoba-shell-v2';
 const DATA = 'kotoba-data-v1';
 
 self.addEventListener('install', () => self.skipWaiting());
@@ -25,10 +25,13 @@ async function cacheFirst(request) {
 }
 
 // App files: always take the latest when online, fall back to the last copy offline.
+// `no-cache` makes the browser check with the server instead of reusing its own
+// copy, which GitHub Pages lets it keep for 10 minutes; unchanged files come back
+// as a quick "not modified".
 async function networkFirst(request) {
   const cache = await caches.open(SHELL);
   try {
-    const response = await fetch(request);
+    const response = await fetch(request, { cache: 'no-cache' });
     if (response.ok) cache.put(request, response.clone());
     return response;
   } catch (err) {
