@@ -7,6 +7,7 @@ A Japanese dictionary and vocab trainer that runs entirely in the browser.
 - **Quiz**: multiple choice and typing questions on your saved words, scheduled with spaced repetition.
 - **Kana test**: hiragana and katakana drills (under the Quiz tab) with a chart of which characters you know.
 - **Verb form quiz**: see a verb in its ます form and give the て-form or た-form (under the Quiz tab).
+- **Notes**: formatted study notes from textbook pages, each with a photo of the original page.
 - **Stats**: study streak, accuracy, word progress and upcoming reviews.
 
 ## Run it
@@ -48,6 +49,7 @@ The config values in `js/firebase-config.js` are not secret; the rules are what 
 | `js/store.js` | Saved words, lists, review schedule and history |
 | `js/sync.js`, `js/firebase-config.js` | Optional syncing through Firebase |
 | `data/` | Compact dictionary files the app loads |
+| `notes/` | Study notes: `index.json` lists them, each note is an HTML file, photos are in `notes/img/` |
 | `tools/build-data.ps1` | Rebuilds `data/` from the latest sources |
 | `sw.js` | Offline support once the app has been opened online |
 

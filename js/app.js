@@ -5,6 +5,7 @@ import { createVocabView } from './views/vocab.js';
 import { createQuizView } from './views/quiz.js';
 import { createKanaView } from './views/kana.js';
 import { createVerbsView } from './views/verbs.js';
+import { createNotesView } from './views/notes.js';
 import { createStatsView } from './views/stats.js';
 
 const factories = {
@@ -13,6 +14,7 @@ const factories = {
   quiz: createQuizView,
   kana: createKanaView,
   verbs: createVerbsView,
+  notes: createNotesView,
   stats: createStatsView,
 };
 // The kana test and the verb form quiz live under the Quiz tab.
@@ -23,8 +25,9 @@ const tabs = [...document.querySelectorAll('#tabs a')];
 const dueBadge = document.getElementById('due-badge');
 let current = '';
 
+// Routes look like #/words or, for a single note, #/notes/<id>.
 function route() {
-  const name = location.hash.replace(/^#\/?/, '');
+  const [name, sub] = location.hash.replace(/^#\/?/, '').split('/');
   const next = factories[name] ? name : 'dictionary';
   if (next !== current) {
     current = next;
@@ -36,7 +39,7 @@ function route() {
     if (tab.dataset.tab === (TAB_FOR[current] || current)) tab.setAttribute('aria-current', 'page');
     else tab.removeAttribute('aria-current');
   }
-  views[current].onShow();
+  views[current].onShow(sub && decodeURIComponent(sub));
 }
 
 function updateBadge() {

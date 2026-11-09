@@ -1,11 +1,14 @@
-// Verb form quiz: shows a verb in its ます form and asks for the て-form (or た-form).
+// Verb form quiz: shows a verb in its ます form and asks for its て-form, た-form or dictionary form.
 import * as dict from '../dict.js';
 import * as store from '../store.js';
 import { conjugations } from '../conjugate.js';
 import { toHiragana, kataToHira } from '../kana.js';
 import { h, ja, speak, icon, shuffle, segmented, quizSwitch, setChildren, furigana, headword, reading, meaningText } from '../ui.js';
 
-const TARGETS = [['te', 'て-form'], ['past', 'た-form (past)']];
+const TARGETS = [['te', 'て-form'], ['past', 'た-form (past)'], ['dict', 'Dictionary form']];
+const TARGET_NAMES = { te: 'て-form', past: 'た-form', dict: 'dictionary form' };
+const U_ROW = 'うくぐすつぬぶむる';
+const I_ROW = 'いきぎしちにびみり';
 const MODES = [['type', 'Type the answer'], ['choice', 'Multiple choice']];
 const COUNTS = [[10, '10'], [20, '20'], [50, '50']];
 const CHOICES = 4;
@@ -21,7 +24,16 @@ const GODAN_RULES = {
   く: 'く → いて', ぐ: 'ぐ → いで', す: 'す → して',
 };
 
-function ruleFor(title, plain) {
+function ruleFor(title, plain, target) {
+  if (target === 'dict') {
+    if (title.startsWith('Ichidan')) return 'Group II (ichidan) verb: drop ます and add る.';
+    if (title.startsWith('Godan')) {
+      const u = plain.slice(-1);
+      return `Group I (godan) verb: change the い-row sound before ます into the う-row sound (${I_ROW[U_ROW.indexOf(u)] || ''} → ${u}).`;
+    }
+    if (plain.endsWith('する')) return 'Group III: します → する.';
+    return 'Group III: 来ます (きます) → 来る (くる).';
+  }
   if (title.startsWith('Ichidan')) return 'Ichidan verb: drop ます and add て.';
   if (title.startsWith('Godan')) {
     if (/(行|い)く$/.test(plain) && plain.length <= 2) return '行く is the exception among く verbs: 行って, not 行いて.';
@@ -38,31 +50,36 @@ function toQuestion(word, target) {
   if (!table) return null;
   const form = (key) => table.rows.find((row) => row.key === key);
   const polite = form('polite');
-  const answer = form(target);
-  if (!polite || !answer || !form('want')) return null;
+  if (!polite || !form('want')) return null;
   // 勉強-type nouns are quizzed as 勉強する.
   const suffix = table.title === 'する verb' ? 'する' : '';
-  return {
-    word,
-    polite,
-    answer,
-    plain: { written: written + suffix, reading: reading(word) && reading(word) + suffix },
-    rule: ruleFor(table.title, written + suffix),
-  };
+  const plain = { written: written + suffix, reading: reading(word) && reading(word) + suffix };
+  const answer = target === 'dict' ? plain : form(target);
+  if (!answer) return null;
+  return { word, polite, answer, plain, rule: ruleFor(table.title, plain.written, target) };
 }
 
-// Wrong answers a learner might really give: the other て-form endings on the same stem.
-function wrongForms(polite, target) {
+// Wrong answers a learner might really give, built on the same ます stem: the other
+// て-form endings, or for the dictionary form, る and the other う-row endings.
+// `short` (a one-character stem like 見ます) is decided from the written form so the
+// written and reading lists line up item for item.
+function wrongForms(polite, target, short) {
   const stem = polite.slice(0, -2);
   const base = stem.slice(0, -1);
+  if (target === 'dict') {
+    return short
+      ? [stem + 'る', stem + 'う', stem + 'く', stem + 'す']
+      : [stem + 'る', ...[...U_ROW].map((u) => base + u)];
+  }
   const forms = [stem + 'て', stem + 'って', stem + 'んで', stem + 'いて'];
-  if (base) forms.push(base + 'って', base + 'んで', base + 'いて', base + 'いで', base + 'して');
+  if (!short) forms.push(base + 'って', base + 'んで', base + 'いて', base + 'いで', base + 'して');
   return target === 'past' ? forms.map((f) => f.slice(0, -1) + (f.endsWith('で') ? 'だ' : 'た')) : forms;
 }
 
 function options(question, target) {
-  const written = wrongForms(question.polite.written, target);
-  const readings = question.polite.reading ? wrongForms(question.polite.reading, target) : [];
+  const short = question.polite.written.length <= 3;
+  const written = wrongForms(question.polite.written, target, short);
+  const readings = question.polite.reading ? wrongForms(question.polite.reading, target, short) : [];
   const seen = new Set([question.answer.written]);
   const out = [{ ...question.answer, correct: true }];
   for (const i of shuffle(written.map((_, n) => n))) {
@@ -161,8 +178,10 @@ export function createVerbsView() {
         furigana(answer.written, answer.reading, 'entry-headword'),
         h('button', { type: 'button', class: 'icon-btn', title: 'Play pronunciation', 'aria-label': 'Play the answer', onclick: () => speak(answer.reading || answer.written) }, icon('speaker')),
       ),
-      h('p', null, 'Dictionary form: ', furigana(question.plain.written, question.plain.reading), ` · ${meaningText(question.word, 2)}`),
-      !correct && session.target === 'te' && h('p', { class: 'muted' }, question.rule),
+      session.target === 'dict'
+        ? h('p', null, meaningText(question.word, 2))
+        : h('p', null, 'Dictionary form: ', furigana(question.plain.written, question.plain.reading), ` · ${meaningText(question.word, 2)}`),
+      !correct && session.target !== 'past' && h('p', { class: 'muted' }, question.rule),
       button,
     ));
     if (correct) timer = setTimeout(next, ADVANCE_MS);
@@ -238,7 +257,7 @@ export function createVerbsView() {
       ),
       h('div', { class: 'card question' },
         h('div', { class: 'prompt' },
-          h('span', { class: 'label' }, `Change to the ${session.target === 'te' ? 'て-form' : 'た-form'}`),
+          h('span', { class: 'label' }, `Change to the ${TARGET_NAMES[session.target]}`),
           furigana(question.polite.written, question.polite.reading, 'prompt-word'),
           h('span', { class: 'muted' }, meaningText(question.word, 2)),
         ),

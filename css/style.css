@@ -496,6 +496,45 @@ kbd {
 .sync-saving, .sync-connecting { background: var(--amber); }
 .sync-error { background: var(--bad); }
 
+/* ---- notes ---- */
+
+.note-card { flex-direction: row; align-items: center; gap: 16px; color: inherit; text-decoration: none; }
+.note-card:hover { border-color: var(--accent); }
+.note-thumb { flex: none; width: 64px; height: 84px; object-fit: cover; object-position: top; border-radius: 6px; border: 1px solid var(--line); }
+.note-card-body { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.note-card-body h2 { font-size: 1.05rem; }
+.back-link { align-self: flex-start; margin-left: -8px; }
+.note-head h1 { margin-bottom: 4px; }
+.note-photo { gap: 0; }
+.note-photo summary { cursor: pointer; font-weight: 600; }
+.note-photo img { display: block; width: 100%; max-width: 560px; margin: 14px auto 0; border-radius: 8px; }
+
+.note-body { display: flex; flex-direction: column; gap: 28px; line-height: 1.6; }
+.note-body section { display: flex; flex-direction: column; gap: 12px; }
+.note-body h3 { margin: 0; font-size: 1.25rem; }
+.note-body h4 { margin: 10px 0 0; font-size: 0.95rem; text-transform: none; letter-spacing: 0; color: var(--ink); }
+.note-body p { margin: 0; }
+.note-body rt { font-size: 0.55em; }
+.note-body [lang="ja"], .note-body td { cursor: pointer; }
+.note-en { color: var(--muted); }
+.note-body .rule { font-weight: 600; color: var(--accent-strong); }
+.note-body .tip { padding: 10px 14px; border-radius: 10px; background: var(--amber-soft); color: var(--ink); font-size: 0.92rem; }
+.note-body .tip::before { content: "Tip  "; font-weight: 700; color: var(--amber); }
+
+.note-table { width: 100%; border-collapse: collapse; font-size: 0.98rem; }
+.note-table th { padding: 6px 10px; text-align: left; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); border-bottom: 2px solid var(--line); }
+.note-table td { padding: 6px 10px; border-bottom: 1px solid var(--line); font-family: var(--font-ja); }
+.note-table td:last-child { font-family: var(--font); color: var(--muted); }
+.note-table td.change { font-weight: 700; color: var(--accent-strong); white-space: nowrap; background: var(--accent-soft); }
+.note-table b, .pattern b { color: var(--accent-strong); }
+
+.pattern { display: flex; flex-direction: column; gap: 10px; padding: 14px 16px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface-2); }
+.pattern-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 14px; font-size: 1.1rem; font-weight: 700; }
+.pattern-head .note-en { font-size: 0.95rem; font-weight: 400; }
+.examples { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 8px; }
+.examples li { display: flex; flex-direction: column; }
+.examples .note-en { font-size: 0.9rem; }
+
 /* ---- small screens: navigation moves to the bottom ---- */
 
 @media (max-width: 640px) {
@@ -511,7 +550,11 @@ kbd {
     background: var(--surface);
     border-top: 1px solid var(--line);
   }
-  .tabs a { padding: 8px 10px; font-size: 0.88rem; }
+  .tabs { padding-inline: 2px; }
+  .tabs a { padding: 8px 6px; font-size: 0.8rem; gap: 3px; }
+  .tab-badge { min-width: 16px; padding: 0 4px; line-height: 16px; font-size: 0.65rem; }
+  .note-table { font-size: 0.9rem; }
+  .note-table td, .note-table th { padding: 5px 6px; }
   main { padding: 16px 12px 110px; }
   .toast { bottom: 84px; }
   .entry-headword { font-size: 1.5rem; }
