@@ -345,9 +345,12 @@ export function importData(json) {
 
 // ---- sync hooks (used by js/sync.js) ----
 
+// Words saved before syncing existed have no updatedAt; their save time stands in.
+const changedAt = (word) => word.updatedAt || word.addedAt || 0;
+
 const wordTime = (id) => {
   const word = state.words[id];
-  return word ? word.updatedAt || word.addedAt || 0 : state.deleted[id] || 0;
+  return word ? changedAt(word) : state.deleted[id] || 0;
 };
 
 export function onDirty(fn) {
@@ -380,6 +383,10 @@ export function restoreDirty(taken) {
 // After first connecting, queue whatever this device has that the account lacks
 // or holds an older copy of. `remote` maps word id -> updatedAt.
 export function queueNewerThan(remoteWords, remoteListsAt) {
+  // Give older data a real timestamp before upload, or other devices would treat
+  // it as older than having nothing and ignore it.
+  for (const word of allWords()) if (!word.updatedAt) word.updatedAt = word.addedAt || 1;
+  if (!state.listsAt && state.lists.length) state.listsAt = 1;
   for (const id of Object.keys(state.words)) {
     if (wordTime(id) > (remoteWords[id] ?? -1)) dirty.words.add(id);
   }
@@ -396,20 +403,23 @@ export function applyRemote({ words = [], lists = null, others = null }) {
   let changed = false;
   for (const doc of words) {
     const id = String(doc.id);
-    if ((doc.updatedAt || 0) <= wordTime(id)) continue;
+    const remoteAt = doc.deleted ? doc.updatedAt || 0 : changedAt(doc);
+    if (remoteAt <= wordTime(id)) continue;
     if (doc.deleted) {
       delete state.words[id];
       state.deleted[id] = doc.updatedAt;
     } else {
       const { deleted, ...word } = doc;
-      state.words[id] = word;
+      state.words[id] = { ...word, updatedAt: remoteAt };
       delete state.deleted[id];
     }
     changed = true;
   }
-  if (lists && (lists.updatedAt || 0) > state.listsAt) {
+  // Lists uploaded before this fix carry updatedAt 0; any non-empty set still beats having none.
+  const listsAt = lists ? lists.updatedAt || ((lists.lists || []).length ? 1 : 0) : 0;
+  if (lists && listsAt > state.listsAt) {
     state.lists = lists.lists || [];
-    state.listsAt = lists.updatedAt;
+    state.listsAt = listsAt;
     const known = new Set(state.lists.map((l) => l.id));
     for (const word of allWords()) word.listIds = word.listIds.filter((l) => known.has(l));
     changed = true;
