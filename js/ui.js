@@ -104,33 +104,34 @@ export const meaningText = (word, max = 3) => word.senses[0].gloss.slice(0, max)
 
 const KANA = /[぀-ヿ]/;
 
-// Writes the reading above the kanji only: 乗る gets の over 乗, and る is left alone.
-// Works by lining the kana already in the word up against the reading.
-export function furigana(written, wordReading, cls) {
-  const el = h('span', { lang: 'ja', class: cls });
-  if (!wordReading || written === wordReading) {
-    el.textContent = written;
-    return el;
-  }
+// Lines the reading up against the written word so it sits over the kanji only:
+// 乗る + のる → [乗/の][る]. Returns [{ text, rt }], rt empty for kana.
+function alignReading(written, wordReading) {
+  if (!wordReading || written === wordReading) return [{ text: written, rt: '' }];
   // Split 食べ物 into [食][べ][物]: kana runs are fixed text, the rest take whatever reading fits.
   const parts = written.match(/[぀-ヿ]+|[^぀-ヿ]+/g);
   const pattern = parts.map((part) => (KANA.test(part) ? kataToHira(part) : '(.+?)')).join('');
   const match = new RegExp(`^${pattern}$`).exec(kataToHira(wordReading));
-  if (!match) {
-    el.append(h('ruby', null, written, h('rt', null, wordReading)));
-    return el;
-  }
+  if (!match) return [{ text: written, rt: wordReading }];
   let at = 0;
   let group = 1;
-  for (const part of parts) {
-    if (KANA.test(part)) {
-      el.append(part);
-      at += part.length;
-    } else {
-      const length = match[group++].length;
-      el.append(h('ruby', null, part, h('rt', null, wordReading.slice(at, at + length))));
-      at += length;
-    }
+  return parts.map((part) => {
+    const length = KANA.test(part) ? part.length : match[group++].length;
+    const rt = KANA.test(part) ? '' : wordReading.slice(at, at + length);
+    at += length;
+    return { text: part, rt };
+  });
+}
+
+// The same word in 漢字{かんじ} notation, for storing text that rubyMarkup can show later.
+export const toMarkup = (written, wordReading) =>
+  alignReading(written, wordReading).map(({ text, rt }) => (rt ? `${text}{${rt}}` : text)).join('');
+
+// Writes the reading above the kanji only: 乗る gets の over 乗, and る is left alone.
+export function furigana(written, wordReading, cls) {
+  const el = h('span', { lang: 'ja', class: cls });
+  for (const { text, rt } of alignReading(written, wordReading)) {
+    el.append(rt ? h('ruby', null, text, h('rt', null, rt)) : text);
   }
   return el;
 }
@@ -299,11 +300,14 @@ export function segmented(name, options, value, onChange) {
 // Switches the Quiz tab between the saved-words quiz, the kana test and the verb form quiz.
 export function quizSwitch(active) {
   return h('nav', { class: 'segmented', 'aria-label': 'Quiz type' },
-    [['quiz', 'My words'], ['kana', 'Hiragana & katakana'], ['verbs', 'Verb forms'], ['grammar', 'Grammar']].map(([route, label]) => h('a', {
-      href: `#/${route}`,
-      class: route === active ? 'on' : '',
-      'aria-current': route === active ? 'page' : null,
-    }, label)));
+    [['quiz', 'My words'], ['kana', 'Hiragana & katakana'], ['verbs', 'Verb forms'], ['grammar', 'Grammar'], ['mistakes', 'Mistakes']].map(([route, label]) => {
+      const count = route === 'mistakes' ? store.openMistakes().length : 0;
+      return h('a', {
+        href: `#/${route}`,
+        class: route === active ? 'on' : '',
+        'aria-current': route === active ? 'page' : null,
+      }, label, count > 0 && h('span', { class: 'count' }, ` ${count}`));
+    }));
 }
 
 export function shuffle(items) {

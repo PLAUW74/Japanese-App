@@ -15,7 +15,7 @@ const GROUPS = {
 };
 const SCRIPTS = [['hiragana', 'Hiragana'], ['katakana', 'Katakana'], ['both', 'Both']];
 const MODES = [['read', 'Choose the reading'], ['type', 'Type the reading'], ['pick', 'Choose the kana']];
-const COUNTS = [[10, '10'], [20, '20'], [50, '50'], [0, 'All']];
+const COUNTS = [[1, '1'], [5, '5'], [10, '10'], [20, '20'], [50, '50'], [0, 'All']];
 const CHOICES = 4;
 const ADVANCE_MS = 650;
 
@@ -37,6 +37,32 @@ function isRightReading(item, answer) {
   const given = answer.trim().toLowerCase();
   if (!given) return false;
   return given === item.romaji || kataToHira(toHiragana(given)) === item.hira || (item.hira === 'を' && given === 'o');
+}
+
+// The item plus three wrong choices from the same script, never one with the same reading (じ / ぢ).
+function choicesFor(item) {
+  const seen = new Set([item.romaji]);
+  const options = [item];
+  for (const other of shuffle(ALL.filter((k) => k.script === item.script))) {
+    if (options.length >= CHOICES) break;
+    if (seen.has(other.romaji)) continue;
+    seen.add(other.romaji);
+    options.push(other);
+  }
+  return shuffle(options);
+}
+
+// A multiple-choice question for one kana, for practising mistakes. `mode` is
+// 'pick' (romaji → kana) or 'read' (kana → romaji).
+export function kanaQuestion(char, mode) {
+  const item = ALL.find((k) => k.kana === char);
+  if (!item) return null;
+  const pick = mode === 'pick';
+  return {
+    item,
+    prompt: pick ? item.romaji : item.kana,
+    options: choicesFor(item).map((o) => ({ text: pick ? o.kana : o.romaji, correct: o.romaji === item.romaji })),
+  };
 }
 
 function mastery(item) {
@@ -112,18 +138,7 @@ export function createKanaView() {
       mode: settings.kanaMode,
       questions: shuffle(chosen).map((item) => {
         const question = { item };
-        if (settings.kanaMode !== 'type') {
-          // Wrong choices: same script, never another kana with the same reading (じ / ぢ).
-          const seen = new Set([item.romaji]);
-          const options = [item];
-          for (const other of shuffle(ALL.filter((k) => k.script === item.script))) {
-            if (options.length >= CHOICES) break;
-            if (seen.has(other.romaji)) continue;
-            seen.add(other.romaji);
-            options.push(other);
-          }
-          question.options = shuffle(options);
-        }
+        if (settings.kanaMode !== 'type') question.options = choicesFor(item);
         return question;
       }),
       index: 0,
@@ -142,12 +157,26 @@ export function createKanaView() {
     else renderQuestion();
   }
 
-  function finish(question, correct, slot) {
+  function finish(question, correct, slot, given) {
     const { item } = question;
     session.answered = true;
     if (correct) session.right += 1;
     else session.missed.push(item);
     store.recordKana(item.kana, correct);
+
+    const key = `kana:${item.kana}:${session.mode === 'pick' ? 'pick' : 'read'}`;
+    if (correct) store.resolveMistake(key);
+    else {
+      const pick = session.mode === 'pick';
+      store.recordMistake({
+        key,
+        quiz: 'kana',
+        prompt: pick ? item.romaji : item.kana,
+        answer: pick ? item.kana : item.romaji,
+        given: given || '',
+        note: `${item.kana} is read “${item.romaji}”.`,
+      });
+    }
 
     if (correct) {
       slot.replaceChildren(h('div', { class: 'feedback right', role: 'status' }, h('div', { class: 'feedback-title' }, 'Correct')));
@@ -183,7 +212,7 @@ export function createKanaView() {
           if (question.options[j].romaji === item.romaji) button.classList.add('right');
         });
         if (!correct) buttons[i].classList.add('wrong');
-        finish(question, correct, slot);
+        finish(question, correct, slot, showKana ? option.kana : option.romaji);
       },
     }, h('kbd', null, String(i + 1)), h('span', null, showKana ? option.kana : option.romaji)));
     return h('div', { class: 'choices' }, buttons);
@@ -205,7 +234,7 @@ export function createKanaView() {
       field.disabled = true;
       controls.hidden = true;
       field.classList.add(correct ? 'right' : 'wrong');
-      finish(question, correct, slot);
+      finish(question, correct, slot, given.trim());
     };
     const controls = h('div', { class: 'answer-controls' },
       h('button', { type: 'submit', class: 'btn btn-primary' }, 'Check'),

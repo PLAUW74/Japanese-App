@@ -3,14 +3,14 @@ import * as dict from '../dict.js';
 import * as store from '../store.js';
 import { conjugations } from '../conjugate.js';
 import { toHiragana, kataToHira } from '../kana.js';
-import { h, ja, speak, icon, shuffle, segmented, quizSwitch, setChildren, furigana, headword, reading, meaningText } from '../ui.js';
+import { h, ja, speak, icon, shuffle, segmented, quizSwitch, setChildren, furigana, headword, reading, meaningText, toMarkup } from '../ui.js';
 
 const TARGETS = [['te', 'て-form'], ['past', 'た-form (past)'], ['dict', 'Dictionary form']];
-const TARGET_NAMES = { te: 'て-form', past: 'た-form', dict: 'dictionary form' };
+export const TARGET_NAMES = { te: 'て-form', past: 'た-form', dict: 'dictionary form' };
 const U_ROW = 'うくぐすつぬぶむる';
 const I_ROW = 'いきぎしちにびみり';
 const MODES = [['type', 'Type the answer'], ['choice', 'Multiple choice']];
-const COUNTS = [[10, '10'], [20, '20'], [50, '50']];
+const COUNTS = [[1, '1'], [5, '5'], [10, '10'], [20, '20'], [50, '50']];
 const CHOICES = 4;
 const SAVED_VERB = /^(v1|v5|vk$|vs-i$|vs$)/;
 
@@ -43,7 +43,7 @@ function ruleFor(title, plain, target) {
 }
 
 // A verb turned into a question, or null when it can't be conjugated.
-function toQuestion(word, target) {
+export function toQuestion(word, target) {
   const written = headword(word);
   const table = conjugations(word, written, reading(word));
   if (!table) return null;
@@ -75,7 +75,7 @@ function wrongForms(polite, target, short) {
   return target === 'past' ? forms.map((f) => f.slice(0, -1) + (f.endsWith('で') ? 'だ' : 'た')) : forms;
 }
 
-function options(question, target) {
+export function options(question, target) {
   const short = question.polite.written.length <= 3;
   const written = wrongForms(question.polite.written, target, short);
   const readings = question.polite.reading ? wrongForms(question.polite.reading, target, short) : [];
@@ -159,13 +159,26 @@ export function createVerbsView() {
     else renderQuestion();
   }
 
-  function finish(question, correct, slot) {
+  function finish(question, correct, slot, given) {
     session.answered = true;
     if (correct) session.right += 1;
     else session.missed.push(question);
     store.recordDrill(correct);
 
     const { answer } = question;
+    const key = `verb:${question.word.id}:${session.target}`;
+    if (correct) store.resolveMistake(key);
+    else {
+      store.recordMistake({
+        key,
+        quiz: 'verbs',
+        prompt: `${toMarkup(question.polite.written, question.polite.reading)} → ${TARGET_NAMES[session.target]}`,
+        answer: toMarkup(answer.written, answer.reading),
+        given: given || '',
+        note: session.target === 'past' ? '' : question.rule,
+        en: meaningText(question.word, 2),
+      });
+    }
     const last = session.index === session.questions.length - 1;
     const button = h('button', { type: 'button', class: 'btn btn-primary btn-large', onclick: next }, last ? 'See results' : 'Next');
     queueMicrotask(() => button.focus());
@@ -194,7 +207,7 @@ export function createVerbsView() {
           if (question.options[j].correct) button.classList.add('right');
         });
         if (!option.correct) buttons[i].classList.add('wrong');
-        finish(question, option.correct, slot);
+        finish(question, option.correct, slot, toMarkup(option.written, option.reading));
       },
     }, h('kbd', null, String(i + 1)), furigana(option.written, option.reading)));
     return h('div', { class: 'choices' }, buttons);
@@ -225,7 +238,7 @@ export function createVerbsView() {
       field.disabled = true;
       controls.hidden = true;
       field.classList.add(correct ? 'right' : 'wrong');
-      finish(question, correct, slot);
+      finish(question, correct, slot, typed);
     };
     const controls = h('div', { class: 'answer-controls' },
       h('button', { type: 'submit', class: 'btn btn-primary' }, 'Check'),

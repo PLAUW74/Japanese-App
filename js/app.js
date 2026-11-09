@@ -6,6 +6,7 @@ import { createQuizView } from './views/quiz.js';
 import { createKanaView } from './views/kana.js';
 import { createVerbsView } from './views/verbs.js';
 import { createGrammarView } from './views/grammar.js';
+import { createMistakesView } from './views/mistakes.js';
 import { createNotesView } from './views/notes.js';
 import { createStatsView } from './views/stats.js';
 
@@ -16,12 +17,13 @@ const factories = {
   kana: createKanaView,
   verbs: createVerbsView,
   grammar: createGrammarView,
+  mistakes: createMistakesView,
   notes: () => createNotesView(),
   reading: () => createNotesView({ dir: 'reading', title: 'Reading', item: 'passage', newestFirst: false }),
   stats: createStatsView,
 };
-// The kana test, verb form quiz and grammar quiz live under the Quiz tab.
-const TAB_FOR = { kana: 'quiz', verbs: 'quiz', grammar: 'quiz' };
+// The kana test, verb form quiz, grammar quiz and mistakes list live under the Quiz tab.
+const TAB_FOR = { kana: 'quiz', verbs: 'quiz', grammar: 'quiz', mistakes: 'quiz' };
 const views = {};
 const main = document.getElementById('view');
 const tabs = [...document.querySelectorAll('#tabs a')];

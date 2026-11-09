@@ -4,21 +4,21 @@ import { QUESTIONS, TOPICS } from '../grammar-data.js';
 import { h, speak, icon, shuffle, segmented, quizSwitch, setChildren, rubyMarkup, markupReading } from '../ui.js';
 
 const LEVELS = [['both', 'N5 + N4'], [5, 'N5'], [4, 'N4']];
-const COUNTS = [[10, '10'], [20, '20'], [0, 'All']];
+const COUNTS = [[1, '1'], [5, '5'], [10, '10'], [20, '20'], [0, 'All']];
 const GAP = '（　）';
 
 const matches = ({ grammarLevel, grammarTopic }) => QUESTIONS.filter((q) =>
   (grammarLevel === 'both' || q.level === grammarLevel) && (grammarTopic === 'all' || q.topic === grammarTopic));
 
 // The finished sentence as marked-up text, with the answer wrapped in [[ ]] for highlighting.
-function solved(question) {
+export function solved(question) {
   if (question.type === 'pick') return question.q.replace(GAP, `[[${question.options[0]}]]`);
   const words = question.order.map((part, i) => (i === question.star ? `[[${part}]]` : part));
   return [question.before, words.join(' '), question.after].filter(Boolean).join(' ');
 }
 
 // Renders text that may contain a [[highlighted]] part and the （　） gap.
-function sentence(text, cls) {
+export function sentence(text, cls) {
   const el = h('span', { lang: 'ja', class: cls });
   for (const [i, part] of text.split(/\[\[|\]\]/).entries()) {
     const pieces = part.split(GAP);
@@ -29,6 +29,14 @@ function sentence(text, cls) {
     });
   }
   return el;
+}
+
+// A short stable id for a question, so a mistake can be matched when it comes up again.
+export function questionId(question) {
+  const text = question.type === 'pick' ? question.q : question.before + question.order.join('') + question.after;
+  let hash = 5381;
+  for (const ch of text) hash = ((hash * 33) ^ ch.codePointAt(0)) >>> 0;
+  return hash.toString(36);
 }
 
 const spoken = (question) => markupReading(solved(question).replace(/\[\[|\]\]/g, '')).replace(/\s+/g, '');
@@ -103,12 +111,28 @@ export function createGrammarView() {
     }, icon('speaker'));
   }
 
-  function finish(item, correct, slot) {
+  function finish(item, correct, slot, given) {
     const { question } = item;
     session.answered = true;
     if (correct) session.right += 1;
     else session.missed.push(question);
     store.recordDrill(correct);
+
+    const key = `grammar:${questionId(question)}`;
+    if (correct) store.resolveMistake(key);
+    else {
+      store.recordMistake({
+        key,
+        quiz: 'grammar',
+        prompt: question.type === 'pick'
+          ? question.q
+          : [question.before, question.order.map((_, i) => (i === question.star ? '★' : '＿')).join(' '), question.after].filter(Boolean).join(' '),
+        answer: solved(question),
+        given: given || '',
+        note: question.why,
+        en: question.en,
+      });
+    }
 
     const last = session.index === session.questions.length - 1;
     const button = h('button', { type: 'button', class: 'btn btn-primary btn-large', onclick: next }, last ? 'See results' : 'Next');
@@ -151,7 +175,7 @@ export function createGrammarView() {
           if (item.options[j].correct) button.classList.add('right');
         });
         if (!option.correct) buttons[i].classList.add('wrong');
-        finish(item, option.correct, slot);
+        finish(item, option.correct, slot, option.text);
       },
     }, h('kbd', null, String(i + 1)), rubyMarkup(option.text)));
 

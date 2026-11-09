@@ -1,11 +1,11 @@
 import * as dict from '../dict.js';
 import * as store from '../store.js';
 import { toHiragana, kataToHira } from '../kana.js';
-import { h, ja, speakButton, headword, reading, meaningText, posText, sensesList, shuffle, segmented, quizSwitch, wordTitle } from '../ui.js';
+import { h, ja, speakButton, headword, reading, meaningText, posText, sensesList, shuffle, segmented, quizSwitch, wordTitle, toMarkup } from '../ui.js';
 
 const MODES = [['mixed', 'Mixed'], ['choice', 'Multiple choice'], ['typing', 'Typing']];
 const DIRECTIONS = [['mixed', 'Mixed'], ['ja-en', 'Japanese → English'], ['en-ja', 'English → Japanese']];
-const COUNTS = [[10, '10'], [20, '20'], [50, '50'], [0, 'All']];
+const COUNTS = [[1, '1'], [5, '5'], [10, '10'], [20, '20'], [50, '50'], [0, 'All']];
 const CHOICES = 4;
 
 const pick = (items) => items[Math.floor(Math.random() * items.length)];
@@ -161,12 +161,29 @@ export function createQuizView() {
     renderQuestion();
   }
 
-  function finish(correct) {
+  // `given` is what the learner chose or typed, in 漢字{かんじ} notation.
+  function finish(correct, given) {
     const question = session.questions[session.index];
+    const { word, direction } = question;
     session.answered = true;
     if (correct) session.right += 1;
-    else session.missed.push(question.word);
-    store.recordAnswer(question.word.id, correct);
+    else session.missed.push(word);
+    store.recordAnswer(word.id, correct);
+
+    const key = `word:${word.id}:${direction}`;
+    if (correct) {
+      store.resolveMistake(key);
+      return;
+    }
+    const written = toMarkup(headword(word), reading(word));
+    store.recordMistake({
+      key,
+      quiz: 'words',
+      prompt: direction === 'ja-en' ? written : meaningText(word),
+      answer: direction === 'ja-en' ? meaningText(word) : written,
+      given: given || '',
+      note: direction === 'ja-en' ? '' : meaningText(word),
+    });
   }
 
   function feedback(question, correct, note) {
@@ -227,7 +244,7 @@ export function createQuizView() {
       onclick: () => {
         if (session.answered) return;
         const correct = option.id === word.id;
-        finish(correct);
+        finish(correct, direction === 'ja-en' ? meaningText(option) : toMarkup(headword(option), reading(option)));
         buttons.forEach((button, j) => {
           button.disabled = true;
           if (question.options[j].id === word.id) button.classList.add('right');
@@ -264,7 +281,7 @@ export function createQuizView() {
     const submit = (given) => {
       if (session.answered) return;
       const correct = toJapanese ? isRightWord(word, given) : isRightMeaning(word, given);
-      finish(correct);
+      finish(correct, given.trim());
       field.disabled = true;
       controls.hidden = true;
       field.classList.add(correct ? 'right' : 'wrong');

@@ -14,7 +14,9 @@ const blank = () => ({
   deleted: {},   // id -> when a word was removed, so sync doesn't bring it back
   log: {},       // this device's 'YYYY-MM-DD' -> { reviews, correct }
   kana: {},      // this device's kana character -> [right, wrong] from the kana test
-  others: {},    // the same log and kana tallies from the learner's other devices
+  mistakes: [],  // this device's wrong answers: [{ key, quiz, prompt, answer, given, note, en, at }]
+  cleared: {},   // mistake key -> when it was answered right or dismissed
+  others: {},    // the same log, kana tallies and mistakes from the learner's other devices
   settings: {
     source: 'due', mode: 'mixed', direction: 'mixed', count: 10,
     kanaScript: 'hiragana', kanaGroups: ['basic'], kanaMode: 'read', kanaCount: 20,
@@ -255,6 +257,54 @@ export function recordDrill(correct) {
   commit(true);
 }
 
+// ---- mistakes ----
+// Every quiz records wrong answers here. Text fields use 漢字{かんじ} notation.
+// A mistake disappears once the same question is answered right or dismissed, on any device.
+
+const MAX_MISTAKES = 300;
+const MAX_CLEARED = 600;
+
+export function recordMistake(entry) {
+  state.mistakes = [{ ...entry, at: Date.now() }, ...state.mistakes.filter((m) => m.key !== entry.key)].slice(0, MAX_MISTAKES);
+  dirty.device = true;
+  commit(true);
+}
+
+export function clearMistakes(keys) {
+  const now = Date.now();
+  for (const key of keys) state.cleared[key] = now;
+  const entries = Object.entries(state.cleared);
+  if (entries.length > MAX_CLEARED) {
+    state.cleared = Object.fromEntries(entries.sort((a, b) => b[1] - a[1]).slice(0, MAX_CLEARED));
+  }
+  dirty.device = true;
+  commit();
+}
+
+const allDevices = () => [state, ...Object.values(state.others)];
+
+// Open mistakes from every device, newest first.
+export function openMistakes() {
+  const clearedAt = {};
+  for (const device of allDevices()) {
+    for (const [key, at] of Object.entries(device.cleared || {})) clearedAt[key] = Math.max(clearedAt[key] || 0, at);
+  }
+  const latest = new Map();
+  for (const device of allDevices()) {
+    for (const mistake of device.mistakes || []) {
+      if (mistake.at <= (clearedAt[mistake.key] || 0)) continue;
+      const seen = latest.get(mistake.key);
+      if (!seen || seen.at < mistake.at) latest.set(mistake.key, mistake);
+    }
+  }
+  return [...latest.values()].sort((a, b) => b.at - a.at);
+}
+
+// A right answer settles an open mistake for the same question.
+export function resolveMistake(key) {
+  if (openMistakes().some((m) => m.key === key)) clearMistakes([key]);
+}
+
 // Each device keeps its own log and kana tallies; these add up every device's.
 export function combinedLog() {
   const out = {};
@@ -366,7 +416,9 @@ export function takeDirty() {
       ? { ...state.words[id] }
       : { id: Number(id) || id, deleted: true, updatedAt: state.deleted[id] || Date.now() }),
     lists: dirty.lists ? { lists: state.lists, updatedAt: state.listsAt } : null,
-    device: dirty.device ? { log: state.log, kana: state.kana, updatedAt: Date.now() } : null,
+    device: dirty.device
+      ? { log: state.log, kana: state.kana, mistakes: state.mistakes, cleared: state.cleared, updatedAt: Date.now() }
+      : null,
   };
   dirty.words.clear();
   dirty.lists = false;
