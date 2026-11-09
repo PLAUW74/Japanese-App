@@ -1,6 +1,7 @@
 // Keeps saved words, lists and review history in step across devices through the
 // learner's Google account (Firebase Auth + Firestore). Data lives at
-// users/{uid}/words/{wordId}, users/{uid}/meta/lists and users/{uid}/devices/{deviceId}.
+// users/{uid}/words/{wordId}, users/{uid}/meta/lists, users/{uid}/devices/{deviceId}
+// and users/{uid}/answers/{page} (what was typed into a note's blanks).
 // The app works the same without it; the Firebase SDK only loads once configured.
 import config from './firebase-config.js';
 import * as store from './store.js';
@@ -90,15 +91,16 @@ export async function signOut() {
 function start(user) {
   const { db, collection, doc, onSnapshot } = fb;
   const base = ['users', user.uid];
-  const first = { words: null, lists: undefined };
+  const first = { words: null, lists: undefined, answers: null };
   session = { uid: user.uid, unsubscribers: [], ready: false };
   setStatus({ state: 'connecting', email: user.email || '', error: '' });
 
   // Once both the words and the lists have arrived, upload what this device has that the account lacks.
   const maybeReady = () => {
-    if (session.ready || first.words === null || first.lists === undefined) return;
+    if (session.ready || first.words === null || first.lists === undefined || first.answers === null) return;
     session.ready = true;
     store.queueNewerThan(first.words, first.lists);
+    store.queueAnswersNewerThan(first.answers);
     flush();
   };
   const failed = (err) => setStatus({ state: 'error', error: describe(err) });
@@ -116,6 +118,15 @@ function start(user) {
     if (data) store.applyRemote({ lists: data });
     if (first.lists === undefined) {
       first.lists = data ? data.updatedAt || 0 : null;
+      maybeReady();
+    }
+  }, failed));
+
+  // What was typed into the blanks of each note page.
+  session.unsubscribers.push(onSnapshot(collection(db, ...base, 'answers'), (snap) => {
+    store.applyRemote({ answers: snap.docChanges().map((change) => change.doc.data()) });
+    if (first.answers === null) {
+      first.answers = Object.fromEntries(snap.docs.map((d) => [d.id, d.data().updatedAt || 0]));
       maybeReady();
     }
   }, failed));
@@ -148,6 +159,7 @@ async function flush() {
     ...changes.words.map((word) => [['words', String(word.id)], word]),
     ...(changes.lists ? [[['meta', 'lists'], changes.lists]] : []),
     ...(changes.device ? [[['devices', store.deviceId], changes.device]] : []),
+    ...changes.answers.map((entry) => [['answers', entry.page], entry]),
   ];
   if (!writes.length) return;
 

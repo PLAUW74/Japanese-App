@@ -17,6 +17,7 @@ const blank = () => ({
   mistakes: [],  // this device's wrong answers: [{ key, quiz, prompt, answer, given, note, en, at }]
   cleared: {},   // mistake key -> when it was answered right or dismissed
   others: {},    // the same log, kana tallies and mistakes from the learner's other devices
+  answers: {},   // note page -> { values, updatedAt }: what was typed into its blanks
   settings: {
     source: 'due', mode: 'mixed', direction: 'mixed', count: 10,
     kanaScript: 'hiragana', kanaGroups: ['basic'], kanaMode: 'read', kanaCount: 20,
@@ -56,9 +57,9 @@ export const deviceId = readDeviceId();
 const subscribers = new Set();
 
 // What has changed locally since sync last took it.
-const dirty = { words: new Set(), lists: false, device: false };
+const dirty = { words: new Set(), lists: false, device: false, answers: new Set() };
 const dirtyListeners = new Set();
-const isDirty = () => dirty.words.size > 0 || dirty.lists || dirty.device;
+const isDirty = () => dirty.words.size > 0 || dirty.lists || dirty.device || dirty.answers.size > 0;
 
 function commit(silent = false) {
   try {
@@ -341,6 +342,17 @@ export function streak(now = Date.now()) {
   return days;
 }
 
+// ---- typed answers in notes ----
+// Keyed by page, e.g. 'notes~homework-1' (no slashes, so it can be a Firestore document id).
+
+export const getAnswers = (page) => (state.answers[page] && state.answers[page].values) || [];
+
+export function setAnswers(page, values) {
+  state.answers[page] = { values: [...values], updatedAt: Date.now() };
+  dirty.answers.add(page);
+  commit(true);
+}
+
 // ---- settings and backup ----
 
 export function saveSettings(patch) {
@@ -419,10 +431,12 @@ export function takeDirty() {
     device: dirty.device
       ? { log: state.log, kana: state.kana, mistakes: state.mistakes, cleared: state.cleared, updatedAt: Date.now() }
       : null,
+    answers: [...dirty.answers].filter((page) => state.answers[page]).map((page) => ({ page, ...state.answers[page] })),
   };
   dirty.words.clear();
   dirty.lists = false;
   dirty.device = false;
+  dirty.answers.clear();
   return out;
 }
 
@@ -431,6 +445,16 @@ export function restoreDirty(taken) {
   for (const word of taken.words) dirty.words.add(String(word.id));
   if (taken.lists) dirty.lists = true;
   if (taken.device) dirty.device = true;
+  for (const entry of taken.answers || []) dirty.answers.add(entry.page);
+}
+
+// After first connecting, queue typed answers the account lacks or holds an older copy of.
+// `remote` maps page -> updatedAt.
+export function queueAnswersNewerThan(remote) {
+  for (const [page, entry] of Object.entries(state.answers)) {
+    if ((entry.updatedAt || 0) > (remote[page] ?? -1)) dirty.answers.add(page);
+  }
+  commit(true);
 }
 
 // After first connecting, queue whatever this device has that the account lacks
@@ -452,8 +476,15 @@ export function queueNewerThan(remoteWords, remoteListsAt) {
 }
 
 // Applies changes from the account. The newer copy of each word wins.
-export function applyRemote({ words = [], lists = null, others = null }) {
+export function applyRemote({ words = [], lists = null, others = null, answers = [] }) {
   let changed = false;
+  for (const doc of answers) {
+    if (!doc.page || !Array.isArray(doc.values)) continue;
+    const local = state.answers[doc.page];
+    if ((doc.updatedAt || 0) <= ((local && local.updatedAt) || 0)) continue;
+    state.answers[doc.page] = { values: doc.values, updatedAt: doc.updatedAt };
+    changed = true;
+  }
   for (const doc of words) {
     const id = String(doc.id);
     const remoteAt = doc.deleted ? doc.updatedAt || 0 : changedAt(doc);

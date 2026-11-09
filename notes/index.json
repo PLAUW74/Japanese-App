@@ -1,5 +1,28 @@
 [
   {
+    "id": "homework",
+    "title": "Homework",
+    "source": "Practice papers",
+    "added": "2026-11-09",
+    "tags": ["homework"]
+  },
+  {
+    "id": "homework-18",
+    "parent": "homework",
+    "title": "Homework no.18",
+    "source": "第18課 · dictionary form, ことが できます, まえに · pp.41–42",
+    "added": "2026-11-09",
+    "tags": ["dictionary form", "ことが できます", "まえに", "particles"]
+  },
+  {
+    "id": "homework-1",
+    "parent": "homework",
+    "title": "Practice paper 1",
+    "source": "復習C (L10–13) · まとめ I · L16 · pp.106–109, 141",
+    "added": "2026-11-09",
+    "tags": ["particles", "question words", "counters", "て/で form"]
+  },
+  {
     "id": "dictionary-form-p108",
     "title": "Dictionary form, ことが できます, 前{まえ}に",
     "source": "練習A · p.108",
