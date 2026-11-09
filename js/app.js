@@ -16,7 +16,8 @@ const factories = {
   kana: createKanaView,
   verbs: createVerbsView,
   grammar: createGrammarView,
-  notes: createNotesView,
+  notes: () => createNotesView(),
+  reading: () => createNotesView({ dir: 'reading', title: 'Reading', item: 'passage', newestFirst: false }),
   stats: createStatsView,
 };
 // The kana test, verb form quiz and grammar quiz live under the Quiz tab.

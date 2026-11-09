@@ -1,121 +1,140 @@
-// Study notes written up from textbook pages. Each note is an HTML file in notes/,
-// listed in notes/index.json together with a photo of the original page.
-import { h, setChildren, speak } from '../ui.js';
+// A shelf of HTML pages listed in an index.json: the Notes tab (study notes from
+// textbook pages, newest first) and the Reading tab (graded passages, easiest first).
+// Each page can write readings inline as 漢字{かんじ} and may come with a photo.
+import { h, setChildren, speak, rubyMarkup } from '../ui.js';
 
-const BASE = new URL('../../notes/', import.meta.url);
-
-let index = null;
-function loadIndex() {
-  if (!index) {
-    index = fetch(new URL('index.json', BASE)).then((res) => {
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return res.json();
-    });
-    index.catch(() => { index = null; });
+// Notes can write readings inline as 漢字{かんじ}; turn those into furigana.
+function addReadings(root) {
+  const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+  const marked = [];
+  for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+    if (node.nodeValue.includes('{')) marked.push(node);
   }
-  return index;
+  for (const node of marked) node.replaceWith(...rubyMarkup(node.nodeValue).childNodes);
 }
 
-const bodies = new Map();
-function loadBody(note) {
-  if (!bodies.has(note.id)) {
-    const body = fetch(new URL(`${note.id}.html`, BASE)).then((res) => {
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      return res.text();
-    });
-    body.catch(() => bodies.delete(note.id));
-    bodies.set(note.id, body);
-  }
-  return bodies.get(note.id);
-}
+const plainTitle = (title) => title.replace(/\{[^}]*\}/g, '');
 
 const formatDate = (iso) => new Date(`${iso}T00:00:00`).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
 
-export function createNotesView() {
+// `dir` is the folder (and route) name; `newestFirst` orders the list by date added,
+// otherwise it keeps the order of index.json.
+export function createNotesView({ dir = 'notes', title = 'Notes', item = 'note', newestFirst = true } = {}) {
+  const base = new URL(`../../${dir}/`, import.meta.url);
   const el = h('section', { class: 'view' });
   let filter = '';
   let openId = null;
 
+  let index = null;
+  function loadIndex() {
+    if (!index) {
+      index = fetch(new URL('index.json', base)).then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      });
+      index.catch(() => { index = null; });
+    }
+    return index;
+  }
+
+  const bodies = new Map();
+  function loadBody(page) {
+    if (!bodies.has(page.id)) {
+      const body = fetch(new URL(`${page.id}.html`, base)).then((res) => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.text();
+      });
+      body.catch(() => bodies.delete(page.id));
+      bodies.set(page.id, body);
+    }
+    return bodies.get(page.id);
+  }
+
   function failed() {
-    setChildren(el, h('div', { class: 'view-head' }, h('h1', null, 'Notes')),
-      h('p', { class: 'error' }, 'The notes could not be loaded. Check your connection and reload the page.'));
+    setChildren(el, h('div', { class: 'view-head' }, h('h1', null, title)),
+      h('p', { class: 'error' }, `The ${item}s could not be loaded. Check your connection and reload the page.`));
   }
 
   async function renderList() {
-    let notes;
-    try { notes = await loadIndex(); } catch (err) { failed(); return; }
+    let pages;
+    try { pages = await loadIndex(); } catch (err) { failed(); return; }
     if (openId) return;
     const needle = filter.trim().toLowerCase();
-    const shown = notes
-      .filter((n) => !needle || [n.title, n.source, ...(n.tags || [])].join(' ').toLowerCase().includes(needle))
-      .sort((a, b) => b.added.localeCompare(a.added));
+    const shown = pages.filter((p) => !needle || [plainTitle(p.title), p.source, ...(p.tags || [])].join(' ').toLowerCase().includes(needle));
+    if (newestFirst) shown.sort((a, b) => b.added.localeCompare(a.added));
 
     const search = el.querySelector('.filter-input') || h('input', {
       type: 'search',
       class: 'filter-input',
-      placeholder: 'Search notes',
-      'aria-label': 'Search notes',
+      placeholder: `Search ${item}s`,
+      'aria-label': `Search ${item}s`,
       oninput: (event) => { filter = event.target.value; renderList(); },
     });
     const searching = document.activeElement === search;
 
     setChildren(el,
-      h('div', { class: 'view-head' }, h('h1', null, 'Notes'), h('span', { class: 'muted' }, `${notes.length} ${notes.length === 1 ? 'note' : 'notes'}`)),
-      notes.length > 3 && search,
+      h('div', { class: 'view-head' }, h('h1', null, title), h('span', { class: 'muted' }, `${pages.length} ${pages.length === 1 ? item : `${item}s`}`)),
+      pages.length > 3 && search,
       shown.length === 0
-        ? h('p', { class: 'muted empty-line' }, notes.length ? `No notes match “${filter.trim()}”.` : 'No notes yet.')
-        : h('div', { class: 'results' }, shown.map((note) => h('a', { class: 'entry note-card', href: `#/notes/${note.id}` },
-          note.image && h('img', { class: 'note-thumb', src: new URL(note.image, BASE).href, alt: '', loading: 'lazy' }),
+        ? h('p', { class: 'muted empty-line' }, pages.length ? `Nothing matches “${filter.trim()}”.` : `No ${item}s yet.`)
+        : h('div', { class: 'results' }, shown.map((page) => h('a', { class: 'entry note-card', href: `#/${dir}/${page.id}` },
+          page.image && h('img', { class: 'note-thumb', src: new URL(page.image, base).href, alt: '', loading: 'lazy' }),
           h('div', { class: 'note-card-body' },
-            h('h2', null, note.title),
-            h('span', { class: 'muted' }, [note.source, formatDate(note.added)].filter(Boolean).join(' · ')),
-            note.tags && h('div', { class: 'badge-row' }, note.tags.map((tag) => h('span', { class: 'badge' }, tag))),
+            h('h2', null, rubyMarkup(page.title)),
+            h('span', { class: 'muted' }, [page.source, newestFirst && formatDate(page.added)].filter(Boolean).join(' · ')),
+            page.tags && h('div', { class: 'badge-row' }, page.tags.map((tag) => h('span', { class: 'badge' }, tag))),
           ),
         ))),
     );
     if (searching) search.focus();
   }
 
-  async function renderNote(id) {
-    let notes;
-    try { notes = await loadIndex(); } catch (err) { failed(); return; }
-    const note = notes.find((n) => n.id === id);
-    if (!note) { location.hash = '#/notes'; return; }
+  async function renderPage(id) {
+    let pages;
+    try { pages = await loadIndex(); } catch (err) { failed(); return; }
+    const page = pages.find((p) => p.id === id);
+    if (!page) { location.hash = `#/${dir}`; return; }
 
     const body = h('div', { class: 'note-body' }, h('p', { class: 'muted' }, 'Loading…'));
     setChildren(el,
-      h('a', { class: 'btn btn-quiet back-link', href: '#/notes' }, '← All notes'),
+      h('a', { class: 'btn btn-quiet back-link', href: `#/${dir}` }, `← All ${item}s`),
       h('div', { class: 'view-head note-head' },
-        h('div', null, h('h1', null, note.title), h('span', { class: 'muted' }, [note.source, `added ${formatDate(note.added)}`].filter(Boolean).join(' · '))),
+        h('div', null, h('h1', null, rubyMarkup(page.title)), h('span', { class: 'muted' }, [page.source, newestFirst && `added ${formatDate(page.added)}`].filter(Boolean).join(' · '))),
       ),
-      note.image && h('details', { class: 'card note-photo' },
+      page.image && h('details', { class: 'card note-photo' },
         h('summary', null, 'Original page'),
-        h('a', { href: new URL(note.image, BASE).href, target: '_blank', rel: 'noopener' },
-          h('img', { src: new URL(note.image, BASE).href, alt: `Photo of ${note.source || note.title}`, loading: 'lazy' })),
+        h('a', { href: new URL(page.image, base).href, target: '_blank', rel: 'noopener' },
+          h('img', { src: new URL(page.image, base).href, alt: `Photo of ${page.source || plainTitle(page.title)}`, loading: 'lazy' })),
       ),
       h('article', { class: 'card' }, body),
     );
     window.scrollTo(0, 0);
 
     try {
-      body.innerHTML = await loadBody(note);
+      body.innerHTML = await loadBody(page);
+      addReadings(body);
     } catch (err) {
-      setChildren(body, h('p', { class: 'error' }, 'This note could not be loaded. Check your connection and reload the page.'));
+      setChildren(body, h('p', { class: 'error' }, `This ${item} could not be loaded. Check your connection and reload the page.`));
     }
   }
 
-  // Tapping Japanese in a note reads it aloud.
+  // Tapping Japanese reads it aloud.
   el.addEventListener('click', (event) => {
     const target = event.target.closest('.note-body [lang="ja"], .note-body td');
     if (!target || !/[぀-ヿ㐀-鿿]/.test(target.textContent)) return;
+    // Read the furigana rather than the kanji, so the voice can't pick the wrong reading.
     const copy = target.cloneNode(true);
-    copy.querySelectorAll('rt').forEach((rt) => rt.remove());
-    speak(copy.textContent.trim());
+    copy.querySelectorAll('ruby').forEach((ruby) => {
+      const rt = ruby.querySelector('rt');
+      ruby.replaceWith(rt ? rt.textContent : ruby.textContent);
+    });
+    copy.querySelectorAll('details').forEach((d) => d.remove());
+    speak(copy.textContent.replace(/\s+/g, ' ').trim());
   });
 
   function show(id) {
     openId = id || null;
-    if (openId) renderNote(openId);
+    if (openId) renderPage(openId);
     else renderList();
   }
 

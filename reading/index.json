@@ -1,0 +1,37 @@
+[
+  {
+    "id": "my-day",
+    "title": "My day · 私{わたし}の 一日{いちにち}",
+    "source": "N5 · everyday",
+    "added": "2026-11-10",
+    "tags": ["N5"]
+  },
+  {
+    "id": "momotaro",
+    "title": "Momotaro · 桃太郎{ももたろう}",
+    "source": "N5 · folk tale",
+    "added": "2026-11-10",
+    "tags": ["N5", "folk tale"]
+  },
+  {
+    "id": "omusubi-korori",
+    "title": "The rolling rice ball · おむすびころりん",
+    "source": "N5–N4 · folk tale",
+    "added": "2026-11-10",
+    "tags": ["N4", "folk tale"]
+  },
+  {
+    "id": "kasajizo",
+    "title": "The straw hats and the statues · 笠{かさ}じぞう",
+    "source": "N4 · folk tale",
+    "added": "2026-11-10",
+    "tags": ["N4", "folk tale"]
+  },
+  {
+    "id": "tsuru",
+    "title": "The crane’s gift · 鶴{つる}の 恩返{おんがえ}し",
+    "source": "N4 · folk tale",
+    "added": "2026-11-10",
+    "tags": ["N4", "folk tale"]
+  }
+]

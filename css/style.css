@@ -541,6 +541,17 @@ kbd {
 .note-body .tip { padding: 10px 14px; border-radius: 10px; background: var(--amber-soft); color: var(--ink); font-size: 0.92rem; }
 .note-body .tip::before { content: "Tip  "; font-weight: 700; color: var(--amber); }
 
+.story { gap: 18px; }
+.story .para { display: flex; flex-direction: column; gap: 4px; }
+.story p[lang="ja"] { font-size: 1.2rem; line-height: 2.3; }
+.story p[lang="ja"] rt { font-size: 0.5em; }
+.note-body details > summary { width: fit-content; cursor: pointer; color: var(--muted); font-size: 0.85rem; }
+.note-body details[open] > summary { margin-bottom: 4px; }
+.note-body details > p { color: var(--muted); }
+.questions { margin: 0; padding-left: 1.4em; display: flex; flex-direction: column; gap: 12px; }
+.questions li > [lang="ja"] { font-size: 1.05rem; line-height: 2.1; }
+.questions details > p[lang="ja"] { color: var(--ink); line-height: 2.1; }
+
 .note-table { width: 100%; border-collapse: collapse; font-size: 0.98rem; }
 .note-table th { padding: 6px 10px; text-align: left; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; color: var(--muted); border-bottom: 2px solid var(--line); }
 .note-table td { padding: 6px 10px; border-bottom: 1px solid var(--line); font-family: var(--font-ja); }

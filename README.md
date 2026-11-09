@@ -9,6 +9,7 @@ A Japanese dictionary and vocab trainer that runs entirely in the browser.
 - **Verb form quiz**: see a verb in its ます form and give the て-form or た-form (under the Quiz tab).
 - **Grammar quiz**: about 110 N5–N4 questions (fill the gap, JLPT-style word order) in `js/grammar-data.js`.
 - **Notes**: formatted study notes from textbook pages, each with a photo of the original page.
+- **Reading**: graded N5–N4 passages and folk tales with furigana, translations, word lists and questions.
 - **Stats**: study streak, accuracy, word progress and upcoming reviews.
 
 ## Run it
@@ -51,6 +52,7 @@ The config values in `js/firebase-config.js` are not secret; the rules are what 
 | `js/sync.js`, `js/firebase-config.js` | Optional syncing through Firebase |
 | `data/` | Compact dictionary files the app loads |
 | `notes/` | Study notes: `index.json` lists them, each note is an HTML file, photos are in `notes/img/` |
+| `reading/` | Graded reading passages, laid out the same way as `notes/` |
 | `tools/build-data.ps1` | Rebuilds `data/` from the latest sources |
 | `sw.js` | Offline support once the app has been opened online |
 
