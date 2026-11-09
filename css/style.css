@@ -379,6 +379,8 @@ rt { font-size: 0.5em; font-weight: 400; color: var(--muted); user-select: none;
 .segmented button, .segmented a { padding: 6px 12px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font-size: 0.9rem; font-weight: 600; text-decoration: none; cursor: pointer; }
 .segmented .on { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
 
+.prompt-line { display: flex; align-items: center; justify-content: center; gap: 8px; }
+.prompt-line .icon-btn { width: 44px; height: 44px; font-size: 1.3rem; }
 .prompt-kana { font-size: 5rem; line-height: 1.1; }
 .choice-kana { font-size: 1.6rem !important; }
 .kana-chart { display: grid; grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); gap: 6px; }

@@ -12,7 +12,6 @@ const I_ROW = 'いきぎしちにびみり';
 const MODES = [['type', 'Type the answer'], ['choice', 'Multiple choice']];
 const COUNTS = [[10, '10'], [20, '20'], [50, '50']];
 const CHOICES = 4;
-const ADVANCE_MS = 900;
 const SAVED_VERB = /^(v1|v5|vk$|vs-i$|vs$)/;
 
 const isVerb = (word) => word.senses.some((sense) => sense.pos.some((tag) => SAVED_VERB.test(tag)));
@@ -93,7 +92,6 @@ function options(question, target) {
 
 export function createVerbsView() {
   let session = null;
-  let timer;
   const el = h('section', { class: 'view quiz' });
 
   // ---- setup ----
@@ -155,7 +153,6 @@ export function createVerbsView() {
   }
 
   function next() {
-    clearTimeout(timer);
     session.index += 1;
     session.answered = false;
     if (session.index >= session.questions.length) renderSummary();
@@ -184,7 +181,6 @@ export function createVerbsView() {
       !correct && session.target !== 'past' && h('p', { class: 'muted' }, question.rule),
       button,
     ));
-    if (correct) timer = setTimeout(next, ADVANCE_MS);
   }
 
   function choiceBody(question, slot) {
@@ -258,7 +254,16 @@ export function createVerbsView() {
       h('div', { class: 'card question' },
         h('div', { class: 'prompt' },
           h('span', { class: 'label' }, `Change to the ${TARGET_NAMES[session.target]}`),
-          furigana(question.polite.written, question.polite.reading, 'prompt-word'),
+          h('div', { class: 'prompt-line' },
+            furigana(question.polite.written, question.polite.reading, 'prompt-word'),
+            h('button', {
+              type: 'button',
+              class: 'icon-btn',
+              title: 'Play pronunciation',
+              'aria-label': 'Play the verb',
+              onclick: () => speak(question.polite.reading || question.polite.written),
+            }, icon('speaker')),
+          ),
           h('span', { class: 'muted' }, meaningText(question.word, 2)),
         ),
         session.mode === 'choice' ? choiceBody(question, slot) : typingBody(question, slot),
@@ -268,13 +273,11 @@ export function createVerbsView() {
   }
 
   function quit() {
-    clearTimeout(timer);
     session = null;
     renderSetup();
   }
 
   function renderSummary() {
-    clearTimeout(timer);
     const done = session.right + session.missed.length;
     const percent = done ? Math.round((session.right / done) * 100) : 0;
     const back = h('button', { type: 'button', class: 'btn btn-primary btn-large', onclick: quit }, 'Back to quiz setup');
