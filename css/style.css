@@ -567,6 +567,11 @@ kbd {
 .questions li > p[lang="ja"] + p[lang="ja"] { margin-top: 4px; }
 
 .note-body .example { color: var(--muted); }
+.table-scroll { overflow-x: auto; }
+.forms-grid td:last-child { font-family: var(--font-ja); color: inherit; }
+.forms-grid td { white-space: nowrap; }
+.forms-grid tr.example td { color: var(--muted); }
+.note-body .choices-box { padding: 8px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); line-height: 2.1; }
 .choices-list { margin: 0; padding: 10px 14px 10px 2.2em; display: flex; flex-direction: column; gap: 4px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); }
 .note-body input.gap-input {
   width: 2.6em;

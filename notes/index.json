@@ -7,6 +7,22 @@
     "tags": ["homework"]
   },
   {
+    "id": "homework-2",
+    "parent": "homework",
+    "title": "Practice paper 2",
+    "source": "復習D · L18 · pp.142–143, 159",
+    "added": "2026-11-09",
+    "tags": ["particles", "て form", "adjectives", "ことが できます"]
+  },
+  {
+    "id": "homework-9-17",
+    "parent": "homework",
+    "title": "Homework 9–17 Summary",
+    "source": "復習 (9〜17課) review test · /100 · pp.37–40",
+    "added": "2026-11-09",
+    "tags": ["review", "particles", "verb forms", "counters", "adjectives"]
+  },
+  {
     "id": "homework-18",
     "parent": "homework",
     "title": "Homework no.18",
