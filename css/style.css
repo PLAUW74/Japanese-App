@@ -565,6 +565,8 @@ rt { font-size: 0.5em; font-weight: 400; color: var(--muted); user-select: none;
 .question { gap: 20px; }
 .prompt { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 0; text-align: center; }
 .prompt-word { font-size: 3rem; font-weight: 600; line-height: 1.2; overflow-wrap: anywhere; }
+.prompt-word rt { font-size: 0.36em; font-weight: 500; }
+.missed-word rt { font-size: 0.5em; }
 .prompt-meaning { font-size: 1.5rem; font-weight: 600; line-height: 1.3; }
 
 .choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }

@@ -1,7 +1,7 @@
 import * as dict from '../dict.js';
 import * as store from '../store.js';
 import { toHiragana, kataToHira } from '../kana.js';
-import { h, ja, speakButton, headword, reading, meaningText, posText, sensesList, shuffle, segmented, quizSwitch, wordTitle, toMarkup } from '../ui.js';
+import { h, speakButton, headword, reading, meaningText, posText, sensesList, shuffle, segmented, quizSwitch, wordTitle, toMarkup, furigana } from '../ui.js';
 import { dropdown } from '../dropdown.js';
 
 const MODES = [['mixed', 'Mixed'], ['choice', 'Multiple choice'], ['typing', 'Typing']];
@@ -243,15 +243,10 @@ export function createQuizView() {
         posText(word.senses[0]) && h('span', { class: 'pos' }, posText(word.senses[0])),
       );
     }
-    const hint = reading(word) && h('button', {
-      type: 'button',
-      class: 'btn btn-quiet btn-small',
-      onclick: () => hint.replaceWith(ja(reading(word), 'entry-reading')),
-    }, 'Show reading');
+    // The reading sits above the kanji, as in the dictionary.
     return h('div', { class: 'prompt' },
       h('span', { class: 'label' }, 'What does this mean?'),
-      h('div', { class: 'prompt-line' }, ja(headword(word), 'prompt-word'), speakButton(word)),
-      hint,
+      h('div', { class: 'prompt-line' }, furigana(headword(word), reading(word), 'prompt-word'), speakButton(word)),
     );
   }
 
@@ -274,7 +269,7 @@ export function createQuizView() {
       },
     },
       h('kbd', null, String(i + 1)),
-      h('span', null, direction === 'ja-en' ? meaningText(option) : wordLabel(option)),
+      direction === 'ja-en' ? h('span', null, meaningText(option)) : furigana(headword(option), reading(option)),
     ));
     return h('div', { class: 'choices' }, buttons);
   }
@@ -359,7 +354,7 @@ export function createQuizView() {
         missed.length > 0 && h('div', { class: 'missed' },
           h('h4', null, 'Words to revisit'),
           missed.map((word) => h('div', { class: 'missed-row' },
-            h('span', null, ja(headword(word), 'missed-word'), reading(word) && ja(reading(word), 'entry-reading')),
+            furigana(headword(word), reading(word), 'missed-word'),
             h('span', { class: 'muted' }, meaningText(word, 2)),
             speakButton(word),
           )),
