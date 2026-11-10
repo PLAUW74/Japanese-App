@@ -1,6 +1,7 @@
 import * as store from '../store.js';
 import * as sync from '../sync.js';
 import { kataToHira, toHiragana } from '../kana.js';
+import { staggerIn } from '../stagger.js';
 import {
   h, ja, icon, toast, speakButton, badges, statusBadge, sensesList, headword, reading, meaningText,
   wordEditor, confirmButton, formsPanel, wordTitle, setChildren
@@ -146,7 +147,13 @@ export function createVocabView() {
     );
   }
 
-  function render() {
+  // When the page was opened: the word cards rise in from then (js/stagger.js), and a redraw
+  // in the first moments carries the entrance on. Filtering or sorting later doesn't replay it.
+  let openedAt = 0;
+  const ENTRANCE_MS = 2500;
+
+  function render(opening = false) {
+    if (opening === true) openedAt = performance.now();
     const state = store.getState();
     const list = state.lists.find((l) => l.id === listId);
     if (!list) listId = 'all';
@@ -197,8 +204,11 @@ export function createVocabView() {
       backup(),
     );
     if (filtering) filterInput.focus();
+    if (body.classList.contains('results') && performance.now() - openedAt < ENTRANCE_MS && !filtering) {
+      staggerIn([...body.children], openedAt);
+    }
   }
 
   render();
-  return { el, onShow: render, onStore: render };
+  return { el, onShow: () => render(true), onStore: () => render() };
 }

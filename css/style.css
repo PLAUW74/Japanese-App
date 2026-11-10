@@ -1,17 +1,22 @@
 :root {
-  /* Light palette. Comments give the name each colour has in the design notes. */
-  --bg: #f7f5f0;             /* warm off-white */
-  --surface: #ffffff;        /* cards, panels */
-  --surface-2: #efece5;      /* plain buttons, hover fills */
+  /* Light palette: soft grey page, white cards, coral primary, steel-blue secondary.
+     Comments give the name each colour has in the design notes. */
+  --bg: #f4f4f6;             /* --bg */
+  --surface: #ffffff;        /* --surface: cards, panels */
+  --surface-2: #e7e7e7;      /* --surface-alt: plain buttons, toggles, hover fills, boxes */
   --field: var(--surface);   /* inputs, chips and choices that sit on a card */
-  --ink: #1f1e1c;            /* --text */
-  --muted: #6b6760;          /* --text-muted */
-  --line: #e3dfd6;           /* --border */
-  --accent: #a7c7e7;         /* pastel blue: buttons, highlights, tags (fills only) */
-  --accent-strong: #93b8de;  /* --accent-hover */
-  --accent-ink: #1b2633;     /* --on-accent: text on the pastel blue */
-  --accent-text: #3b6e9e;    /* links and blue text, borders, focus rings, the typing cursor */
-  --accent-soft: #e3edf7;    /* selected tabs and chips, focused blanks */
+  --ink: #1c2430;            /* --text */
+  --muted: #5a6472;          /* --text-muted */
+  --line: #d2d2d4;           /* --border */
+  --main-strong: #5b8db8;    /* --secondary: chart bars */
+  --accent: #ff634a;         /* --primary, coral: buttons, selected tab, today (fills only) */
+  --accent-strong: #e8503a;  /* --primary-hover */
+  --accent-ink: #1c2430;     /* --on-accent: dark text on the coral (white on it is too faint) */
+  --accent-text: #3f6e99;    /* --link: links, selected chips, focus rings, the typing cursor */
+  --accent-soft: #e2ecf5;    /* the secondary blue as a pale tint: selected chips, focused blanks */
+  --link-hover: #2e5478;     /* a link under the pointer: the link blue, a shade deeper */
+  --badge-bg: var(--surface-2);  /* plain badges: note tags, a word's "New" */
+  --badge-text: var(--muted);
   --good: #2e7350;
   --good-soft: #ddefe5;
   --bad: #a8423a;
@@ -20,7 +25,7 @@
   --blue-soft: #e5e7f5;
   --amber: #8a5a00;
   --amber-soft: #faeed2;
-  --shadow: 0 1px 2px rgba(31, 30, 28, 0.06), 0 4px 14px rgba(31, 30, 28, 0.05);
+  --shadow: 0 1px 2px rgba(28, 36, 48, 0.06), 0 4px 14px rgba(28, 36, 48, 0.05);
   --radius: 14px;
   --font: system-ui, -apple-system, "Segoe UI", Roboto, "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
   --font-ja: "Hiragino Sans", "Yu Gothic UI", "Meiryo", "Noto Sans JP", system-ui, sans-serif;
@@ -30,17 +35,21 @@
 /* Dark palette. index.html sets data-theme before the page draws: from the theme button's
    saved choice, or from the device setting when the choice is Auto. */
 :root[data-theme="dark"] {
-  --bg: #15171a;
-  --surface: #1e2125;
-  --surface-2: #282c31;
-  --ink: #e8e6e1;            /* --text */
-  --muted: #9a9893;          /* --text-muted */
-  --line: #2d3137;           /* --border */
-  --accent: #a7c7e7;
-  --accent-strong: #bdd5ee;  /* --accent-hover */
-  --accent-ink: #15171a;     /* --on-accent */
-  --accent-text: #a7c7e7;    /* pastel blue is readable as text on dark */
-  --accent-soft: #22303f;
+  --bg: #12161d;             /* --bg */
+  --surface: #1a202a;        /* --surface */
+  --surface-2: #232b37;      /* --surface-alt */
+  --ink: #e6e9ee;            /* --text */
+  --muted: #9aa4b2;          /* --text-muted */
+  --line: #2f3947;           /* --border */
+  --main-strong: #5b8db8;    /* --secondary: chart bars */
+  --accent: #e8735f;         /* --primary: a softer coral for dark */
+  --accent-strong: #f08a77;  /* --primary-hover */
+  --accent-ink: #12161d;     /* --on-accent */
+  --accent-text: #7ba6cc;    /* --link */
+  --accent-soft: #1f3145;    /* the secondary blue as a deep tint: selected chips, focused blanks */
+  --link-hover: #e6e9ee;     /* --link-hover */
+  --badge-bg: rgba(232, 115, 95, 0.15);  /* --badge-bg: the coral as a faint wash */
+  --badge-text: #f08a77;     /* --badge-text */
   --good: #7bc9a0;
   --good-soft: #1b3328;
   --bad: #ee9a90;
@@ -49,7 +58,7 @@
   --blue-soft: #262a47;
   --amber: #e2b65c;
   --amber-soft: #3a2f16;
-  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
   color-scheme: dark;
 }
 
@@ -75,6 +84,8 @@ h2 { font-size: 1.1rem; }
 h4 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: 6px; }
 
 a { color: var(--accent-text); }
+/* Lowest priority on purpose: links styled as buttons, tabs or cards keep their own colours. */
+a:where(:hover) { color: var(--link-hover); }
 button, input, select, textarea { font: inherit; color: inherit; }
 :focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
 
@@ -247,14 +258,14 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline-offs
   font-size: 0.72rem;
   font-weight: 600;
   white-space: nowrap;
-  background: var(--surface-2);
-  color: var(--muted);
+  background: var(--badge-bg);
+  color: var(--badge-text);
 }
 .badge-row { display: flex; flex-wrap: wrap; gap: 6px; }
 .badge-row:empty { display: none; }
 .badge-common { background: var(--good-soft); color: var(--good); }
 .badge-jlpt { background: var(--blue-soft); color: var(--blue); }
-.status-new { background: var(--surface-2); color: var(--muted); }
+.status-new { background: var(--badge-bg); color: var(--badge-text); }
 .status-due { background: var(--accent-soft); color: var(--accent-text); }
 .status-learning { background: var(--amber-soft); color: var(--amber); }
 .status-mature { background: var(--good-soft); color: var(--good); }
@@ -637,12 +648,14 @@ kbd {
 
 .bars { display: flex; align-items: flex-end; gap: 6px; height: 150px; }
 .bar-col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 4px; height: 100%; min-width: 0; }
-.bar { width: 100%; max-width: 34px; min-height: 2px; border-radius: 5px 5px 2px 2px; background: color-mix(in srgb, var(--accent) 45%, var(--surface-2)); }
+.bar { width: 100%; max-width: 34px; min-height: 2px; border-radius: 5px 5px 2px 2px; background: var(--main-strong); }
 .bar-col.today .bar { background: var(--accent); }
 .bar-value { font-size: 0.72rem; color: var(--muted); font-variant-numeric: tabular-nums; min-height: 1.1em; }
 .bar-label { font-size: 0.72rem; color: var(--muted); white-space: nowrap; }
 .bar-col.today .bar-label { color: var(--ink); font-weight: 600; }
-
+/* Bars grow from the baseline and value labels pop from their centre (Motion Prompt #002). */
+.bar { transform-origin: 50% 100%; }
+.bar-value { transform-origin: 50% 70%; }
 .sync-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
 .sync-row .btn { margin-left: auto; }
 .sync-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--muted); }
@@ -688,6 +701,59 @@ kbd {
 .questions li > p[lang="ja"] + p[lang="ja"] { margin-top: 4px; }
 
 .note-body .example { color: var(--muted); }
+
+/* Dictionary opening (the bounce of Motion Prompt #008): 言葉 drawn on a 539:240 canvas in the
+   welcome mark's colour. At 300px wide the characters come out at about the old mark's 3.2rem. */
+.opening { display: block; width: 100%; max-width: 300px; aspect-ratio: 539 / 240; margin: 0 auto; color: var(--accent-text); cursor: pointer; }
+/* With the opening, the rest of the welcome rises in from below, one line after another:
+   the heading, the paragraph, then the example chips one by one. */
+@keyframes rise-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+.welcome.intro > h1, .welcome.intro > p, .welcome.intro > .chips > .chip {
+  animation: rise-in 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.welcome.intro > h1 { animation-delay: 0.55s; }
+.welcome.intro > p { animation-delay: 0.75s; }
+.welcome.intro > .chips > .chip { animation-delay: calc(0.95s + var(--i, 0) * 0.06s); }
+.welcome.intro > .chips > .chip:nth-child(2) { --i: 1; }
+.welcome.intro > .chips > .chip:nth-child(3) { --i: 2; }
+.welcome.intro > .chips > .chip:nth-child(4) { --i: 3; }
+.welcome.intro > .chips > .chip:nth-child(5) { --i: 4; }
+.welcome.intro > .chips > .chip:nth-child(6) { --i: 5; }
+@media (prefers-reduced-motion: reduce) { .welcome.intro > * , .welcome.intro > .chips > .chip { animation: none; } }
+
+/* ---- note tools: play buttons, tap-a-word, hidden answers, lookup ---- */
+::highlight(spoken-word) { background-color: var(--accent-soft); color: var(--accent-text); }
+.play-btn.playing { color: var(--accent-text); background: var(--accent-soft); }
+ol.questions.with-play { padding-left: 3.6em; }
+.questions.with-play > li { position: relative; }
+.qn-play { position: absolute; left: -3.6em; top: 0.15em; }
+.note-body .with-play, .note-body .example, .note-body .examples li { position: relative; padding-left: 2.5em; }
+.line-play { position: absolute; left: 0; top: 0.1em; }
+.passage-play { display: flex; align-items: center; gap: 8px; }
+.qn-play .icon-btn, .line-play .icon-btn, .passage-play .icon-btn { width: 32px; height: 32px; }
+
+.answer-box { position: relative; margin-top: 4px; }
+.answer-box.blurred { min-height: 2.8em; }
+.answer-box.blurred .answer-content { filter: blur(7px); user-select: none; }
+.answer-content > p[lang="ja"] { line-height: 2.1; color: var(--ink); }
+.answer-reveal {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  border: 1px dashed var(--accent); border-radius: 8px; background: color-mix(in srgb, var(--surface) 55%, transparent);
+  color: var(--accent-strong); font: inherit; font-weight: 600; cursor: pointer;
+}
+.answer-reveal:hover { background: color-mix(in srgb, var(--accent-soft) 70%, transparent); }
+.answer-tools { display: flex; flex-direction: column; gap: 12px; margin-top: 10px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); }
+.lookup { display: flex; flex-direction: column; gap: 6px; }
+.lookup-field { display: flex; align-items: center; gap: 8px; padding: 4px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--muted); }
+.lookup-field:focus-within { border-color: var(--accent); }
+.lookup-field input.lookup-input { flex: 1; min-width: 0; height: auto; min-height: 0; padding: 6px 0; border: 0; box-shadow: none; background: transparent; color: var(--ink); font: inherit; outline: none; }
+.lookup-row { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 10px; padding: 6px 0; border-top: 1px solid var(--line); }
+.lookup-row:first-child { border-top: 0; }
+.lookup-word { padding: 0; border: 0; background: none; color: var(--ink); font: inherit; font-size: 1.15rem; cursor: pointer; }
+.lookup-word rt { font-size: 0.5em; }
+.lookup-meaning { font-size: 0.9rem; color: var(--muted); min-width: 0; }
+.badge-question { margin-right: 6px; background: var(--accent-soft); color: var(--accent-text); }
+.lookup-save.on { color: var(--good); }
 .table-scroll { overflow-x: auto; }
 .forms-grid td:last-child { font-family: var(--font-ja); color: inherit; }
 .forms-grid td { white-space: nowrap; }

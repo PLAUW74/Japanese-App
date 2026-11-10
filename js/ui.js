@@ -30,6 +30,7 @@ const ICONS = {
   chevron: '<path d="m6 9 6 6 6-6"/>',
   close: '<path d="M6 6l12 12M18 6 6 18"/>',
   search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  stop: '<rect x="7" y="7" width="10" height="10" rx="1.5" fill="currentColor"/>',
   sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/>',
   moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
   themeAuto: '<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/>',
@@ -52,23 +53,75 @@ export function toast(message) {
   toastTimer = setTimeout(() => el.classList.remove('show'), 2600);
 }
 
-export function speak(text) {
+// What is being read aloud now: { onend }. Starting anything else, or stopSpeaking(), ends it
+// and calls its onend, so a play button can switch back from "stop".
+let speaking = null;
+
+function finishSpeaking() {
+  const current = speaking;
+  speaking = null;
+  if (current && current.onend) current.onend();
+}
+
+export function stopSpeaking() {
+  finishSpeaking();
+  if ('speechSynthesis' in window) speechSynthesis.cancel();
+}
+
+// Long text is read one sentence at a time: some browsers cut a single long utterance off.
+// `onend` runs when it finishes or is stopped. Returns false when nothing could be played.
+export function speak(text, { onend } = {}) {
   if (!('speechSynthesis' in window)) {
     toast('This browser cannot play audio');
-    return;
+    return false;
   }
   const voices = speechSynthesis.getVoices();
   const voice = voices.find((v) => v.lang.replace('_', '-').toLowerCase().startsWith('ja'));
   if (voices.length && !voice) {
     toast('No Japanese voice is installed on this device');
-    return;
+    return false;
   }
-  const utterance = new SpeechSynthesisUtterance(text);
-  utterance.lang = 'ja-JP';
-  utterance.rate = 0.9;
-  if (voice) utterance.voice = voice;
+  const chunks = String(text).match(/[^。！？!?]+[。！？!?」]*/g)?.map((s) => s.trim()).filter(Boolean) || [];
+  if (!chunks.length) return false;
+  finishSpeaking();
   speechSynthesis.cancel();
-  speechSynthesis.speak(utterance);
+  const session = { onend };
+  speaking = session;
+  const done = () => { if (speaking === session) finishSpeaking(); };
+  chunks.forEach((chunk, i) => {
+    const utterance = new SpeechSynthesisUtterance(chunk);
+    utterance.lang = 'ja-JP';
+    utterance.rate = 0.9;
+    if (voice) utterance.voice = voice;
+    if (i === chunks.length - 1) utterance.onend = done;
+    utterance.onerror = (event) => { if (!['interrupted', 'canceled'].includes(event.error)) done(); };
+    speechSynthesis.speak(utterance);
+  });
+  return true;
+}
+
+// A play button that turns into a stop button while it is reading. `getText` is called on
+// each press, so it can include what was typed into blanks.
+export function playButton(getText, label = 'Play') {
+  const button = h('button', {
+    type: 'button',
+    class: 'icon-btn play-btn',
+    title: label,
+    'aria-label': label,
+    'aria-pressed': 'false',
+  }, icon('speaker'));
+  const setPlaying = (on) => {
+    button.classList.toggle('playing', on);
+    button.setAttribute('aria-pressed', String(on));
+    button.title = on ? 'Stop' : label;
+    button.replaceChildren(icon(on ? 'stop' : 'speaker'));
+  };
+  button.addEventListener('click', (event) => {
+    event.stopPropagation();
+    if (button.classList.contains('playing')) { stopSpeaking(); return; }
+    if (speak(getText(), { onend: () => setPlaying(false) })) setPlaying(true);
+  });
+  return button;
 }
 
 export function speakButton(word) {
@@ -96,7 +149,9 @@ export function questionSpeaker(text, label = 'Read the question aloud') {
 // in 漢字{かんじ} markup, whose words the dictionary picks out, or a list of dictionary entries.
 // A word that was already saved shows as saved but can't be removed from here: removing it
 // would throw away its review history. One saved from here can be tapped again to undo.
-export function wordSaver(source, label = 'Words in this sentence') {
+// `source` can also be a promise of entries. With `hideSaved`, words already in My Words are
+// left out, and nothing shows when every word is saved.
+export function wordSaver(source, label = 'Words in this sentence', { hideSaved = false } = {}) {
   const chips = h('div', { class: 'chips' });
   const saveAll = h('button', { type: 'button', class: 'btn btn-quiet btn-small', hidden: true }, 'Save all');
   const box = h('div', { class: 'word-saver', hidden: true },
@@ -145,9 +200,9 @@ export function wordSaver(source, label = 'Words in this sentence') {
     draw();
   });
 
-  Promise.resolve(Array.isArray(source) ? source : dict.words(source))
+  Promise.resolve(typeof source === 'string' ? dict.words(source) : source)
     .then((found) => {
-      entries = found;
+      entries = hideSaved ? found.filter((entry) => !store.hasWord(entry.id)) : found;
       if (!entries.length) return;
       draw();
       box.hidden = false;

@@ -55,6 +55,10 @@ export const verbs = (count, minLevel) => call('verbs', { count, minLevel });
 export const get =(ids) => call('get', { ids });
 // The vocabulary in a sentence written in 漢字{かんじ} markup, in order, without particles.
 export const words = (markup) => call('words', { markup });
+// The same from pieces a page already split ({ text, reading, annotated }).
+export const wordsInParts = (parts) => call('words', { parts });
+// Word boundaries for several sentences at once: one [{ from, to, reading }] list per sentence.
+export const segments = (list) => call('segments', { list });
 
 // { char: { meanings, on, kun, strokes, grade, freq } } for the kanji found in `text`.
 export async function kanjiInfo(text) {

@@ -3,6 +3,7 @@ import * as sync from '../sync.js';
 import { h, ja, icon, headword, reading, meaningText, setChildren, segmented } from '../ui.js';
 import { THEMES, themeChoice, setThemeChoice, onThemeChange } from '../theme.js';
 import { countUp } from '../countup.js';
+import { barChart } from './charts.js';
 
 const THEME_ICONS = { auto: 'themeAuto', light: 'sun', dark: 'moon' };
 
@@ -38,17 +39,6 @@ function days(count, offset) {
     out.push(day);
   }
   return out;
-}
-
-function barChart(items, emptyText) {
-  const max = Math.max(...items.map((item) => item.value));
-  if (max === 0) return h('p', { class: 'muted' }, emptyText);
-  return h('div', { class: 'bars', role: 'img', 'aria-label': items.map((item) => `${item.title}: ${item.value}`).join(', ') },
-    items.map((item) => h('div', { class: `bar-col ${item.highlight ? 'today' : ''}`, title: `${item.title}: ${item.value}` },
-      h('span', { class: 'bar-value' }, item.value || ''),
-      h('div', { class: 'bar', style: `height:${(item.value / max) * 100}%` }),
-      h('span', { class: 'bar-label' }, item.label),
-    )));
 }
 
 const SYNC_TEXT = {
@@ -102,7 +92,13 @@ export function createStatsView() {
 
   // The tile numbers count up when the page is opened (Motion Prompt #007, js/countup.js);
   // a redraw after a sync or a setting change shows them as they are.
+  // When the page was last opened: the charts' entrances (js/views/charts.js) run from then,
+  // and a redraw part-way through continues them rather than restarting or dropping them.
+  let openedAt = 0;
+
   function render(animate = false) {
+    if (animate) openedAt = performance.now();
+    const chartsSince = openedAt;
     const count = (n) => countUp(n, { animate });
     const log = store.combinedLog();
     const words = store.allWords();
@@ -146,11 +142,11 @@ export function createStatsView() {
       h('div', { class: 'card-pair' },
         h('div', { class: 'card' },
           h('h2', null, 'Reviews, last 14 days'),
-          barChart(activity, 'No reviews yet. Finish a quiz to start your streak.'),
+          barChart(activity, 'No reviews yet. Finish a quiz to start your streak.', { since: chartsSince }),
         ),
         h('div', { class: 'card' },
           h('h2', null, 'Words added, last 14 days'),
-          barChart(added, 'No words added in the last two weeks. Save some from the dictionary.'),
+          barChart(added, 'No words added in the last two weeks. Save some from the dictionary.', { since: chartsSince }),
         ),
       ),
       toughest.length > 0 && h('div', { class: 'card' },

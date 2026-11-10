@@ -2,7 +2,9 @@
 // textbook pages, newest first) and the Reading tab (graded passages, easiest first).
 // Each page can write readings inline as 漢字{かんじ} and may come with a photo.
 import * as store from '../store.js';
-import { h, setChildren, speak, rubyMarkup } from '../ui.js';
+import { h, setChildren, rubyMarkup, stopSpeaking } from '../ui.js';
+import { enhanceNote, onWordTap } from './note-tools.js';
+import { staggerIn } from '../stagger.js';
 
 // Notes can write readings inline as 漢字{かんじ}; turn those into furigana.
 function addReadings(root) {
@@ -171,6 +173,18 @@ export function createNotesView({ dir = 'notes', title = 'Notes', item = 'note',
         : h('div', { class: 'results' }, shown.map((page) => card(page, pages))),
     );
     if (searching) search.focus();
+    else entrance();
+  }
+
+  // Cards rise in one after another (Motion Prompt #002, js/stagger.js) when a list is opened,
+  // timed from when they are drawn, so loading the index first doesn't eat into it. Searching
+  // redraws the list without replaying it.
+  let enterNext = false;
+  function entrance() {
+    if (!enterNext) return;
+    enterNext = false;
+    const results = el.querySelector(':scope > .results');
+    if (results) staggerIn([...results.children], performance.now());
   }
 
   const childrenOf = (page, pages) => pages.filter((p) => p.parent === page.id);
@@ -198,6 +212,7 @@ export function createNotesView({ dir = 'notes', title = 'Notes', item = 'note',
       h('div', { class: 'results' }, kids.map((kid) => card(kid, []))),
     );
     window.scrollTo(0, 0);
+    entrance();
   }
 
   async function renderPage(id) {
@@ -233,32 +248,23 @@ export function createNotesView({ dir = 'notes', title = 'Notes', item = 'note',
       migrateOldAnswers(dir, page.id, key);
       const inputs = makeGapsEditable(body, key);
       if (inputs && openId === id) gapPage = { key, inputs };
+      enhanceNote(body);
     } catch (err) {
       setChildren(body, h('p', { class: 'error' }, `This ${item} could not be loaded. Check your connection and reload the page.`));
     }
   }
 
-  // Tapping Japanese reads it aloud.
+  // Tapping a word in a Japanese sentence reads just that word (js/views/note-tools.js).
   el.addEventListener('click', (event) => {
-    if (event.target.closest('input, button, summary')) return;
-    const target = event.target.closest('.note-body [lang="ja"], .note-body td');
-    if (!target || !/[぀-ヿ㐀-鿿]/.test(target.textContent)) return;
-    // Read the furigana rather than the kanji, so the voice can't pick the wrong reading.
-    const copy = target.cloneNode(true);
-    // Read what you typed into the blanks as part of the sentence.
-    const typed = [...target.querySelectorAll('.gap-input')].map((input) => input.value);
-    copy.querySelectorAll('.gap-input').forEach((input, i) => input.replaceWith(typed[i] || ''));
-    copy.querySelectorAll('ruby').forEach((ruby) => {
-      const rt = ruby.querySelector('rt');
-      ruby.replaceWith(rt ? rt.textContent : ruby.textContent);
-    });
-    copy.querySelectorAll('details').forEach((d) => d.remove());
-    speak(copy.textContent.replace(/\s+/g, ' ').trim());
+    const body = el.querySelector('.note-body');
+    if (body) onWordTap(event, body);
   });
 
   function show(id) {
+    stopSpeaking();
     openId = id || null;
     gapPage = null;
+    enterNext = true; // a list or folder drawn for this visit slides in; a note page ignores it
     if (openId) renderPage(openId);
     else renderList();
   }

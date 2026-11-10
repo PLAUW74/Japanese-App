@@ -1,6 +1,8 @@
 import * as dict from '../dict.js';
 import * as store from '../store.js';
 import { toHiragana, isKanji } from '../kana.js';
+import { createOpening } from './opening.js';
+import { staggerIn } from '../stagger.js';
 import { h, ja, icon, toast, speakButton, formsPanel, wordTitle, badges, sensesList, headword, reading, wordEditor } from '../ui.js';
 
 const PREVIEW_SENSES = 3;
@@ -64,6 +66,9 @@ export function createDictionaryView() {
     searching = false;
     expanded.clear();
     render();
+    // Each new set of results rises in one after another (Motion Prompt #002, js/stagger.js).
+    // Saving a word or opening its details redraws the list without replaying this.
+    staggerIn([...list.querySelectorAll(':scope > .entry')], performance.now());
   }
 
   function renderLoader() {
@@ -164,9 +169,21 @@ export function createDictionaryView() {
     );
   }
 
+  // Made once and reused, so re-rendering the welcome doesn't restart it.
+  const opening = createOpening();
+  let openingPlayed = false;
+  function playOpeningOnce() {
+    if (openingPlayed || query || !opening.el.isConnected || !el.offsetParent) return;
+    openingPlayed = true;
+    opening.play();
+    // The heading, text and example chips rise in line by line while 言葉 bounces (CSS .intro).
+    const welcomeEl = list.querySelector('.welcome');
+    if (welcomeEl && !matchMedia('(prefers-reduced-motion: reduce)').matches) welcomeEl.classList.add('intro');
+  }
+
   function welcome() {
     return h('div', { class: 'welcome' },
-      ja('言葉', 'welcome-mark'),
+      opening.el,
       h('h1', null, 'Look up a Japanese word'),
       h('p', { class: 'muted' }, 'Type English, romaji, kana or kanji. Save the words you want to remember, then quiz yourself on them.'),
       h('div', { class: 'chips center' }, EXAMPLES.map((example) => h('button', {
@@ -195,7 +212,11 @@ export function createDictionaryView() {
 
   return {
     el,
-    onShow: () => input.focus({ preventScroll: true }),
+    onShow: () => {
+      input.focus({ preventScroll: true });
+      // The first time the Dictionary is on screen in a visit, play the opening.
+      requestAnimationFrame(playOpeningOnce);
+    },
     onStore: render,
   };
 }

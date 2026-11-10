@@ -336,8 +336,10 @@ const endingAt = (parts, i) => {
   return ENDINGS.find((ending) => ahead.startsWith(ending));
 };
 
-function words(markup) {
-  const parts = pieces(markup);
+// `source` is 漢字{かんじ} markup, or pieces already split the same way ({ text, reading,
+// annotated }), as a page makes from ruby it is showing.
+function words(source) {
+  const parts = Array.isArray(source) ? source : pieces(source);
   const seen = new Set();
   const out = [];
   let previous = null; // the last word matched, while nothing else has come between
@@ -364,8 +366,56 @@ function words(markup) {
   return out;
 }
 
+// Where each word of a sentence starts and ends, so tapping one can read just that word.
+// Takes pieces ({ text, reading, annotated }) and returns [{ from, to, reading }] over their
+// indexes, `reading` being how the sentence itself says it. Particles and endings get spans of
+// their own; runs that match nothing are kept together; punctuation gets none.
+const SPOKEN = /[぀-ヿ㐀-鿿々〆ヶー]/;
+const DIGIT = /^[0-9０-９]$/;
+
+function segments(parts) {
+  const out = [];
+  const span = (from, to) => out.push({ from, to, reading: parts.slice(from, to).map((p) => p.reading).join('') });
+  let previous = null;
+  let loose = -1; // start of a run of characters that matched nothing
+  const closeLoose = (at) => { if (loose >= 0) span(loose, at); loose = -1; };
+  for (let i = 0; i < parts.length;) {
+    const text = parts[i].text;
+    if (/^[\s」』）)]$/.test(text)) { closeLoose(i); i += 1; continue; }
+    // Numbers stay with the counter after them: 10分{ぷん}, 3人{にん}.
+    if (DIGIT.test(text)) {
+      closeLoose(i);
+      let end = i;
+      while (end < parts.length && DIGIT.test(parts[end].text)) end += 1;
+      const counter = end < parts.length && parts[end].annotated ? matchAt(parts, end) : null;
+      const to = counter ? end + counter.length : end;
+      span(i, to);
+      previous = counter;
+      i = to;
+      continue;
+    }
+    const ending = previous && endingAt(parts, i);
+    if (ending) { span(i, i + ending.length); i += ending.length; previous = null; continue; }
+    if (previous && PARTICLE.has(text)) { span(i, i + 1); i += 1; previous = null; continue; }
+    const match = SPOKEN.test(text) ? matchAt(parts, i) : null;
+    if (!match) {
+      if (SPOKEN.test(text)) { if (loose < 0) loose = i; } else closeLoose(i);
+      previous = null;
+      i += 1;
+      continue;
+    }
+    closeLoose(i);
+    span(i, i + match.length);
+    previous = match;
+    i += match.length;
+  }
+  closeLoose(parts.length);
+  return out;
+}
+
 const handlers = {
-  words: ({ markup }) => words(markup),
+  words: ({ markup, parts }) => words(parts || markup),
+  segments: ({ list }) => list.map(segments),
   verbs: ({ count, minLevel }) => verbs(count, minLevel),
   search: ({ query }) => search(query),
   random: ({ count, exclude }) => random(count, exclude),
