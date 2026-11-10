@@ -642,3 +642,136 @@ kbd {
   .missed-row .muted:not(.small) { grid-column: 1 / -1; grid-row: 2; }
   .toolbar { flex-direction: column; }
 }
+
+/* ---- typing: Motion Prompt #006 · Typewriter / タイプライター ---- */
+/* Every keyframe below is the reference's own formula, sampled: the character settle
+   1 + 0.35·e^(−16t), the 0.94 s / 0.5 s cursor blink, the send spring
+   1 − e^(−6.5t)·cos(15t) capped at 1.25, the half-sine press that takes off 20%,
+   and the 70 px rise (1.944em at the reference's 36 px type) as the text fades. */
+
+.tw-field { position: relative; display: block; width: 100%; min-width: 0; flex-shrink: 1; }
+.tw-field > input { width: 100%; }
+.tw-field.tw-inline { display: inline-block; width: auto; vertical-align: baseline; }
+
+/* The real glyphs and caret step aside; the overlay draws them so each one can move. */
+input.tw-on { caret-color: transparent; -webkit-text-fill-color: transparent; }
+input.tw-on::placeholder { color: var(--muted); -webkit-text-fill-color: var(--muted); }
+
+.tw-ghost {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  border-style: solid;
+  border-color: transparent;
+  white-space: pre;
+  pointer-events: none;
+}
+.tw-ghost.tw-off { visibility: hidden; }
+.tw-row { flex: 0 0 100%; min-width: 0; }
+.tw-ch { display: inline-block; }
+.tw-ch.tw-pop { animation: tw-pop 0.42s linear; }
+
+/* Coral cursor, 5 × 44 on the reference's 36 px type, sitting 4 px past the last character.
+   It takes up no width, so dropping it between characters moves nothing. */
+.tw-caret {
+  position: relative;
+  display: inline-block;
+  width: 0;
+  height: 1.222em;
+  vertical-align: top;
+  /* Centred on the line the text sits on, whatever the field's line-height is. */
+  margin-top: 0.139em;
+  margin-top: calc((1lh - 1.222em) / 2);
+}
+.tw-caret::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0.111em;
+  width: max(2px, 0.139em);
+  height: 100%;
+  border-radius: 0.069em;
+  background: var(--accent);
+  animation: tw-blink 0.94s linear infinite;
+}
+.tw-caret.tw-solid::after { animation: none; opacity: 1; }
+.tw-row.tw-sent { animation: tw-fly 0.45s linear forwards; }
+
+/* Send: grey until there is something to send, then the accent disc springs in. */
+.tw-send { position: relative; overflow: hidden; background: var(--surface-2); color: var(--muted); transition: color 0.3s linear; }
+.tw-send:hover:not(:disabled) { background: var(--surface-2); }
+.tw-send::before { content: ''; position: absolute; inset: 0; border-radius: inherit; background: var(--accent); transform: scale(0); }
+.tw-send .tw-label, .tw-send .icon { position: relative; }
+/* The label flips once the disc is nearly full (0.96 at 0.1 s), so it is never dark on grey. */
+.tw-send.tw-armed { color: var(--accent-ink); transition: color 0s linear 0.1s; }
+.tw-send.tw-armed.tw-instant { transition: none; }
+.tw-send.tw-armed::before { animation: tw-arm 0.82s linear forwards; }
+.tw-send.tw-armed.tw-instant::before { animation: none; transform: scale(1); }
+.tw-send.tw-armed:hover:not(:disabled)::before { background: var(--accent-strong); }
+.tw-send.tw-disarming::before { animation: tw-disarm 0.3s linear forwards; }
+.tw-send.tw-press { animation: tw-press 0.25s linear; }
+
+@keyframes tw-pop {
+  0% { transform: scale(1.35); }
+  4.76% { transform: scale(1.2542); }
+  9.52% { transform: scale(1.1846); }
+  14.29% { transform: scale(1.134); }
+  19.05% { transform: scale(1.0973); }
+  26.19% { transform: scale(1.0602); }
+  33.33% { transform: scale(1.0373); }
+  42.86% { transform: scale(1.0196); }
+  54.76% { transform: scale(1.0088); }
+  69.05% { transform: scale(1.0034); }
+  100% { transform: scale(1); }
+}
+
+@keyframes tw-blink {
+  0%, 53.19% { opacity: 1; }
+  53.2%, 100% { opacity: 0; }
+}
+
+@keyframes tw-arm {
+  0% { transform: scale(0); }
+  6.1% { transform: scale(0.4714); }
+  12.2% { transform: scale(0.9631); }
+  18.29% { transform: scale(1.2369); }
+  24.39% { transform: scale(1.25); }
+  30.49% { transform: scale(1.1616); }
+  36.59% { transform: scale(1.03); }
+  43.9% { transform: scale(0.9389); }
+  51.22% { transform: scale(0.9348); }
+  60.98% { transform: scale(0.9866); }
+  73.17% { transform: scale(1.0184); }
+  85.37% { transform: scale(1.005); }
+  100% { transform: scale(1); }
+}
+
+@keyframes tw-disarm {
+  from { transform: scale(1); opacity: 1; }
+  to { transform: scale(1); opacity: 0; }
+}
+
+@keyframes tw-press {
+  0% { transform: scale(1); }
+  12.5% { transform: scale(0.9235); }
+  25% { transform: scale(0.8586); }
+  37.5% { transform: scale(0.8152); }
+  50% { transform: scale(0.8); }
+  62.5% { transform: scale(0.8152); }
+  75% { transform: scale(0.8586); }
+  87.5% { transform: scale(0.9235); }
+  100% { transform: scale(1); }
+}
+
+@keyframes tw-fly {
+  0%, 37.8% { transform: translateY(0); opacity: 1; }
+  100% { transform: translateY(-1.944em); opacity: 0; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tw-ch.tw-pop, .tw-send.tw-armed::before, .tw-send.tw-press, .tw-row.tw-sent { animation: none; }
+  .tw-send.tw-armed::before { transform: scale(1); }
+  .tw-caret::after { animation: none; opacity: 1; }
+}

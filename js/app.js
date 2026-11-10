@@ -1,5 +1,6 @@
 import * as store from './store.js';
 import * as sync from './sync.js';
+import { enableTypewriter } from './typewriter.js';
 import { createDictionaryView } from './views/dictionary.js';
 import { createVocabView } from './views/vocab.js';
 import { createQuizView } from './views/quiz.js';
@@ -73,6 +74,8 @@ setInterval(updateBadge, 60000);
 updateBadge();
 route();
 sync.init();
+// Characters pop in as they are typed, with a coral cursor behind them.
+enableTypewriter(main);
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch(() => {});
