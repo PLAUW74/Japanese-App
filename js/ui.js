@@ -3,6 +3,7 @@ import * as dict from './dict.js';
 import * as store from './store.js';
 import { conjugations } from './conjugate.js';
 import { kataToHira } from './kana.js';
+import { createTabMarker } from './pager.js';
 
 export function h(tag, props, ...children) {
   const el = document.createElement(tag);
@@ -29,6 +30,9 @@ const ICONS = {
   chevron: '<path d="m6 9 6 6 6-6"/>',
   close: '<path d="M6 6l12 12M18 6 6 18"/>',
   search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2.5v2M12 19.5v2M4.6 4.6 6 6M18 18l1.4 1.4M2.5 12h2M19.5 12h2M4.6 19.4 6 18M18 6l1.4-1.4"/>',
+  moon: '<path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5z"/>',
+  themeAuto: '<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/>',
 };
 
 export function icon(name) {
@@ -75,6 +79,81 @@ export function speakButton(word) {
     'aria-label': `Play pronunciation of ${word.kana[0]}`,
     onclick: (event) => { event.stopPropagation(); speak(word.kana[0]); },
   }, icon('speaker'));
+}
+
+// A speaker button for a quiz question. `text` is what to say, in kana or kanji.
+export function questionSpeaker(text, label = 'Read the question aloud') {
+  return h('button', {
+    type: 'button',
+    class: 'icon-btn',
+    title: label,
+    'aria-label': label,
+    onclick: (event) => { event.stopPropagation(); speak(text); },
+  }, icon('speaker'));
+}
+
+// The vocabulary of a quiz question, each word one tap from My Words. `source` is a sentence
+// in 漢字{かんじ} markup, whose words the dictionary picks out, or a list of dictionary entries.
+// A word that was already saved shows as saved but can't be removed from here: removing it
+// would throw away its review history. One saved from here can be tapped again to undo.
+export function wordSaver(source, label = 'Words in this sentence') {
+  const chips = h('div', { class: 'chips' });
+  const saveAll = h('button', { type: 'button', class: 'btn btn-quiet btn-small', hidden: true }, 'Save all');
+  const box = h('div', { class: 'word-saver', hidden: true },
+    h('div', { class: 'word-saver-head' }, h('span', { class: 'label' }, label), saveAll),
+    chips,
+  );
+  const addedHere = new Set();
+  let entries = [];
+
+  const save = (entry) => { store.addWord(entry); addedHere.add(entry.id); };
+  function draw() {
+    setChildren(chips, entries.map((entry) => {
+      const saved = store.hasWord(entry.id);
+      const locked = saved && !addedHere.has(entry.id);
+      return h('button', {
+        type: 'button',
+        class: `chip word-chip ${saved ? 'on' : ''}`,
+        'aria-pressed': String(saved),
+        'aria-disabled': locked ? 'true' : null,
+        title: locked ? 'Already in My Words' : saved ? 'Saved. Tap again to undo.' : 'Save to My Words',
+        onclick: () => {
+          if (locked) { toast('Already in My Words'); return; }
+          if (saved) {
+            store.removeWord(entry.id);
+            addedHere.delete(entry.id);
+            toast(`Removed ${headword(entry)} from My Words`);
+          } else {
+            save(entry);
+            toast(`Saved ${headword(entry)} to My Words`);
+          }
+          draw();
+        },
+      },
+        icon(saved ? 'check' : 'plus'),
+        furigana(headword(entry), reading(entry)),
+        h('span', { class: 'word-chip-meaning' }, entry.senses[0].gloss[0]),
+      );
+    }));
+    saveAll.hidden = entries.filter((entry) => !store.hasWord(entry.id)).length < 2;
+  }
+
+  saveAll.addEventListener('click', () => {
+    const fresh = entries.filter((entry) => !store.hasWord(entry.id));
+    fresh.forEach(save);
+    toast(`Saved ${fresh.length} words to My Words`);
+    draw();
+  });
+
+  Promise.resolve(Array.isArray(source) ? source : dict.words(source))
+    .then((found) => {
+      entries = found;
+      if (!entries.length) return;
+      draw();
+      box.hidden = false;
+    })
+    .catch(() => {});
+  return box;
 }
 
 // A button that needs a second click before it does something destructive.
@@ -298,16 +377,27 @@ export function segmented(name, options, value, onChange) {
 }
 
 // Switches the Quiz tab between the saved-words quiz, the kana test and the verb form quiz.
+// The quiz picker at the top of every quiz page. Each page draws its own, so the Pagination
+// marker (js/pager.js) slides on the one that was clicked while app.js fades only the page
+// below it; the next page's picker then appears with its marker already in place.
 export function quizSwitch(active) {
-  return h('nav', { class: 'segmented', 'aria-label': 'Quiz type' },
-    [['quiz', 'My words'], ['kana', 'Hiragana & katakana'], ['verbs', 'Verb forms'], ['grammar', 'Grammar'], ['mistakes', 'Mistakes']].map(([route, label]) => {
+  const links = [['quiz', 'My words'], ['kana', 'Hiragana & katakana'], ['verbs', 'Verb forms'], ['grammar', 'Grammar'], ['mistakes', 'Mistakes']]
+    .map(([route, label]) => {
       const count = route === 'mistakes' ? store.openMistakes().length : 0;
       return h('a', {
         href: `#/${route}`,
         class: route === active ? 'on' : '',
         'aria-current': route === active ? 'page' : null,
       }, label, count > 0 && h('span', { class: 'count' }, ` ${count}`));
-    }));
+    });
+  const nav = h('nav', { class: 'segmented quiz-switch', 'aria-label': 'Quiz type' }, links);
+  const marker = createTabMarker(nav);
+  marker.moveTo(links.find((link) => link.classList.contains('on')));
+  nav.addEventListener('click', (event) => {
+    const link = event.target.closest('a');
+    if (link) marker.moveTo(link);
+  });
+  return nav;
 }
 
 export function shuffle(items) {

@@ -1,6 +1,7 @@
 import * as store from '../store.js';
 import { toHiragana, kataToHira, hiraToKata } from '../kana.js';
 import { h, ja, speak, icon, shuffle, segmented, quizSwitch, setChildren } from '../ui.js';
+import { dropdown } from '../dropdown.js';
 
 const GROUPS = {
   basic: ['Basic (46)',
@@ -100,7 +101,7 @@ export function createKanaView() {
             }, on && icon('check'), label);
           })),
         ),
-        h('div', { class: 'field' }, h('span', { class: 'label' }, 'Question type'), segmented('Question type', MODES, settings.kanaMode, (kanaMode) => set({ kanaMode }))),
+        h('div', { class: 'field' }, h('span', { class: 'label' }, 'Question type'), dropdown('Question type', MODES, settings.kanaMode, (kanaMode) => set({ kanaMode }))),
         h('div', { class: 'field' }, h('span', { class: 'label' }, 'Questions'), segmented('Questions', COUNTS, settings.kanaCount, (kanaCount) => set({ kanaCount }))),
         h('button', { type: 'button', class: 'btn btn-primary btn-large', disabled: items.length === 0, onclick: start },
           items.length === 0 ? 'Pick at least one group' : `Start test · ${size} ${size === 1 ? 'question' : 'questions'}`),

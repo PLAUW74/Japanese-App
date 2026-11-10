@@ -2,6 +2,7 @@ import * as dict from '../dict.js';
 import * as store from '../store.js';
 import { toHiragana, kataToHira } from '../kana.js';
 import { h, ja, speakButton, headword, reading, meaningText, posText, sensesList, shuffle, segmented, quizSwitch, wordTitle, toMarkup } from '../ui.js';
+import { dropdown } from '../dropdown.js';
 
 const MODES = [['mixed', 'Mixed'], ['choice', 'Multiple choice'], ['typing', 'Typing']];
 const DIRECTIONS = [['mixed', 'Mixed'], ['ja-en', 'Japanese → English'], ['en-ja', 'English → Japanese']];
@@ -52,7 +53,7 @@ function isRightWord(word, answer) {
 }
 
 function sourceWords(source) {
-  if (source === 'due') return store.dueWords().sort((a, b) => a.srs.due - b.srs.due);
+  if (source === 'challenge') return store.dailyChallenge().left;
   if (source === 'all') return shuffle(store.allWords());
   return shuffle(store.wordsInList(source));
 }
@@ -79,15 +80,40 @@ export function createQuizView() {
       return;
     }
 
+    // Today's 10 words; their progress is shown, never how many are due in all.
+    const challenge = store.dailyChallenge();
     const sources = [
-      ['due', 'Due for review', store.dueWords().length],
+      ['challenge', 'Daily challenge', challenge.words.length ? `${challenge.done}/${challenge.words.length}` : '—'],
       ['all', 'All words', total],
       ...state.lists.map((list) => [list.id, list.name, store.wordsInList(list.id).length]),
     ];
-    if (!sources.some(([key]) => key === settings.source)) settings.source = 'due';
+    // 'due' was the old name for reviewing; it is the daily challenge now.
+    if (!sources.some(([key]) => key === settings.source)) settings.source = 'challenge';
     const set = (patch) => { store.saveSettings(patch); renderSetup(); };
-    const available = sources.find(([key]) => key === settings.source)[2];
-    const size = settings.count ? Math.min(settings.count, available) : available;
+    const isChallenge = settings.source === 'challenge';
+    const available = isChallenge ? challenge.left.length : sourceWords(settings.source).length;
+    const size = isChallenge || !settings.count ? available : Math.min(settings.count, available);
+    const plural = (n) => (n === 1 ? 'word' : 'words');
+
+    let note;
+    if (!isChallenge) {
+      note = available === 0
+        ? 'This list has no words yet.'
+        : 'Practice mode: wrong answers come back for review, right answers leave the schedule alone unless the word was due.';
+    } else if (challenge.words.length === 0) {
+      note = 'Nothing to review today. Pick “All words” to practise anyway.';
+    } else if (available === 0) {
+      note = challenge.more ? 'Today’s challenge is done. Nice work! Keep going with 10 more, or come back tomorrow.' : 'Today’s challenge is done. Nice work! A new one is ready tomorrow.';
+    } else {
+      note = `Today’s ${challenge.words.length} ${plural(challenge.words.length)}, picked from the ones waiting longest. Right answers push a word’s next review further out; wrong answers bring it back sooner.`;
+    }
+
+    const action = isChallenge && available === 0 && challenge.more
+      ? h('button', { type: 'button', class: 'btn btn-primary btn-large', onclick: () => { store.extendChallenge(); renderSetup(); } }, 'Another 10 words')
+      : h('button', { type: 'button', class: 'btn btn-primary btn-large', disabled: available === 0, onclick: start },
+        available === 0 ? 'Start quiz'
+          : isChallenge ? `Start daily challenge · ${size} ${plural(size)} left`
+            : `Start quiz · ${size} ${size === 1 ? 'question' : 'questions'}`);
 
     el.replaceChildren(
       head,
@@ -101,18 +127,12 @@ export function createQuizView() {
             onclick: () => set({ source: key }),
           }, h('span', null, label), h('span', { class: 'count' }, count)))),
         ),
-        h('div', { class: 'field' }, h('span', { class: 'label' }, 'Question type'), segmented('Question type', MODES, settings.mode, (mode) => set({ mode }))),
-        h('div', { class: 'field' }, h('span', { class: 'label' }, 'Direction'), segmented('Direction', DIRECTIONS, settings.direction, (direction) => set({ direction }))),
-        h('div', { class: 'field' }, h('span', { class: 'label' }, 'Questions'), segmented('Questions', COUNTS, settings.count, (count) => set({ count }))),
-        available === 0
-          ? h('p', { class: 'muted' }, settings.source === 'due'
-            ? 'Nothing is due right now. Pick “All words” to practise anyway.'
-            : 'This list has no words yet.')
-          : h('p', { class: 'muted' }, settings.source === 'due'
-            ? 'Right answers push a word’s next review further out; wrong answers bring it back sooner.'
-            : 'Practice mode: wrong answers come back for review, right answers leave the schedule alone unless the word was due.'),
-        h('button', { type: 'button', class: 'btn btn-primary btn-large', disabled: available === 0, onclick: start },
-          available === 0 ? 'Start quiz' : `Start quiz · ${size} ${size === 1 ? 'question' : 'questions'}`),
+        h('div', { class: 'field' }, h('span', { class: 'label' }, 'Question type'), dropdown('Question type', MODES, settings.mode, (mode) => set({ mode }))),
+        h('div', { class: 'field' }, h('span', { class: 'label' }, 'Direction'), dropdown('Direction', DIRECTIONS, settings.direction, (direction) => set({ direction }))),
+        // The challenge is always its 10 words, so the count only applies to practice.
+        !isChallenge && h('div', { class: 'field' }, h('span', { class: 'label' }, 'Questions'), segmented('Questions', COUNTS, settings.count, (count) => set({ count }))),
+        h('p', { class: 'muted' }, note),
+        action,
       ),
     );
   }
@@ -122,7 +142,7 @@ export function createQuizView() {
   async function start() {
     const { settings } = store.getState();
     let words = sourceWords(settings.source);
-    if (settings.count) words = words.slice(0, settings.count);
+    if (settings.count && settings.source !== 'challenge') words = words.slice(0, settings.count);
     if (!words.length) return;
 
     session = { questions: [], index: 0, right: 0, missed: [], answered: false };
@@ -230,7 +250,7 @@ export function createQuizView() {
     }, 'Show reading');
     return h('div', { class: 'prompt' },
       h('span', { class: 'label' }, 'What does this mean?'),
-      ja(headword(word), 'prompt-word'),
+      h('div', { class: 'prompt-line' }, ja(headword(word), 'prompt-word'), speakButton(word)),
       hint,
     );
   }

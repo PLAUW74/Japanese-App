@@ -16,6 +16,9 @@
 // The curves live in css/style.css as keyframes sampled from those formulas, so a keystroke
 // costs one span and none of our own animation frames.
 
+import { icon } from './ui.js';
+import { popIn, popOut } from './popin.js';
+
 // 0.24 s between characters in the reference, plus the 0.1 s the cursor stays solid after
 // the last one: how long after a keystroke we still count as "typing".
 const TYPING_GRACE = 340;
@@ -89,11 +92,33 @@ function sendButton(input) {
   return button;
 }
 
+// Search fields swap the browser's own ✕ for one on an accent disc that pops in (Motion
+// Prompt #001, js/popin.js) when there is something to clear and pops out when there isn't.
+function clearButton(input, holder) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'tw-clear';
+  button.tabIndex = -1; // Esc clears a search field from the keyboard, as before
+  button.setAttribute('aria-label', 'Clear');
+  button.hidden = true;
+  button.append(icon('close'));
+  button.addEventListener('click', () => {
+    input.value = '';
+    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.focus();
+  });
+  holder.classList.add('tw-has-clear');
+  holder.append(button);
+  return button;
+}
+
 class Typewriter {
   constructor(input) {
     this.input = input;
     Object.assign(this, wrap(input));
     this.button = sendButton(input);
+    this.clear = input.type === 'search' ? clearButton(input, this.holder) : null;
+    this.clearShown = false;
     this.shown = [];  // code points currently drawn, one span each
     this.spans = [];
     this.native = false;
@@ -167,6 +192,13 @@ class Typewriter {
     this.placeCaret();
     this.track();
     this.updateSend(arm);
+    // Pop on the change itself, so typing again while it is still leaving brings it back.
+    const wantClear = input.value !== '';
+    if (this.clear && wantClear !== this.clearShown) {
+      this.clearShown = wantClear;
+      if (wantClear) popIn(this.clear, { instant: arm === 'instant' });
+      else popOut(this.clear);
+    }
   }
 
   // Keep the overlay lined up with a field that has scrolled sideways.
@@ -268,7 +300,8 @@ export function enableTypewriter(root = document.body) {
     const live = fields.get(document.activeElement);
     if (live) live.sync();
   });
-  for (const query of [matchMedia('(prefers-color-scheme: dark)'), reduce]) {
-    query.addEventListener('change', () => { for (const live of all) live.restyle(); });
-  }
+  // The overlay copies each field's colours, so recopy them when the theme switches.
+  const restyleAll = () => { for (const live of all) live.restyle(); };
+  new MutationObserver(restyleAll).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  reduce.addEventListener('change', restyleAll);
 }

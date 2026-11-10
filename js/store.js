@@ -16,10 +16,11 @@ const blank = () => ({
   kana: {},      // this device's kana character -> [right, wrong] from the kana test
   mistakes: [],  // this device's wrong answers: [{ key, quiz, prompt, answer, given, note, en, at }]
   cleared: {},   // mistake key -> when it was answered right or dismissed
+  vocab: {},     // this device's word id -> { wrong, right, at, entry }: words met inside quiz questions
   others: {},    // the same log, kana tallies and mistakes from the learner's other devices
   answers: {},   // note page -> { values, updatedAt }: what was typed into its blanks
   settings: {
-    source: 'due', mode: 'mixed', direction: 'mixed', count: 10,
+    source: 'challenge', mode: 'mixed', direction: 'mixed', count: 10,
     kanaScript: 'hiragana', kanaGroups: ['basic'], kanaMode: 'read', kanaCount: 20,
     verbSource: 'n5', verbTarget: 'te', verbMode: 'type', verbCount: 10,
     grammarLevel: 'both', grammarTopic: 'all', grammarCount: 10,
@@ -199,6 +200,62 @@ export const wordsInList = (listId) => allWords().filter((w) => w.listIds.includ
 export const isDue = (word, now = Date.now()) => word.srs.due <= now;
 export const dueWords = (now = Date.now()) => allWords().filter((w) => isDue(w, now));
 
+// ---- daily challenge ----
+// Instead of facing every due word at once, the learner gets 10 a day: the most overdue ones,
+// picked the first time the day's challenge is asked for and kept for the rest of the day.
+// A word counts as done once it has been answered today, right or wrong. When all are done,
+// another 10 can be added. The pick lives in this device's settings.
+export const CHALLENGE_SIZE = 10;
+
+const reviewedToday = (word, now) => word.stats.last >= startOfDay(now);
+
+function pickDue(now, taken) {
+  return dueWords(now)
+    .filter((word) => !taken.includes(word.id) && !reviewedToday(word, now))
+    .sort((a, b) => a.srs.due - b.srs.due)
+    .slice(0, CHALLENGE_SIZE)
+    .map((word) => word.id);
+}
+
+function todaysPick(now) {
+  const day = dayKey(now);
+  let pick = state.settings.challenge;
+  if (!pick || pick.day !== day) {
+    pick = { day, ids: pickDue(now, []) };
+    state.settings.challenge = pick;
+    commit(true);
+  } else if (!pick.ids.some((id) => state.words[id])) {
+    // Picked when nothing was waiting (or its words were deleted since): try again now, so a
+    // word saved or falling due later in the day still gets a challenge.
+    const ids = pickDue(now, []);
+    if (ids.length) {
+      pick.ids = ids;
+      commit(true);
+    }
+  }
+  return pick;
+}
+
+// { words, done, left, more }: today's words, how many are done, the ones still to do, and
+// whether another 10 could be added. Never the total number due.
+export function dailyChallenge(now = Date.now()) {
+  const pick = todaysPick(now);
+  const words = pick.ids.map((id) => state.words[id]).filter(Boolean);
+  const left = words.filter((word) => !reviewedToday(word, now));
+  return {
+    words,
+    done: words.length - left.length,
+    left,
+    more: left.length === 0 && pickDue(now, pick.ids).length > 0,
+  };
+}
+
+export function extendChallenge(now = Date.now()) {
+  const pick = todaysPick(now);
+  pick.ids = pick.ids.concat(pickDue(now, pick.ids));
+  commit();
+}
+
 export function wordStatus(word, now = Date.now()) {
   if (!word.stats.correct && !word.stats.wrong) return 'new';
   if (isDue(word, now)) return 'due';
@@ -264,6 +321,61 @@ export function recordDrill(correct) {
 
 const MAX_MISTAKES = 300;
 const MAX_CLEARED = 600;
+
+// ---- words inside quiz questions ----
+// A question's words share its result: answer a grammar sentence wrong and every word in it
+// counts as missed once (and as understood once when it is answered right), on the view that
+// a wrong answer can come from not knowing any of them. Each tally keeps a small copy of the
+// word, so words that aren't saved can still be listed.
+const MAX_VOCAB = 500;
+const compact = (entry) => ({
+  id: entry.id,
+  kanji: entry.kanji.slice(0, 1),
+  kana: entry.kana.slice(0, 1),
+  senses: [{ gloss: entry.senses[0].gloss.slice(0, 3), pos: [], tags: entry.senses[0].tags || [] }],
+});
+
+export function recordContext(entries, correct) {
+  if (!entries.length) return;
+  const now = Date.now();
+  for (const entry of entries) {
+    const tally = state.vocab[entry.id] || { wrong: 0, right: 0 };
+    if (correct) tally.right += 1;
+    else tally.wrong += 1;
+    tally.at = now;
+    tally.entry = compact(entry);
+    state.vocab[entry.id] = tally;
+  }
+  const ids = Object.keys(state.vocab);
+  if (ids.length > MAX_VOCAB) {
+    ids.sort((a, b) => state.vocab[a].at - state.vocab[b].at);
+    for (const id of ids.slice(0, ids.length - MAX_VOCAB)) delete state.vocab[id];
+  }
+  dirty.device = true;
+  commit(true);
+}
+
+// The most missed words across every quiz and device: a saved word's own My Words quiz
+// results, plus each time it was part of a question answered wrong (or right).
+// [{ word, wrong, right }], most missed first.
+export function missedWords(limit = 5) {
+  const totals = new Map();
+  const add = (id, wrong, right, word) => {
+    const total = totals.get(id) || { word: null, wrong: 0, right: 0 };
+    total.wrong += wrong;
+    total.right += right;
+    total.word = state.words[id] || total.word || word;
+    totals.set(id, total);
+  };
+  for (const word of allWords()) add(String(word.id), word.stats.wrong, word.stats.correct, word);
+  for (const vocab of [state.vocab, ...Object.values(state.others).map((device) => device.vocab || {})]) {
+    for (const [id, tally] of Object.entries(vocab)) add(String(id), tally.wrong || 0, tally.right || 0, tally.entry);
+  }
+  return [...totals.values()]
+    .filter((total) => total.wrong > 0 && total.word)
+    .sort((a, b) => b.wrong - a.wrong || a.right - b.right)
+    .slice(0, limit);
+}
 
 export function recordMistake(entry) {
   state.mistakes = [{ ...entry, at: Date.now() }, ...state.mistakes.filter((m) => m.key !== entry.key)].slice(0, MAX_MISTAKES);
@@ -429,7 +541,7 @@ export function takeDirty() {
       : { id: Number(id) || id, deleted: true, updatedAt: state.deleted[id] || Date.now() }),
     lists: dirty.lists ? { lists: state.lists, updatedAt: state.listsAt } : null,
     device: dirty.device
-      ? { log: state.log, kana: state.kana, mistakes: state.mistakes, cleared: state.cleared, updatedAt: Date.now() }
+      ? { log: state.log, kana: state.kana, mistakes: state.mistakes, cleared: state.cleared, vocab: state.vocab, updatedAt: Date.now() }
       : null,
     answers: [...dirty.answers].filter((page) => state.answers[page]).map((page) => ({ page, ...state.answers[page] })),
   };

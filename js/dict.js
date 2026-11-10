@@ -53,6 +53,8 @@ export const search = (query) => call('search', { query });
 export const random = (count, exclude = []) => call('random', { count, exclude });
 export const verbs = (count, minLevel) => call('verbs', { count, minLevel });
 export const get =(ids) => call('get', { ids });
+// The vocabulary in a sentence written in 漢字{かんじ} markup, in order, without particles.
+export const words = (markup) => call('words', { markup });
 
 // { char: { meanings, on, kun, strokes, grade, freq } } for the kanji found in `text`.
 export async function kanjiInfo(text) {

@@ -3,7 +3,8 @@ import * as dict from '../dict.js';
 import * as store from '../store.js';
 import { conjugations } from '../conjugate.js';
 import { toHiragana, kataToHira } from '../kana.js';
-import { h, ja, speak, icon, shuffle, segmented, quizSwitch, setChildren, furigana, headword, reading, meaningText, toMarkup } from '../ui.js';
+import { h, ja, speak, icon, shuffle, segmented, quizSwitch, setChildren, furigana, headword, reading, meaningText, toMarkup, wordSaver } from '../ui.js';
+import { dropdown } from '../dropdown.js';
 
 const TARGETS = [['te', 'て-form'], ['past', 'た-form (past)'], ['dict', 'Dictionary form']];
 export const TARGET_NAMES = { te: 'て-form', past: 'た-form', dict: 'dictionary form' };
@@ -116,8 +117,8 @@ export function createVerbsView() {
             onclick: () => set({ verbSource: key }),
           }, h('span', null, label), count !== undefined && h('span', { class: 'count' }, count)))),
         ),
-        h('div', { class: 'field' }, h('span', { class: 'label' }, 'Convert ます form to'), segmented('Target form', TARGETS, settings.verbTarget, (verbTarget) => set({ verbTarget }))),
-        h('div', { class: 'field' }, h('span', { class: 'label' }, 'Question type'), segmented('Question type', MODES, settings.verbMode, (verbMode) => set({ verbMode }))),
+        h('div', { class: 'field' }, h('span', { class: 'label' }, 'Convert ます form to'), dropdown('Target form', TARGETS, settings.verbTarget, (verbTarget) => set({ verbTarget }))),
+        h('div', { class: 'field' }, h('span', { class: 'label' }, 'Question type'), dropdown('Question type', MODES, settings.verbMode, (verbMode) => set({ verbMode }))),
         h('div', { class: 'field' }, h('span', { class: 'label' }, 'Questions'), segmented('Questions', COUNTS, settings.verbCount, (verbCount) => set({ verbCount }))),
         empty && h('p', { class: 'muted' }, 'You have no verbs in My Words yet. Save some from the dictionary, or pick a common verb set.'),
         message && h('p', { class: 'error' }, message),
@@ -164,6 +165,7 @@ export function createVerbsView() {
     if (correct) session.right += 1;
     else session.missed.push(question);
     store.recordDrill(correct);
+    store.recordContext([question.word], correct); // the verb shares the result
 
     const { answer } = question;
     const key = `verb:${question.word.id}:${session.target}`;
@@ -192,6 +194,7 @@ export function createVerbsView() {
         ? h('p', null, meaningText(question.word, 2))
         : h('p', null, 'Dictionary form: ', furigana(question.plain.written, question.plain.reading), ` · ${meaningText(question.word, 2)}`),
       !correct && session.target !== 'past' && h('p', { class: 'muted' }, question.rule),
+      wordSaver([question.word], 'Save this verb'),
       button,
     ));
   }

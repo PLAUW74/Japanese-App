@@ -153,7 +153,8 @@ export function createVocabView() {
     const pool = list ? store.wordsInList(list.id) : store.allWords();
     const needle = filter.trim().toLowerCase();
     const words = pool.filter((w) => matches(w, needle)).sort(SORTS[sort][1]);
-    const due = pool.filter((w) => store.isDue(w)).length;
+    // Point at today's challenge rather than at how many words are due in all.
+    const challengeLeft = store.dailyChallenge().left.length;
 
     // Keep the filter field (and its focus) across re-renders.
     const filterInput = el.querySelector('.filter-input') || h('input', {
@@ -181,7 +182,7 @@ export function createVocabView() {
     setChildren(el,
       h('div', { class: 'view-head' },
         h('h1', null, 'My Words'),
-        due > 0 && h('a', { class: 'btn btn-primary', href: '#/quiz' }, `Review ${due} due`),
+        challengeLeft > 0 && h('a', { class: 'btn btn-primary', href: '#/quiz' }, `Daily challenge · ${challengeLeft} left`),
       ),
       listBar(state),
       list && listTools(list),

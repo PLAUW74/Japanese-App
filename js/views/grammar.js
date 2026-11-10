@@ -1,7 +1,10 @@
 // Grammar quiz: fill-the-gap and JLPT-style word order questions from js/grammar-data.js.
+import * as dict from '../dict.js';
 import * as store from '../store.js';
 import { QUESTIONS, TOPICS } from '../grammar-data.js';
-import { h, speak, icon, shuffle, segmented, quizSwitch, setChildren, rubyMarkup, markupReading } from '../ui.js';
+import { h, speak, icon, shuffle, segmented, quizSwitch, setChildren, rubyMarkup, markupReading, questionSpeaker, wordSaver } from '../ui.js';
+import { dropdown } from '../dropdown.js';
+import { wordOrder } from '../word-order.js';
 
 const LEVELS = [['both', 'N5 + N4'], [5, 'N5'], [4, 'N4']];
 const COUNTS = [[1, '1'], [5, '5'], [10, '10'], [20, '20'], [0, 'All']];
@@ -39,7 +42,21 @@ export function questionId(question) {
   return hash.toString(36);
 }
 
+// The parts in a new order, never the right one, so a word order question isn't solved on sight.
+function scrambled(parts) {
+  let out = parts;
+  for (let tries = 0; tries < 10 && out.join('|') === parts.join('|'); tries++) out = shuffle(parts);
+  return out;
+}
+
 const spoken = (question) => markupReading(solved(question).replace(/\[\[|\]\]/g, '')).replace(/\s+/g, '');
+// The question as asked, for reading aloud: a pause where the gap or the ★ blanks are, so
+// hearing it doesn't give the answer away.
+const spokenQuestion = (question) => {
+  const text = question.type === 'pick' ? question.q : [question.before, GAP, question.after].filter(Boolean).join(' ');
+  // The gap first: its full-width space would go with the other spaces.
+  return markupReading(text.split(GAP).join('、')).replace(/\s+/g, '');
+};
 
 export function createGrammarView() {
   let session = null;
@@ -59,15 +76,7 @@ export function createGrammarView() {
       h('div', { class: 'card setup' },
         h('p', { class: 'muted' }, 'Fill the gap or put the words in order. Readings sit above every kanji.'),
         h('div', { class: 'field' }, h('span', { class: 'label' }, 'Level'), segmented('Level', LEVELS, settings.grammarLevel, (grammarLevel) => set({ grammarLevel }))),
-        h('div', { class: 'field' },
-          h('span', { class: 'label' }, 'Topic'),
-          h('div', { class: 'chips' }, topics.map(([key, label]) => h('button', {
-            type: 'button',
-            class: `chip ${key === settings.grammarTopic ? 'on' : ''}`,
-            'aria-pressed': String(key === settings.grammarTopic),
-            onclick: () => set({ grammarTopic: key }),
-          }, label))),
-        ),
+        h('div', { class: 'field' }, h('span', { class: 'label' }, 'Topic'), dropdown('Topic', topics, settings.grammarTopic, (grammarTopic) => set({ grammarTopic }))),
         h('div', { class: 'field' }, h('span', { class: 'label' }, 'Questions'), segmented('Questions', COUNTS, settings.grammarCount, (grammarCount) => set({ grammarCount }))),
         available === 0 && h('p', { class: 'muted' }, 'No questions for that level and topic yet. Try another combination.'),
         h('button', { type: 'button', class: 'btn btn-primary btn-large', disabled: available === 0, onclick: start },
@@ -85,9 +94,9 @@ export function createGrammarView() {
     if (!questions.length) return;
     session = {
       questions: questions.map((question) => {
-        const right = question.type === 'pick' ? question.options[0] : question.order[question.star];
-        const choices = question.type === 'pick' ? question.options : question.order;
-        return { question, options: shuffle(choices).map((text) => ({ text, correct: text === right })) };
+        if (question.type === 'order') return { question, tiles: scrambled(question.order) };
+        const right = question.options[0];
+        return { question, options: shuffle(question.options).map((text) => ({ text, correct: text === right })) };
       }),
       index: 0,
       right: 0,
@@ -117,6 +126,8 @@ export function createGrammarView() {
     if (correct) session.right += 1;
     else session.missed.push(question);
     store.recordDrill(correct);
+    // Every word in the sentence shares the result (for Most missed words on the Stats page).
+    dict.words(solved(question).replace(/\[\[|\]\]/g, '')).then((entries) => store.recordContext(entries, correct), () => {});
 
     const key = `grammar:${questionId(question)}`;
     if (correct) store.resolveMistake(key);
@@ -142,6 +153,7 @@ export function createGrammarView() {
       h('div', { class: 'feedback-word' }, sentence(solved(question), 'grammar-sentence'), playButton(question)),
       h('p', null, question.en),
       h('p', { class: 'muted' }, rubyMarkup(question.why)),
+      wordSaver(solved(question).replace(/\[\[|\]\]/g, '')),
       button,
     ));
   }
@@ -150,21 +162,57 @@ export function createGrammarView() {
     if (question.type === 'pick') {
       return h('div', { class: 'prompt' },
         h('span', { class: 'label' }, `N${question.level} · Choose what goes in the gap`),
-        sentence(question.q, 'grammar-question'),
+        h('div', { class: 'prompt-line' }, sentence(question.q, 'grammar-question'), questionSpeaker(spokenQuestion(question))),
       );
     }
-    const blanks = question.order.map((_, i) => h('span', { class: `gap ${i === question.star ? 'star' : ''}` }, i === question.star ? '★' : '　'));
+    // Word order: the sentence itself is on the tile board below.
     return h('div', { class: 'prompt' },
-      h('span', { class: 'label' }, `N${question.level} · Which word goes in ★?`),
-      h('span', { lang: 'ja', class: 'grammar-question' },
-        question.before && rubyMarkup(question.before), ' ', ...blanks.flatMap((b) => [b, ' ']), question.after && rubyMarkup(question.after)),
+      h('div', { class: 'prompt-line' },
+        h('span', { class: 'label' }, `N${question.level} · Put the words in order`),
+        questionSpeaker(spokenQuestion(question)),
+      ),
+      h('p', { class: 'muted' }, question.en),
     );
+  }
+
+  // Tiles to tap or drag into place, then Check.
+  function orderBody(item, slot) {
+    const { question } = item;
+    const check = h('button', { type: 'button', class: 'btn btn-primary btn-large', disabled: true }, 'Check');
+    const board = wordOrder({
+      before: question.before,
+      parts: item.tiles,
+      after: question.after,
+      onChange: (complete) => { check.disabled = !complete; },
+    });
+    check.addEventListener('click', () => {
+      if (session.answered) return;
+      const given = board.arranged();
+      const correct = given.every((part, i) => part === question.order[i]);
+      board.lock(question.order);
+      check.hidden = true;
+      finish(item, correct, slot, given.join(' '));
+    });
+    return [board.el, h('div', { class: 'wo-actions' }, check)];
   }
 
   function renderQuestion() {
     const item = session.questions[session.index];
     const count = session.questions.length;
     const slot = h('div', { class: 'feedback-slot' });
+    const body = item.question.type === 'order' ? orderBody(item, slot) : choicesBody(item, slot);
+    setChildren(el,
+      h('div', { class: 'quiz-bar' },
+        h('span', { class: 'muted' }, `${session.index + 1} of ${count}`),
+        h('div', { class: 'progress' }, h('div', { class: 'progress-fill', style: `width:${(session.index / count) * 100}%` })),
+        h('button', { type: 'button', class: 'btn btn-quiet btn-small', onclick: () => (session.index > 0 || session.answered ? renderSummary() : quit()) }, 'End quiz'),
+      ),
+      h('div', { class: 'card question' }, prompt(item.question), body, slot),
+    );
+  }
+
+  // Fill the gap: four choices, also answered with the number keys.
+  function choicesBody(item, slot) {
     const buttons = item.options.map((option, i) => h('button', {
       type: 'button',
       class: 'choice choice-kana',
@@ -178,15 +226,7 @@ export function createGrammarView() {
         finish(item, option.correct, slot, option.text);
       },
     }, h('kbd', null, String(i + 1)), rubyMarkup(option.text)));
-
-    setChildren(el,
-      h('div', { class: 'quiz-bar' },
-        h('span', { class: 'muted' }, `${session.index + 1} of ${count}`),
-        h('div', { class: 'progress' }, h('div', { class: 'progress-fill', style: `width:${(session.index / count) * 100}%` })),
-        h('button', { type: 'button', class: 'btn btn-quiet btn-small', onclick: () => (session.index > 0 || session.answered ? renderSummary() : quit()) }, 'End quiz'),
-      ),
-      h('div', { class: 'card question' }, prompt(item.question), h('div', { class: 'choices' }, buttons), slot),
-    );
+    return h('div', { class: 'choices' }, buttons);
   }
 
   function quit() {

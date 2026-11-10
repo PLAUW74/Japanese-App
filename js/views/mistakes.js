@@ -4,7 +4,7 @@ import * as dict from '../dict.js';
 import * as store from '../store.js';
 import {
   h, icon, speak, shuffle, quizSwitch, setChildren, confirmButton, markupReading,
-  headword, reading, meaningText, toMarkup,
+  headword, reading, meaningText, toMarkup, questionSpeaker, wordSaver,
 } from '../ui.js';
 import { QUESTIONS } from '../grammar-data.js';
 import { sentence, solved, questionId } from './grammar.js';
@@ -20,6 +20,14 @@ const formatWhen = (ts) => new Date(ts).toLocaleDateString(undefined, { day: 'nu
 
 // Kana for the voice: readings instead of kanji, without highlight marks or the “→ て-form” label.
 const toSpeech = (text) => markupReading(text.replace(/\[\[|\]\]/g, '').replace(/ → .*$/, '')).replace(/\s+/g, '');
+// A practice question read aloud with a pause for each gap (（　）, ★ ＿ ＿), so it doesn't
+// say the answer.
+const questionSpeech = (prompt) => toSpeech(prompt.replace(/（[\s　]*）|[★＿](?:\s*[★＿])*/g, '、'));
+// Kana questions ask about the sound itself, and an English prompt is no use to a Japanese
+// voice, so only Japanese prompts from the other quizzes get a speaker.
+const canSpeak = (item) => item.mistake.quiz !== 'kana' && JAPANESE.test(item.prompt);
+// Quizzes whose answers are made of dictionary words worth collecting.
+const SAVES_WORDS = { grammar: 'Words in this sentence', verbs: 'Save this verb' };
 
 // ---- turning a stored mistake back into a question ----
 // Each returns { prompt, options: [{ text, correct }], answer, note, en } in 漢字{かんじ}
@@ -186,6 +194,13 @@ export function createMistakesView() {
     practice.answered = true;
     const { mistake } = item;
     store.recordDrill(option.correct);
+    // The words in the question share the result: a saved word by its id, a sentence or verb
+    // form by the words the dictionary finds in it. Kana questions have no vocabulary.
+    const [quizKey, id] = mistake.key.split(':');
+    if (quizKey === 'word' && store.getState().words[id]) store.recordContext([store.getState().words[id]], option.correct);
+    else if (quizKey === 'grammar' || quizKey === 'verb') {
+      dict.words(item.answer.replace(/\[\[|\]\]/g, '')).then((entries) => store.recordContext(entries, option.correct), () => {});
+    }
     if (option.correct) {
       practice.right += 1;
       store.clearMistakes([mistake.key]);
@@ -212,6 +227,7 @@ export function createMistakesView() {
         playButton([item.answer, item.prompt].find((text) => JAPANESE.test(text)))),
       item.en && h('p', null, item.en),
       item.note && h('p', { class: 'muted' }, sentence(item.note)),
+      SAVES_WORDS[mistake.quiz] && wordSaver(item.answer.replace(/\[\[|\]\]/g, ''), SAVES_WORDS[mistake.quiz]),
       next,
     ));
   }
@@ -243,7 +259,10 @@ export function createMistakesView() {
       h('div', { class: 'card question' },
         h('div', { class: 'prompt' },
           h('span', { class: 'label' }, `Mistake practice · ${QUIZZES[item.mistake.quiz] || ''}`),
-          sentence(item.prompt, 'grammar-question'),
+          h('div', { class: 'prompt-line' },
+            sentence(item.prompt, 'grammar-question'),
+            canSpeak(item) && questionSpeaker(questionSpeech(item.prompt)),
+          ),
         ),
         h('div', { class: 'choices' }, buttons),
         slot,
