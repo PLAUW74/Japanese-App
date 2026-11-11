@@ -1,10 +1,10 @@
 // Page-side handle on the dictionary worker.
 
-const worker = new Worker(new URL('./dict-worker.js', import.meta.url), { type: 'module' });
 const pending = new Map();
 const listeners = new Set();
 let nextId = 1;
 let kanjiData = null;
+let worker = null;
 
 export const status = { state: 'loading', progress: 0, count: 0, date: '', tags: {}, error: '' };
 
@@ -12,7 +12,17 @@ function notify() {
   listeners.forEach((fn) => fn(status));
 }
 
-worker.onmessage = ({ data }) => {
+// Started on the first call rather than when this module loads: the dictionary is 26 MB,
+// and opening the app in Chinese should not fetch a word of it.
+function start() {
+  if (worker) return worker;
+  worker = new Worker(new URL('./dict-worker.js', import.meta.url), { type: 'module' });
+  worker.onmessage = onMessage;
+  worker.onerror = onError;
+  return worker;
+}
+
+const onMessage = ({ data }) => {
   if (data.type === 'progress') {
     status.progress = data.value;
     notify();
@@ -30,21 +40,23 @@ worker.onmessage = ({ data }) => {
   }
 };
 
-worker.onerror = (event) => {
+const onError = (event) => {
   Object.assign(status, { state: 'failed', error: event.message || 'The dictionary could not be started' });
   notify();
 };
 
 function call(type, payload) {
+  const w = start();
   return new Promise((resolve, reject) => {
     const id = nextId++;
     pending.set(id, { resolve, reject });
-    worker.postMessage({ id, type, ...payload });
+    w.postMessage({ id, type, ...payload });
   });
 }
 
 export function onStatus(fn) {
   listeners.add(fn);
+  start();
   fn(status);
   return () => listeners.delete(fn);
 }

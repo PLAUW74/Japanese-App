@@ -824,6 +824,32 @@ ol.questions.with-play { padding-left: 3.6em; }
 .examples li { display: flex; flex-direction: column; }
 .examples .note-en { font-size: 0.9rem; }
 
+/* ---- tone-coloured pinyin ---- */
+/* The four tones plus the neutral one, each its own colour, so the tone is visible at a
+   glance rather than read off a small mark. The hues are the palette's own, and each is
+   given a different lightness so they still read apart without colour: the mark above the
+   letter stays the real signal, and the colour is the reminder. */
+:root {
+  --tone1: #3f6e99;   /* high and flat, the link blue */
+  --tone2: #2e7350;   /* rising, green */
+  --tone3: #8a5a00;   /* dipping, amber */
+  --tone4: #a8423a;   /* falling, red */
+  --tone5: #5a6472;   /* neutral, muted */
+}
+:root[data-theme="dark"] {
+  --tone1: #7ba6cc;
+  --tone2: #7bc9a0;
+  --tone3: #e2b65c;
+  --tone4: #ee9a90;
+  --tone5: #9aa4b2;
+}
+rt.tone { font-weight: 600; letter-spacing: 0.01em; }
+rt.tone1 { color: var(--tone1); }
+rt.tone2 { color: var(--tone2); }
+rt.tone3 { color: var(--tone3); }
+rt.tone4 { color: var(--tone4); }
+rt.tone5 { color: var(--tone5); }
+
 /* ---- the Chinese overview's build order ---- */
 /* Each row carries its own M-number, so the list drops the numbering it would add. */
 .milestones { list-style: none; display: grid; gap: 9px; margin: 14px 0 0; padding: 0; }

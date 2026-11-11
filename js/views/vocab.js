@@ -1,6 +1,7 @@
 import * as store from '../store.js';
 import * as sync from '../sync.js';
 import { kataToHira, toHiragana } from '../kana.js';
+import { plain as plainPinyin } from '../lang/zh/pinyin.js';
 import { staggerIn } from '../stagger.js';
 import {
   h, ja, icon, toast, speakButton, badges, statusBadge, sensesList, headword, reading, meaningText, wordEditor, confirmButton, formsPanel, wordTitle, setChildren, route
@@ -9,9 +10,11 @@ import {
 const SORTS = {
   recent: ['Recently added', (a, b) => b.addedAt - a.addedAt],
   due: ['Next review', (a, b) => a.srs.due - b.srs.due],
-  kana: ['Reading (あ→ん)', (a, b) => a.kana[0].localeCompare(b.kana[0], 'ja')],
+  kana: ['Reading', (a, b) => a.kana[0].localeCompare(b.kana[0], 'ja')],
   hardest: ['Most missed', (a, b) => b.stats.wrong - a.stats.wrong || a.stats.correct - b.stats.correct],
 };
+// Japanese readings sort in kana order, Chinese ones alphabetically by pinyin.
+const SORT_LABEL = { ja: { kana: 'Reading (あ→ん)' }, zh: { kana: 'Reading (a→z)' } };
 
 export function createVocabView() {
   let listId = 'all';
@@ -24,9 +27,13 @@ export function createVocabView() {
 
   function matches(word, needle) {
     if (!needle) return true;
-    const kana = kataToHira(toHiragana(needle));
+    const zh = store.getLang() === 'zh';
+    // Typing a reading: romaji folded to kana for Japanese, pinyin stripped of its tones
+    // and spacing for Chinese, so "haochi" finds hǎochī.
+    const wanted = zh ? plainPinyin(needle) : kataToHira(toHiragana(needle));
+    const readingHit = (k) => (zh ? plainPinyin(k).includes(wanted) : kataToHira(k).includes(wanted));
     return word.kanji.some((k) => k.includes(needle))
-      || word.kana.some((k) => kataToHira(k).includes(kana))
+      || (!!wanted && word.kana.some(readingHit))
       || word.senses.some((s) => s.gloss.some((g) => g.toLowerCase().includes(needle)))
       || (word.note || '').toLowerCase().includes(needle);
   }
@@ -197,7 +204,8 @@ export function createVocabView() {
         h('select', {
           'aria-label': 'Sort words',
           onchange: (event) => { sort = event.target.value; render(); },
-        }, Object.entries(SORTS).map(([key, [label]]) => h('option', { value: key, selected: key === sort }, label))),
+        }, Object.entries(SORTS).map(([key, [label]]) => h('option', { value: key, selected: key === sort },
+          (SORT_LABEL[store.getLang()] || {})[key] || label))),
       ),
       body,
       backup(),

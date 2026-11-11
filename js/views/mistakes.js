@@ -1,6 +1,6 @@
 // Wrong answers from every quiz, kept until the same question is answered right or dismissed,
 // with a practice round that asks them again.
-import * as dict from '../dict.js';
+import { current as dictFor, ifAvailable } from '../dicts.js';
 import * as store from '../store.js';
 import {
   h, icon, speak, shuffle, quizSwitch, setChildren, confirmButton, markupReading,
@@ -38,7 +38,7 @@ async function wordItem(mistake, id, direction) {
   if (!word) return null;
   const label = direction === 'ja-en' ? (w) => meaningText(w) : (w) => toMarkup(headword(w), reading(w));
   let others = shuffle(store.allWords().filter((w) => w.id !== word.id));
-  if (others.length < CHOICES - 1) others = others.concat(await dict.random(6, [word.id]).catch(() => []));
+  if (others.length < CHOICES - 1) others = others.concat(await dictFor().random(6, [word.id]).catch(() => []));
   const seen = new Set([label(word)]);
   const options = [{ text: label(word), correct: true }];
   for (const other of others) {
@@ -63,7 +63,7 @@ function kanaItem(mistake, char, mode) {
 }
 
 async function verbItem(mistake, id, target) {
-  const word = store.getState().words[id] || (await dict.get([id]).catch(() => []))[0];
+  const word = store.getState().words[id] || (await dictFor().get([id]).catch(() => []))[0];
   const question = word && verbQuestion(word, target);
   if (!question) return null;
   return {
@@ -199,7 +199,7 @@ export function createMistakesView() {
     const [quizKey, id] = mistake.key.split(':');
     if (quizKey === 'word' && store.getState().words[id]) store.recordContext([store.getState().words[id]], option.correct);
     else if (quizKey === 'grammar' || quizKey === 'verb') {
-      dict.words(item.answer.replace(/\[\[|\]\]/g, '')).then((entries) => store.recordContext(entries, option.correct), () => {});
+      Promise.resolve(ifAvailable('words', item.answer.replace(/\[\[|\]\]/g, '')) || []).then((entries) => store.recordContext(entries, option.correct), () => {});
     }
     if (option.correct) {
       practice.right += 1;

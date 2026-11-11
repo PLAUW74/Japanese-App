@@ -1,7 +1,7 @@
 import * as store from './store.js';
 import * as sync from './sync.js';
 import { languages, language } from './lang/index.js';
-import { h, setChildren, setSpeech } from './ui.js';
+import { h, setChildren, setLanguage } from './ui.js';
 import { enableTypewriter } from './typewriter.js';
 import { initTheme } from './theme.js';
 import { createTabMarker } from './pager.js';
@@ -97,7 +97,8 @@ function buildChrome(lang) {
   brand.href = address(lang, adapter.home);
   brandMark.textContent = adapter.mark;
   brandMark.lang = adapter.htmlLang;
-  setSpeech({ code: lang, tag: adapter.speechTag, match: adapter.voice, label: adapter.label });
+  setLanguage({ code: lang, tag: adapter.speechTag, match: adapter.voice,
+                label: adapter.label, level: adapter.level, quizPages: adapter.quizPages });
 
   dueBadge = null;
   tabs = adapter.tabs.map((tab) => {

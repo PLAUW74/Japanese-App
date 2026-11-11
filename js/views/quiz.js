@@ -1,13 +1,17 @@
-import * as dict from '../dict.js';
+import { current as dictFor } from '../dicts.js';
 import * as store from '../store.js';
 import { toHiragana, kataToHira } from '../kana.js';
-import { h, speakButton, headword, reading, meaningText, posText, sensesList, shuffle, segmented, quizSwitch, wordTitle, toMarkup, furigana, route } from '../ui.js';
+import { matchesReading } from '../lang/zh/pinyin.js';
+import { h, speakButton, headword, reading, meaningText, posText, sensesList, shuffle, segmented, quizSwitch, wordTitle, toMarkup, wordRuby, scriptTag, route } from '../ui.js';
 import { dropdown } from '../dropdown.js';
 
 const MODES = [['mixed', 'Mixed'], ['choice', 'Multiple choice'], ['typing', 'Typing']];
-const DIRECTIONS = [['mixed', 'Mixed'], ['ja-en', 'Japanese → English'], ['en-ja', 'English → Japanese']];
+// The keys stay 'ja-en' and 'en-ja' whatever the language: they are in saved settings and
+// in the key of every mistake already recorded. Only the labels follow the language.
+const directions = (name) => [['mixed', 'Mixed'], ['ja-en', `${name} → English`], ['en-ja', `English → ${name}`]];
 const COUNTS = [[1, '1'], [5, '5'], [10, '10'], [20, '20'], [50, '50'], [0, 'All']];
 const CHOICES = 4;
+const LANGUAGE_NAME = { ja: 'Japanese', zh: 'Chinese' };
 
 const pick = (items) => items[Math.floor(Math.random() * items.length)];
 const wordLabel = (word) => headword(word) + (reading(word) ? `（${reading(word)}）` : '');
@@ -48,8 +52,12 @@ function isRightMeaning(word, answer) {
 function isRightWord(word, answer) {
   const given = answer.trim();
   if (!given) return false;
+  if (word.kanji.includes(given)) return true;
+  // Chinese is typed as pinyin far more often than as characters, and tones only have to
+  // be right when they were typed at all (js/lang/zh/pinyin.js explains why).
+  if (store.getLang() === 'zh') return word.kana.some((reading) => matchesReading(reading, given));
   const kana = kataToHira(toHiragana(given));
-  return word.kanji.includes(given) || word.kana.some((k) => kataToHira(k) === kana);
+  return word.kana.some((k) => kataToHira(k) === kana);
 }
 
 function sourceWords(source) {
@@ -128,7 +136,7 @@ export function createQuizView() {
           }, h('span', null, label), h('span', { class: 'count' }, count)))),
         ),
         h('div', { class: 'field' }, h('span', { class: 'label' }, 'Question type'), dropdown('Question type', MODES, settings.mode, (mode) => set({ mode }))),
-        h('div', { class: 'field' }, h('span', { class: 'label' }, 'Direction'), dropdown('Direction', DIRECTIONS, settings.direction, (direction) => set({ direction }))),
+        h('div', { class: 'field' }, h('span', { class: 'label' }, 'Direction'), dropdown('Direction', directions(LANGUAGE_NAME[store.getLang()] || 'Word'), settings.direction, (direction) => set({ direction }))),
         // The challenge is always its 10 words, so the count only applies to practice.
         !isChallenge && h('div', { class: 'field' }, h('span', { class: 'label' }, 'Questions'), segmented('Questions', COUNTS, settings.count, (count) => set({ count }))),
         h('p', { class: 'muted' }, note),
@@ -152,7 +160,7 @@ export function createQuizView() {
     const own = store.allWords();
     let extra = [];
     if (settings.mode !== 'typing') {
-      const lookup = dict.random(40, own.map((w) => w.id)).catch(() => []);
+      const lookup = dictFor().random(40, own.map((w) => w.id)).catch(() => []);
       extra = await Promise.race([lookup, new Promise((resolve) => setTimeout(() => resolve([]), 4000))]);
     }
 
@@ -246,7 +254,7 @@ export function createQuizView() {
     // The reading sits above the kanji, as in the dictionary.
     return h('div', { class: 'prompt' },
       h('span', { class: 'label' }, 'What does this mean?'),
-      h('div', { class: 'prompt-line' }, furigana(headword(word), reading(word), 'prompt-word'), speakButton(word)),
+      h('div', { class: 'prompt-line' }, wordRuby(word, 'prompt-word'), speakButton(word)),
     );
   }
 
@@ -255,7 +263,7 @@ export function createQuizView() {
     const buttons = question.options.map((option, i) => h('button', {
       type: 'button',
       class: 'choice',
-      lang: direction === 'en-ja' ? 'ja' : null,
+      lang: direction === 'en-ja' ? scriptTag() : null,
       onclick: () => {
         if (session.answered) return;
         const correct = option.id === word.id;
@@ -269,7 +277,7 @@ export function createQuizView() {
       },
     },
       h('kbd', null, String(i + 1)),
-      direction === 'ja-en' ? h('span', null, meaningText(option)) : furigana(headword(option), reading(option)),
+      direction === 'ja-en' ? h('span', null, meaningText(option)) : wordRuby(option),
     ));
     return h('div', { class: 'choices' }, buttons);
   }
@@ -277,18 +285,20 @@ export function createQuizView() {
   function typingBody(question, slot) {
     const { word, direction } = question;
     const toJapanese = direction === 'en-ja';
+    const kanaInput = toJapanese && store.getLang() === 'ja';
     const field = h('input', {
       type: 'text',
       class: 'answer-input',
-      lang: toJapanese ? 'ja' : null,
-      placeholder: toJapanese ? 'Type the word (romaji turns into kana)' : 'Type a meaning in English',
+      lang: toJapanese ? scriptTag() : null,
+      placeholder: !toJapanese ? 'Type a meaning in English'
+        : kanaInput ? 'Type the word (romaji turns into kana)' : 'Type the word, in pinyin or characters',
       autocomplete: 'off',
       autocapitalize: 'off',
       spellcheck: false,
       'aria-label': 'Your answer',
       oninput: (event) => {
         // Leave text alone while a Japanese IME is composing.
-        if (!toJapanese || event.isComposing) return;
+        if (!kanaInput || event.isComposing) return;
         const converted = toHiragana(field.value, true);
         if (converted !== field.value) field.value = converted;
       },
@@ -354,7 +364,7 @@ export function createQuizView() {
         missed.length > 0 && h('div', { class: 'missed' },
           h('h4', null, 'Words to revisit'),
           missed.map((word) => h('div', { class: 'missed-row' },
-            furigana(headword(word), reading(word), 'missed-word'),
+            wordRuby(word, 'missed-word'),
             h('span', { class: 'muted' }, meaningText(word, 2)),
             speakButton(word),
           )),

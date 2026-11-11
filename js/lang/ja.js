@@ -22,6 +22,7 @@ export default {
   voice: 'ja',         // what ui.js speak() looks for in the device's voices
   speechTag: 'ja-JP',  // the tag it reads text out with
   home: 'dictionary',
+  level: { label: (n) => `JLPT N${n}` },
 
   tabs: [
     { route: 'dictionary', label: 'Dictionary' },

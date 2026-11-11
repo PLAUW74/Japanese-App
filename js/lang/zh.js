@@ -1,7 +1,13 @@
-// Chinese (Mandarin, simplified): the same shape as js/lang/ja.js. Only the pages that
-// exist yet are listed. Stats is shared with Japanese — it reads whichever language is
-// showing, and holds the sync and theme settings, which belong to neither.
+// Chinese (Mandarin, simplified): the same shape as js/lang/ja.js.
+//
+// My Words, the quiz, the mistakes list and Stats are the Japanese views unchanged — the
+// Chinese word list hands back entries shaped like the Japanese ones (js/lang/zh/dict.js),
+// so everything built on a saved word works without knowing which language it is.
 import { createZhOverviewView } from '../views/zh-overview.js';
+import { createZhDictionaryView } from '../views/zh-dictionary.js';
+import { createVocabView } from '../views/vocab.js';
+import { createQuizView } from '../views/quiz.js';
+import { createMistakesView } from '../views/mistakes.js';
 import { createStatsView } from '../views/stats.js';
 
 export default {
@@ -12,18 +18,27 @@ export default {
   htmlLang: 'zh-CN',
   voice: 'zh',
   speechTag: 'zh-CN',
-  home: 'overview',
+  home: 'dictionary',
+  level: { label: (n) => `HSK ${n}` },
 
   tabs: [
-    { route: 'overview', label: 'Overview' },
+    { route: 'dictionary', label: 'Dictionary' },
+    { route: 'words', label: 'My Words' },
+    { route: 'quiz', label: 'Quiz', badge: true },
+    { route: 'overview', label: 'Plan' },
     { route: 'stats', label: 'Stats' },
   ],
 
   routes: {
+    dictionary: createZhDictionaryView,
+    words: createVocabView,
+    quiz: createQuizView,
+    mistakes: createMistakesView,
     overview: createZhOverviewView,
     stats: createStatsView,
   },
 
-  tabFor: {},
-  quizPages: [],
+  // The mistakes list lives under the Quiz tab, as it does in Japanese.
+  tabFor: { mistakes: 'quiz' },
+  quizPages: [['quiz', 'My words'], ['mistakes', 'Mistakes']],
 };

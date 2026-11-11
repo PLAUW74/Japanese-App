@@ -303,6 +303,14 @@ function pickDue(now, taken) {
     .map((word) => word.id);
 }
 
+// A challenge worth less than a full helping, that the learner has not started. Growing it
+// is fair; growing one already under way would move the finish line while they worked.
+function shortAndUnstarted(pick, now) {
+  const words = bucket().words;
+  const picked = pick.ids.map((id) => words[id]).filter(Boolean);
+  return picked.length < challengeSize() && !picked.some((word) => reviewedToday(word, now));
+}
+
 function todaysPick(now) {
   const day = dayKey(now);
   const { settings, words } = bucket();
@@ -311,9 +319,11 @@ function todaysPick(now) {
     pick = { day, ids: pickDue(now, []) };
     settings.challenge = pick;
     commit(true);
-  } else if (!pick.ids.some((id) => words[id])) {
-    // Picked when nothing was waiting (or its words were deleted since): try again now, so a
-    // word saved or falling due later in the day still gets a challenge.
+  } else if (!pick.ids.some((id) => words[id]) || shortAndUnstarted(pick, now)) {
+    // Picked when nothing was waiting, or when less was waiting than a full helping and
+    // none of it has been answered yet. Either way the day's words are still open, so take
+    // them again: saving a band of words should give a full challenge, not the one word
+    // that happened to be saved first.
     const ids = pickDue(now, []);
     if (ids.length) {
       pick.ids = ids;
