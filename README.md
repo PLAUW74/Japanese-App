@@ -60,10 +60,12 @@ Japanese syncs to `users/{uid}/words`, `meta/lists` and `answers`, the paths it 
 | `js/dict-worker.js` | Loads the dictionary and runs searches off the main thread |
 | `js/store.js` | Saved words, lists, review schedule and history, kept per language |
 | `js/sync.js`, `js/firebase-config.js` | Optional syncing through Firebase |
-| `data/` | Compact dictionary files the app loads |
+| `data/` | Compact Japanese dictionary files the app loads |
+| `data/zh/` | The HSK 3.0 word, character, grammar, topic and task lists |
 | `notes/` | Study notes: `index.json` lists them, each note is an HTML file, photos are in `notes/img/` |
 | `reading/` | Graded reading passages, laid out the same way as `notes/` |
 | `tools/build-data.ps1` | Rebuilds `data/` from the latest sources |
+| `tools/build-zh-data.ps1` | Rebuilds `data/zh/` from the HSK lists and CC-CEDICT |
 | `sw.js` | Offline support once the app has been opened online |
 
 ## Updating the dictionary
@@ -74,7 +76,39 @@ powershell -ExecutionPolicy Bypass -File tools\build-data.ps1 -Release "<jmdict-
 
 Afterwards bump `DATA` in `sw.js` so browsers drop the cached copy.
 
+## Updating the Chinese data
+
+```bash
+powershell -ExecutionPolicy Bypass -File toolsuild-zh-data.ps1
+```
+
+Downloads the HSK 3.0 lists and CC-CEDICT into `data-src/zh/`, then writes `data/zh/`. It
+needs Python 3 but nothing installed beyond it, and the generated files are committed, so
+this only has to run when the sources change. Add `-Force` to fetch them again. Every run
+writes `data-src/zh/build-log.txt`: the band counts checked against the published totals,
+and every word whose reading or meaning needed a judgement call.
+
+The topic and task lists come from the syllabus PDF instead, which is a separate step
+because it is the one part that needs a package installed:
+
+```bash
+pip install --user pymupdf
+```
+
+```bash
+python -E -P -X utf8 tools/build_zh_topics.py --pdf data-src/zh-pdf/syllabus.pdf --out data/zh
+```
+
 ## Data sources
 
 - [JMdict and KANJIDIC2](https://www.edrdg.org/) by the Electronic Dictionary Research and Development Group, used under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/), in the JSON form published by [jmdict-simplified](https://github.com/scriptin/jmdict-simplified).
 - JLPT levels from Jonathan Waller's lists via [yomitan-jlpt-vocab](https://github.com/stephenmk/yomitan-jlpt-vocab) (CC BY). The JLPT publishes no official word lists, so these levels are a guide.
+- HSK 3.0 word, character, handwriting and grammar lists, and the BCT lists, from [krmanik/HSK-3.0](https://github.com/krmanik/HSK-3.0).
+- Chinese meanings from [CC-CEDICT](https://www.mdbg.net/chinese/dictionary?page=cc-cedict), used under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+- Chinese topics and tasks from the official HSK syllabus (中文水平考试 HSK 考试大纲, CLEC, November 2025). That is CLEC/CTI material, used here for personal study inside the app and not redistributed.
+
+Two editions of the HSK 3.0 lists are in circulation and they disagree. The 2021 standard
+(GF 0025-2021) sets each word's band here, because its totals are the ones published
+everywhere and the ones the study plan counts against; the 2025 exam syllabus supplies the
+word classes, the handwriting list and the grammar, and where it puts a word at a different
+level that is kept alongside as `band2025`.
