@@ -7,7 +7,7 @@ import { staggerIn } from '../stagger.js';
 
 const MILESTONES = [
   ['M1', 'Language split and toggle', 'done'],
-  ['M2', 'HSK 3.0 syllabus → data/zh/', 'next'],
+  ['M2', 'HSK 3.0 syllabus → data/zh/', 'done'],
   ['M3', 'Dictionary, My Words and vocab SRS with tone-coloured pinyin', 'next'],
   ['M4', 'Plan dashboard and grammar checklist', 'later'],
   ['M5', 'Sentence correction and writing journal', 'later'],
