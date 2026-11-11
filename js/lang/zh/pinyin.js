@@ -59,7 +59,10 @@ export const markedSpaced = (pinyin) => syllables(pinyin).map(markSyllable).join
 /** [{ text, tone }] per syllable, for colouring each one by its tone. */
 export const toned = (pinyin) => syllables(pinyin).map((s) => ({ text: markSyllable(s), tone: toneOf(s) }));
 
-/** Tone marks off, ü folded to u, spacing and punctuation gone: for comparing loosely. */
+/**
+ * Tone marks off, ü folded to u, spacing and punctuation gone: for comparing loosely.
+ * A keyboard has no ü, and pinyin input methods take v for it, so lv is lü too.
+ */
 export function plain(text) {
   return String(text || "")
     .normalize("NFD")
@@ -68,6 +71,7 @@ export function plain(text) {
     .toLowerCase()
     .replace(/u:/g, "u")
     .replace(/ü/g, "u")
+    .replace(/v/g, "u")
     .replace(/[^a-z]/g, "");
 }
 
@@ -76,8 +80,8 @@ export const toneString = (pinyin) => syllables(pinyin).map(toneOf).join("");
 
 /** What someone typed, reduced the same way as plain() but keeping any tone digits. */
 export function typedTones(text) {
-  const digits = String(text || "").match(/[1-5]/g);
-  return digits ? digits.join("") : "";
+  const digits = String(text || "").match(/[0-5]/g);
+  return digits ? digits.join("").replace(/0/g, "5") : "";
 }
 
 /**
@@ -124,4 +128,50 @@ export function tonesFromMarks(text) {
     if (tone) tones += tone;
   }
   return tones;
+}
+
+/**
+ * Whether a typed answer gives the reading *with its tones*, for the question that asks
+ * for exactly that. Returns { ok, missing } — `missing` is true when the syllables were
+ * right but no tones were given, so the learner can be told which half to fix.
+ *
+ * Tones can be typed as digits (hao3, with 5 or 0 or nothing for a neutral tone) or as
+ * marks (hǎo). A neutral tone has no mark and is often left without a digit, so both are
+ * compared with the neutral tones taken out as well as with them in.
+ */
+export function matchesReadingWithTones(pinyin, answer) {
+  const given = String(answer || "").trim();
+  if (!given || plain(given) !== plain(pinyin)) return { ok: false, missing: false };
+  const wanted = toneString(pinyin);
+  const withoutNeutral = wanted.replace(/5/g, "");
+  const typed = typedTones(given) || tonesFromMarks(given);
+  if (!typed) return { ok: false, missing: true };
+  return { ok: typed === wanted || typed === withoutNeutral || typed.replace(/5/g, "") === withoutNeutral, missing: false };
+}
+
+/**
+ * Readings that differ from this one by a single tone — 'ai4' gives 'ai1', 'ai2', 'ai3'.
+ * As the wrong options of a multiple-choice question they make it a question about tones,
+ * which is the half of a reading that is easiest to half-know.
+ */
+export function toneVariants(pinyin, count = 2) {
+  const parts = syllables(pinyin);
+  const out = [];
+  const seen = new Set([parts.join(" ")]);
+  // Change the toned syllables first; a neutral tone given a full tone reads oddly.
+  const order = parts.map((s, i) => i).sort((a, b) => (toneOf(parts[a]) === 5) - (toneOf(parts[b]) === 5));
+  for (const i of order) {
+    const base = parts[i].replace(/[1-5]$/, "");
+    for (const tone of [1, 2, 3, 4]) {
+      if (out.length >= count) return out;
+      if (tone === toneOf(parts[i])) continue;
+      const next = [...parts];
+      next[i] = `${base}${tone}`;
+      const key = next.join(" ");
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(key);
+    }
+  }
+  return out;
 }

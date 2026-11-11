@@ -62,6 +62,7 @@ Japanese syncs to `users/{uid}/words`, `meta/lists` and `answers`, the paths it 
 | `js/sync.js`, `js/firebase-config.js` | Optional syncing through Firebase |
 | `data/` | Compact Japanese dictionary files the app loads |
 | `data/zh/` | The HSK 3.0 word, character, grammar, topic and task lists |
+| `data/zh/plan.json` | The 78-week study plan the Chinese dashboard reads. Yours to edit |
 | `notes/` | Study notes: `index.json` lists them, each note is an HTML file, photos are in `notes/img/` |
 | `reading/` | Graded reading passages, laid out the same way as `notes/` |
 | `tools/build-data.ps1` | Rebuilds `data/` from the latest sources |

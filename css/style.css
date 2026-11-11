@@ -843,19 +843,67 @@ ol.questions.with-play { padding-left: 3.6em; }
   --tone4: #ee9a90;
   --tone5: #9aa4b2;
 }
-rt.tone { font-weight: 600; letter-spacing: 0.01em; }
-rt.tone1 { color: var(--tone1); }
-rt.tone2 { color: var(--tone2); }
-rt.tone3 { color: var(--tone3); }
-rt.tone4 { color: var(--tone4); }
-rt.tone5 { color: var(--tone5); }
+/* Above characters (rt) and on its own, as the answer to a reading question (span). */
+.tone { font-weight: 600; letter-spacing: 0.01em; }
+.tone1 { color: var(--tone1); }
+.tone2 { color: var(--tone2); }
+.tone3 { color: var(--tone3); }
+.tone4 { color: var(--tone4); }
+.tone5 { color: var(--tone5); }
+/* A character asked about on its own, with nothing above it to read off instead. */
+.prompt-hanzi { font-size: 3.4rem; line-height: 1.2; font-weight: 500; }
 
-/* ---- the Chinese overview's build order ---- */
-/* Each row carries its own M-number, so the list drops the numbering it would add. */
-.milestones { list-style: none; display: grid; gap: 9px; margin: 14px 0 0; padding: 0; }
-.milestone { display: grid; grid-template-columns: 30px 1fr auto; align-items: center; gap: 10px; }
-.milestone-id { color: var(--muted); font-weight: 700; font-size: 0.85rem; }
-.milestone.is-later .milestone-what { color: var(--muted); }
+/* ---- the grammar checklist ---- */
+.grammar-group { margin-bottom: 22px; }
+.grammar-category {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.grammar-point { display: grid; gap: 10px; }
+.grammar-name { font-size: 1.15rem; font-weight: 600; }
+/* A point's state is a button, so it has to look pressable where a badge does not. */
+.mark-btn { display: inline-flex; align-items: center; gap: 4px; border: 0; cursor: pointer; font: inherit; font-size: 0.78rem; }
+.mark-btn:hover { filter: brightness(1.08); }
+/* Done points recede: what is left to learn should be what catches the eye. */
+.grammar-point.mark-mature { opacity: 0.62; }
+.grammar-point.mark-mature:hover { opacity: 1; }
+.grammar-point .chip { text-decoration: none; }
+
+/* ---- the plan's daily blocks ---- */
+.block-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+.block-row:first-of-type { border-top: 0; }
+.block-label { font-weight: 600; }
+.block-row.is-done .block-what { opacity: 0.55; }
+.block-row.is-done .block-label { text-decoration: line-through; }
+.block-tick {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--accent-ink);
+  cursor: pointer;
+}
+.block-tick:hover { border-color: var(--accent-text); }
+.block-tick.on { border-color: var(--accent); background: var(--accent); }
+.block-tick .icon svg { width: 16px; height: 16px; }
+
+.plan-table { width: 100%; margin-top: 12px; }
+.plan-table .is-now { background: var(--accent-soft); }
+.plan-table .is-now td:first-child { font-weight: 700; }
 
 /* ---- small screens: navigation moves to the bottom ---- */
 

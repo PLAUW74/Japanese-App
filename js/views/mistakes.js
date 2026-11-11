@@ -1,6 +1,7 @@
 // Wrong answers from every quiz, kept until the same question is answered right or dismissed,
 // with a practice round that asks them again.
 import { current as dictFor, ifAvailable } from '../dicts.js';
+import { toneVariants, marked as markedPinyin, syllables, plain as plainPinyin } from '../lang/zh/pinyin.js';
 import * as store from '../store.js';
 import {
   h, icon, speak, shuffle, quizSwitch, setChildren, confirmButton, markupReading,
@@ -23,9 +24,11 @@ const toSpeech = (text) => markupReading(text.replace(/\[\[|\]\]/g, '').replace(
 // A practice question read aloud with a pause for each gap (（　）, ★ ＿ ＿), so it doesn't
 // say the answer.
 const questionSpeech = (prompt) => toSpeech(prompt.replace(/（[\s　]*）|[★＿](?:\s*[★＿])*/g, '、'));
-// Kana questions ask about the sound itself, and an English prompt is no use to a Japanese
-// voice, so only Japanese prompts from the other quizzes get a speaker.
-const canSpeak = (item) => item.mistake.quiz !== 'kana' && JAPANESE.test(item.prompt);
+// Kana questions ask about the sound itself, and so do Chinese pinyin questions — hearing
+// 半 read aloud is hearing the answer. An English prompt is no use to the voice either. So
+// only the other quizzes' prompts in Japanese or Chinese get a speaker.
+const asksForTheSound = (item) => item.mistake.quiz === 'kana' || item.mistake.key.endsWith(':read');
+const canSpeak = (item) => !asksForTheSound(item) && JAPANESE.test(item.prompt);
 // Quizzes whose answers are made of dictionary words worth collecting.
 const SAVES_WORDS = { grammar: 'Words in this sentence', verbs: 'Save this verb' };
 
@@ -33,9 +36,26 @@ const SAVES_WORDS = { grammar: 'Words in this sentence', verbs: 'Save this verb'
 // Each returns { prompt, options: [{ text, correct }], answer, note, en } in 漢字{かんじ}
 // notation, or null when the question can't be rebuilt (say, a word since deleted).
 
+// A pinyin question again: the characters alone, and the reading among readings that
+// differ from it by a tone, as the quiz asked it.
+async function readingItem(word) {
+  const right = word.kana[0];
+  const texts = [right, ...toneVariants(right, 2)];
+  const other = shuffle(store.allWords()).find((w) => w.id !== word.id
+    && syllables(w.kana[0]).length === syllables(right).length && plainPinyin(w.kana[0]) !== plainPinyin(right));
+  if (other) texts.push(other.kana[0]);
+  return {
+    prompt: headword(word),
+    options: shuffle([...new Set(texts)].slice(0, CHOICES).map((r) => ({ text: markedPinyin(r), correct: r === right }))),
+    answer: markedPinyin(right),
+    note: meaningText(word),
+  };
+}
+
 async function wordItem(mistake, id, direction) {
   const word = store.getState().words[id];
   if (!word) return null;
+  if (direction === 'read') return readingItem(word);
   const label = direction === 'ja-en' ? (w) => meaningText(w) : (w) => toMarkup(headword(w), reading(w));
   let others = shuffle(store.allWords().filter((w) => w.id !== word.id));
   if (others.length < CHOICES - 1) others = others.concat(await dictFor().random(6, [word.id]).catch(() => []));

@@ -3,7 +3,8 @@
 // My Words, the quiz, the mistakes list and Stats are the Japanese views unchanged — the
 // Chinese word list hands back entries shaped like the Japanese ones (js/lang/zh/dict.js),
 // so everything built on a saved word works without knowing which language it is.
-import { createZhOverviewView } from '../views/zh-overview.js';
+import { createZhPlanView } from '../views/zh-plan.js';
+import { createZhGrammarView } from '../views/zh-grammar.js';
 import { createZhDictionaryView } from '../views/zh-dictionary.js';
 import { createVocabView } from '../views/vocab.js';
 import { createQuizView } from '../views/quiz.js';
@@ -25,7 +26,8 @@ export default {
     { route: 'dictionary', label: 'Dictionary' },
     { route: 'words', label: 'My Words' },
     { route: 'quiz', label: 'Quiz', badge: true },
-    { route: 'overview', label: 'Plan' },
+    { route: 'grammar', label: 'Grammar' },
+    { route: 'plan', label: 'Plan' },
     { route: 'stats', label: 'Stats' },
   ],
 
@@ -34,7 +36,8 @@ export default {
     words: createVocabView,
     quiz: createQuizView,
     mistakes: createMistakesView,
-    overview: createZhOverviewView,
+    grammar: createZhGrammarView,
+    plan: createZhPlanView,
     stats: createStatsView,
   },
 

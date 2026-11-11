@@ -53,6 +53,16 @@ foreach ($n in 3..6) {
 }
 
 Get-Source "$repo/BCT/BCTB_cihui.txt" (Join-Path $src 'bct_b.txt')
+
+# The Chinese Grammar Wiki's level pages list every article beside its pattern in hanzi,
+# which is what links each syllabus pattern to the article that explains it; its Keywords
+# page lists the characters that have a page of their own. Six pages, fetched once.
+New-Item -ItemType Directory -Force (Join-Path $src 'wiki') | Out-Null
+$wiki = 'https://resources.allsetlearning.com/chinese/grammar'
+foreach ($level in 'A1', 'A2', 'B1', 'B2', 'C1') {
+    Get-Source "$wiki/${level}_grammar_points" (Join-Path $src "wiki/${level}_grammar_points.html")
+}
+Get-Source "$wiki/Keywords" (Join-Path $src 'wiki/Keywords.html')
 Get-Source 'https://www.mdbg.net/chinese/export/cedict/cedict_1_0_ts_utf-8_mdbg.txt.gz' (Join-Path $src 'cedict.txt.gz')
 
 $python = (Get-Command python -ErrorAction SilentlyContinue)

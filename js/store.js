@@ -51,6 +51,7 @@ const blankLang = (code) => ({
   cleared: {},   // mistake key -> when it was answered right or dismissed
   vocab: {},     // this device's word id -> { wrong, right, at, entry }: words met inside quiz questions
   answers: {},   // note page -> { values, updatedAt }: what was typed into its blanks
+  marks: {},     // id -> { status, updatedAt }: a short value kept against an id
   settings: { ...BASE_SETTINGS, ...LANG_SETTINGS[code] },
 });
 
@@ -126,10 +127,10 @@ export function setLang(lang) {
 }
 
 // What has changed locally since sync last took it, per language.
-const freshDirty = () => ({ words: new Set(), lists: false, device: false, answers: new Set() });
+const freshDirty = () => ({ words: new Set(), lists: false, device: false, answers: new Set(), marks: new Set() });
 const dirty = Object.fromEntries(LANGS.map((code) => [code, freshDirty()]));
 const dirtyListeners = new Set();
-const langDirty = (d) => d.words.size > 0 || d.lists || d.device || d.answers.size > 0;
+const langDirty = (d) => d.words.size > 0 || d.lists || d.device || d.answers.size > 0 || d.marks.size > 0;
 const isDirty = () => LANGS.some((code) => langDirty(dirty[code]));
 
 function commit(silent = false) {
@@ -581,6 +582,31 @@ export function setAnswers(page, values) {
   commit(true);
 }
 
+// ---- marks ----
+// A short value kept against an id, for the things that are neither a saved word nor a
+// setting: how a grammar point is going ('practising' or 'done'), the day the study plan
+// was started, and which of a day's blocks are ticked off. Settings stay on their device;
+// these follow the learner, so they sync alongside the words.
+
+export const getMark = (id) => (bucket().marks[id] && bucket().marks[id].status) || '';
+
+export function setMark(id, status) {
+  if (status) bucket().marks[id] = { status, updatedAt: Date.now() };
+  else bucket().marks[id] = { status: '', updatedAt: Date.now() };
+  dirty[current].marks.add(String(id));
+  commit();
+}
+
+// How many items in a group carry each status: { practising: 3, done: 12 }.
+export function markCounts(ids) {
+  const out = {};
+  for (const id of ids) {
+    const status = getMark(id);
+    if (status) out[status] = (out[status] || 0) + 1;
+  }
+  return out;
+}
+
 // ---- settings and backup ----
 
 export function saveSettings(patch) {
@@ -676,6 +702,7 @@ export function takeDirty() {
         : { id: Number(id) || id, deleted: true, updatedAt: own.deleted[id] || Date.now() }),
       lists: mine.lists ? { lists: own.lists, updatedAt: own.listsAt } : null,
       answers: [...mine.answers].filter((page) => own.answers[page]).map((page) => ({ page, ...own.answers[page] })),
+      marks: [...mine.marks].filter((id) => own.marks[id]).map((id) => ({ id, ...own.marks[id] })),
       device: mine.device,
     };
     if (mine.device) anyDevice = true;
@@ -683,6 +710,7 @@ export function takeDirty() {
     mine.lists = false;
     mine.device = false;
     mine.answers.clear();
+    mine.marks.clear();
   }
   return { langs, device: anyDevice ? deviceDoc() : null };
 }
@@ -709,6 +737,7 @@ export function restoreDirty(taken) {
     if (part.lists) dirty[lang].lists = true;
     if (part.device) dirty[lang].device = true;
     for (const entry of part.answers || []) dirty[lang].answers.add(entry.page);
+    for (const entry of part.marks || []) dirty[lang].marks.add(String(entry.id));
   }
 }
 
@@ -717,6 +746,14 @@ export function restoreDirty(taken) {
 export function queueAnswersNewerThan(lang, remote) {
   for (const [page, entry] of Object.entries(bucket(lang).answers)) {
     if ((entry.updatedAt || 0) > (remote[page] ?? -1)) dirty[lang].answers.add(page);
+  }
+  commit(true);
+}
+
+// The same for how each item is going. `remote` maps item id -> updatedAt.
+export function queueMarksNewerThan(lang, remote) {
+  for (const [id, entry] of Object.entries(bucket(lang).marks)) {
+    if ((entry.updatedAt || 0) > (remote[id] ?? -1)) dirty[lang].marks.add(id);
   }
   commit(true);
 }
@@ -742,7 +779,7 @@ export function queueNewerThan(lang, remoteWords, remoteListsAt) {
 
 // Applies changes from the account. The newer copy of each word wins. `others` is not
 // language-specific: one document per device holds them all.
-export function applyRemote(lang, { words = [], lists = null, others = null, answers = [] }) {
+export function applyRemote(lang, { words = [], lists = null, others = null, answers = [], marks = [] }) {
   const own = bucket(lang);
   let changed = false;
   for (const doc of answers) {
@@ -750,6 +787,13 @@ export function applyRemote(lang, { words = [], lists = null, others = null, ans
     const local = own.answers[doc.page];
     if ((doc.updatedAt || 0) <= ((local && local.updatedAt) || 0)) continue;
     own.answers[doc.page] = { values: doc.values, updatedAt: doc.updatedAt };
+    changed = true;
+  }
+  for (const doc of marks) {
+    if (!doc.id) continue;
+    const local = own.marks[doc.id];
+    if ((doc.updatedAt || 0) <= ((local && local.updatedAt) || 0)) continue;
+    own.marks[doc.id] = { status: doc.status || '', updatedAt: doc.updatedAt };
     changed = true;
   }
   for (const doc of words) {

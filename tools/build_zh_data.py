@@ -453,7 +453,230 @@ def build_characters(src, out, log):
     return rows
 
 
+# ---- links to the Chinese Grammar Wiki ----
+#
+# The syllabus names each grammar point by its pattern (第—, A比B+形容词) and explains
+# nothing. The Chinese Grammar Wiki explains nearly all of them, but names its articles in
+# English ("Ordinal numbers with di"), so a search for the syllabus's pattern finds little —
+# and its placeholder dash breaks the search outright. Its level pages, though, list every
+# article beside the same kind of hanzi pattern (第 + Number), and matching those patterns
+# to the syllabus's is what links each pattern to its article.
+
+WIKI_LEVELS = ["A1", "A2", "B1", "B2", "C1"]
+# Which wiki level an HSK band's grammar sits nearest, as an index into WIKI_LEVELS: when
+# several articles fit a pattern, the one written for the learner's level wins.
+LEVEL_FOR_BAND = {1: 0, 2: 1, 3: 2, 4: 2.5, 5: 3, 6: 4}
+
+# The syllabus writes a slot as the name of what fills it, in Chinese — 动词 for "a verb",
+# 形容词 for "an adjective" — where the wiki writes "Verb" or "Adj.". These are names, not
+# part of the pattern, so they are taken out before matching. Longest first, so 动词性短语
+# goes before 动词 can split it.
+SLOT_NAMES = sorted({
+    "动词或动词性短语", "形容词性短语", "动词性短语", "名词性短语", "主谓短语", "动补短语",
+    "动宾短语", "偏正短语", "并列短语", "数量短语", "名词短语", "专用名量词", "借用名量词",
+    "数量补语", "结果补语", "程度补语", "趋向补语", "可能补语", "动量补语", "时量补语",
+    "情态补语", "状态补语", "表示概数", "概数表达法", "用动态助词", "疑问代词", "人称代词",
+    "指示代词", "能愿动词", "动态助词", "结构助词", "语气助词", "其他成分", "主谓句",
+    "方位词", "处所词", "时间词", "形容词", "动词", "名词", "代词", "数词", "量词", "副词",
+    "介词", "连词", "助词", "补语", "宾语", "主语", "谓语", "定语", "状语", "短语",
+    "小句", "分句", "句子", "处所", "表示",
+}, key=len, reverse=True)
+
+HANZI_RUN = re.compile(r"[㐀-鿿]+")
+OPTIONAL_PART = re.compile(r"[（(]([^）)]*)[）)]")
+NUMBERING = re.compile(r"[（(]\s*\d+\s*[）)]")
+
+# A reduplication pattern (AA, ABAB, A一A) has nothing to match on but its letters, so the
+# point's own name says which article it is.
+REDUPLICATION = {
+    "动词重叠": "Reduplication of verbs",
+    "形容词重叠": "Reduplication of adjectives",
+    "量词重叠": "Reduplication of measure words",
+}
+
+# Some word-class points list words rather than patterns — the measure words 本 and 只,
+# the numeral 一 — and a character on its own matches whatever article happens to use it:
+# 只 the measure word would land on "Expressing only with zhi". For these classes the
+# article has to say, in its title, that it is about that use; otherwise the pattern
+# falls back to a search rather than send the learner to the wrong lesson. Adverbs,
+# prepositions, particles and modal verbs need no such check: there the word is the point.
+CLASS_TITLE_WORDS = {
+    # 岁, 日, 点 and 年 are filed as time measure words; "Age with sui" and "Structure of
+    # dates" are about exactly that use.
+    ("量词", "时量词"): ("age", "date", "time", "measure word", "counting"),
+    ("量词", None): ("measure word", "counting"),
+    ("数词", None): ("number", "numeral", "counting", "half"),
+    ("代词", "人称代词"): ("pronoun",),
+    ("代词", "指示代词"): ("this", "that", "demonstrative", "some"),
+    ("代词", "疑问代词"): ("question", "asking", "how", "what", "who", "where", "which", "why", "when"),
+    ("代词", None): ("pronoun",),
+    ("名词", "方位名词"): ("location", "position", "direction"),
+    ("叹词", None): ("interjection", "exclamation"),
+}
+
+WIKI_ROW = re.compile(r"<tr[^>]*>(.*?)</tr>", re.S)
+WIKI_LINK = re.compile(r'<a href="/chinese/grammar/(ASG[A-Z0-9]+)"[^>]*>([^<]+)</a>')
+WIKI_CELL = re.compile(r"<td[^>]*>(.*?)</td>", re.S)
+TAG = re.compile(r"<[^>]+>")
+ALTERNATIVES = re.compile(r"[㐀-鿿]+(?:\s*/\s*[㐀-鿿]+)+")
+
+
+def pattern_anchors(text):
+    """(required, optional) hanzi runs of a pattern, slot names and numbering taken out.
+
+    'A比B+形容词' -> (['比'], []); '(正) 在 + Verb' -> (['在'], ['正']).
+    """
+    def runs(part):
+        for name in SLOT_NAMES:
+            part = part.replace(name, " ")
+        return HANZI_RUN.findall(part)
+    text = NUMBERING.sub(" ", text)
+    optional = " ".join(OPTIONAL_PART.findall(text))
+    return runs(OPTIONAL_PART.sub(" ", text)), runs(optional)
+
+
+def read_wiki_keywords(src):
+    """The characters and words the wiki has a keyword page for (/chinese/grammar/了),
+    each page listing every article that uses it."""
+    import urllib.parse
+    path = src / "wiki" / "Keywords.html"
+    if not path.exists():
+        return set()
+    page = path.read_text(encoding="utf-8", errors="replace")
+    body = page.split('id="mw-content-text"', 1)[-1].split('id="catlinks"', 1)[0]
+    keys = set()
+    for href in re.findall(r'<a href="([^"]+)"', body):
+        match = re.match(r"^/chinese/grammar/([㐀-鿿]+)$", urllib.parse.unquote(href))
+        if match:
+            keys.add(match.group(1))
+    return keys
+
+
+def read_wiki_index(src):
+    """Every article on the wiki's level pages: asg id, title, level and pattern anchors."""
+    import html as html_lib
+    articles, seen = [], set()
+    for index, level in enumerate(WIKI_LEVELS):
+        path = src / "wiki" / f"{level}_grammar_points.html"
+        if not path.exists():
+            continue
+        page = path.read_text(encoding="utf-8", errors="replace")
+        for row in WIKI_ROW.findall(page):
+            link = WIKI_LINK.search(row)
+            cells = [html_lib.unescape(TAG.sub("", c)).strip() for c in WIKI_CELL.findall(row)]
+            if not link or len(cells) < 2 or link.group(1) in seen:
+                continue
+            seen.add(link.group(1))
+            title, pattern = html_lib.unescape(link.group(2)).strip(), cells[1]
+            required, optional = pattern_anchors(pattern)
+            # 上 / 下 / 里 / 旁边 is a choice of one, not four things the pattern needs.
+            groups = [set(HANZI_RUN.findall(g))
+                      for g in ALTERNATIVES.findall(OPTIONAL_PART.sub(" ", pattern))]
+            articles.append({
+                "asg": link.group(1), "title": title, "level": index, "pattern": pattern,
+                "required": required, "optional": optional, "groups": groups,
+                "compact": "".join(HANZI_RUN.findall(pattern)),
+                # An article weighing up two or three words against each other is the wrong
+                # place to learn one of them.
+                "comparison": title.startswith("Comparing") or " vs" in pattern,
+            })
+    return articles
+
+
+def match_score(required, optional, article, band, compares=False):
+    """How well an article fits a syllabus pattern, or None when it does not fit at all.
+
+    Every hanzi the syllabus pattern needs must appear in the article's pattern. A single
+    character has to stand on its own there — 过 is not found inside 不过 — while a longer
+    run may also sit inside the article's pattern. Hanzi the article needs and the syllabus
+    does not, a comparison article, and distance from the learner's level all count against.
+    """
+    runs = set(article["required"]) | set(article["optional"])
+    score = 0
+    for anchor in required:
+        if anchor in runs:
+            score += 10
+        elif len(anchor) >= 2 and anchor in article["compact"]:
+            score += 6
+        else:
+            return None
+    score += sum(1 for anchor in optional if anchor in runs)
+    wanted = set(required) | set(optional)
+    in_groups = set().union(*article["groups"]) if article["groups"] else set()
+    extra = sum(1 for group in article["groups"] if not group & wanted)
+    extra += sum(1 for r in article["required"] if r not in in_groups and r not in wanted)
+    score -= 3 * extra
+    # A comparison article is the wrong place to learn one word — unless the syllabus is
+    # itself setting two side by side, as 二/两 does.
+    if article["comparison"] and not compares:
+        score -= 6
+    score -= 2 * abs(article["level"] - LEVEL_FOR_BAND.get(band, 2))
+    return score
+
+
+def link_pattern(pattern, band, name, detail, articles, category="", keywords=frozenset()):
+    """[wiki path, label, search term] for one syllabus pattern.
+
+    The path is what follows /chinese/grammar/ on the wiki, and both kinds of page it can
+    name live there:
+      - an article ('ASG846EA'), when one fits better than the rest;
+      - a keyword page ('了'), listing every article that uses the character, when several
+        fit equally well or none fits but the character has one;
+    and it is empty when neither exists, leaving the search term — the pattern with its
+    placeholders taken out — for the wiki's own search.
+    """
+    required, optional = pattern_anchors(pattern)
+    term = " ".join(required + optional) or detail or name
+    # A pattern that describes a sentence type in grammar terms — 主谓句1：动词谓语句 — has
+    # nothing left once its slot names go but a stray 句. Search the description itself
+    # (the specific part after the colon, where there is one): the wiki's full-text search
+    # finds "Sentence with a verbal predicate" for 动词谓语句, and nothing useful for 句.
+    if len(term.replace(" ", "")) <= 1:
+        body = NUMBERING.sub("", pattern).split("：")[-1].split(":")[-1]
+        whole = "".join(HANZI_RUN.findall(body))
+        if len(whole) > 2:
+            term = whole
+    keyword = required[0] if len(required) == 1 and required[0] in keywords else ""
+    keyword_link = [keyword, f"Every article that uses {keyword}", term] if keyword else None
+    for key, title in REDUPLICATION.items():
+        if key in (detail or "") or key in (name or ""):
+            hit = next((a for a in articles if a["title"] == title), None)
+            if hit:
+                return [hit["asg"], hit["title"], term]
+    if not required:
+        return ["", "", term]
+    compares = "/" in pattern
+    title_words = None
+    if category == "词类":
+        title_words = CLASS_TITLE_WORDS.get((name, detail)) or CLASS_TITLE_WORDS.get((name, None))
+    # One character matches far more articles than a pattern does, so it has to fit better.
+    floor = 4 if all(len(a) == 1 for a in required) else 2
+    scored = []
+    for article in articles:
+        if title_words and not (compares and article["comparison"]):
+            if not any(w in article["title"].lower() for w in title_words):
+                continue
+        score = match_score(required, optional, article, band, compares)
+        if score is not None and score >= floor:
+            scored.append((score, article))
+    if not scored:
+        return keyword_link or ["", "", term]
+    scored.sort(key=lambda s: (-s[0], len(s[1]["required"]), s[1]["level"], s[1]["title"]))
+    best_score, best = scored[0]
+    # Five articles on 了 all fit 了 equally well. Picking one would be a guess; the
+    # character's keyword page lists them all and lets the learner choose.
+    if len(scored) > 1 and scored[1][0] == best_score and keyword_link:
+        return keyword_link
+    return [best["asg"], best["title"], term]
+
+
 def build_grammar(src, out, log):
+    articles = read_wiki_index(src)
+    keywords = read_wiki_keywords(src)
+    if articles:
+        log.append(f"  Chinese Grammar Wiki: {len(articles)} articles on its level pages")
+    else:
+        log.append("  Chinese Grammar Wiki level pages not downloaded: links fall back to searches")
     rows = []
     for band in BANDS:
         path = src / f"grammar_{band}.json"
@@ -470,12 +693,30 @@ def build_grammar(src, out, log):
                 continue
             # The content lists its patterns separated by the Chinese enumeration comma.
             patterns = [p.strip() for p in content.split("、") if p.strip()]
-            rows.append([f"g{band}-{n + 1}", band, category, name, detail, patterns])
+            links = [link_pattern(p, band, name, detail, articles, category, keywords) for p in patterns]
+            rows.append([f"g{band}-{n + 1}", band, category, name, detail, patterns, links])
         log.append(f"  band {band}: {sum(1 for r in rows if r[1] == band)} grammar points")
+
+    every = [(row, pattern, link) for row in rows for pattern, link in zip(row[5], row[6])]
+    linked = [e for e in every if e[2][0]]
+    to_article = sum(1 for e in linked if e[2][0].startswith("ASG"))
+    log.append(f"  {len(every)} patterns: {to_article} link to an article, "
+               f"{len(linked) - to_article} to a keyword page listing the articles on that "
+               f"character, {len(every) - len(linked)} to a wiki search with the placeholders taken out")
+    # Enough of each to review by eye: what the early bands link to, and what found nothing.
+    for row, pattern, link in [e for e in linked if e[0][1] <= 2][:40]:
+        log.append(f"    HSK {row[1]} {pattern}  ->  {link[1]}")
+    unlinked = [f"{pattern}" for row, pattern, link in every if not link[0] and row[1] <= 3]
+    if unlinked:
+        log.append(f"  HSK 1-3 patterns with no article ({len(unlinked)}): {'  '.join(unlinked)}")
+
     write_json(out / "grammar.json", {
         "date": date.today().isoformat(),
-        "source": "HSK 3.0 grammar syllabus, 2025 edition. Point names are the syllabus's own Chinese.",
-        # [id, band, category, name, detail, [pattern]]
+        "source": ("HSK 3.0 grammar syllabus, 2025 edition. Point names are the syllabus's own "
+                   "Chinese. Links are to the Chinese Grammar Wiki (resources.allsetlearning.com)."),
+        # [id, band, category, name, detail, [pattern], [[wiki path, label, search term]]]
+        # wiki path: an article id (ASG846EA) or a keyword page (了), under /chinese/grammar/;
+        # empty when the search term is all there is.
         "points": rows,
     }, "points")
     return rows

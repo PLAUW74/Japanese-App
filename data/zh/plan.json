@@ -1,0 +1,182 @@
+{
+  "plan": {
+    "name": "HSK 3.0 band 6 and BCT B in 78 weeks",
+    "note": "Each band gets a share of the weeks in proportion to how many new words it carries, which works out at a steady ~12 new words a day throughout. Week 1 is for placement. This file is yours to edit: change the weeks, the blocks or the links and the dashboard follows.",
+    "weeks": 78,
+    "studyDaysPerWeek": 6,
+    "phases": [
+      {
+        "band": 1,
+        "fromWeek": 2,
+        "toWeek": 8,
+        "weeks": 7,
+        "words": 500,
+        "characters": 300,
+        "grammar": 70,
+        "newPerDay": 12,
+        "focus": "Get the tones and pinyin straight, and the first 300 characters readable."
+      },
+      {
+        "band": 2,
+        "fromWeek": 9,
+        "toWeek": 19,
+        "weeks": 11,
+        "words": 760,
+        "characters": 299,
+        "grammar": 78,
+        "newPerDay": 12,
+        "focus": "Everyday exchanges: shopping, directions, times, simple past and future."
+      },
+      {
+        "band": 3,
+        "fromWeek": 20,
+        "toWeek": 33,
+        "weeks": 14,
+        "words": 965,
+        "characters": 300,
+        "grammar": 96,
+        "newPerDay": 11,
+        "focus": "Hold a conversation about familiar things. Start reading short graded stories."
+      },
+      {
+        "band": 4,
+        "fromWeek": 34,
+        "toWeek": 47,
+        "weeks": 14,
+        "words": 993,
+        "characters": 300,
+        "grammar": 95,
+        "newPerDay": 12,
+        "focus": "Opinions and reasons. Longer sentences, complements, and the first news headlines."
+      },
+      {
+        "band": 5,
+        "fromWeek": 48,
+        "toWeek": 62,
+        "weeks": 15,
+        "words": 1065,
+        "characters": 300,
+        "grammar": 70,
+        "newPerDay": 12,
+        "focus": "Abstract and work topics. Read full articles; write short pieces without a dictionary."
+      },
+      {
+        "band": 6,
+        "fromWeek": 63,
+        "toWeek": 78,
+        "weeks": 16,
+        "words": 1131,
+        "characters": 300,
+        "grammar": 50,
+        "newPerDay": 12,
+        "focus": "Work-level range: meetings, email, argument and nuance. Sit the BCT B material alongside."
+      }
+    ],
+    "blocks": [
+      {
+        "id": "review",
+        "label": "Review what is due",
+        "minutes": 20,
+        "kind": "app",
+        "route": "quiz"
+      },
+      {
+        "id": "new",
+        "label": "Learn new words",
+        "minutes": 15,
+        "kind": "app",
+        "route": "dictionary"
+      },
+      {
+        "id": "grammar",
+        "label": "One grammar point",
+        "minutes": 10,
+        "kind": "app",
+        "route": "grammar"
+      },
+      {
+        "id": "listen",
+        "label": "Listening",
+        "minutes": 15,
+        "kind": "link",
+        "url": "https://www.youtube.com/@ComprehensibleChinese",
+        "note": "Comprehensible Chinese, at or just above your band"
+      },
+      {
+        "id": "read",
+        "label": "Graded reading",
+        "minutes": 10,
+        "kind": "link",
+        "url": "https://www.duchinese.net",
+        "note": "Du Chinese free stories"
+      },
+      {
+        "id": "news",
+        "label": "Read the news",
+        "minutes": 10,
+        "kind": "link",
+        "fromBand": 3,
+        "url": "https://www.zaobao.com.sg",
+        "note": "Lianhe Zaobao, with Pleco’s clipboard reader"
+      },
+      {
+        "id": "speak",
+        "label": "Shadowing",
+        "minutes": 10,
+        "kind": "link",
+        "url": "https://www.youtube.com/@MandarinCorner",
+        "note": "Mandarin Corner interviews: say each line after the speaker"
+      }
+    ],
+    "checkpoints": [
+      {
+        "week": 1,
+        "band": 0,
+        "what": "Placement: mark what you already know",
+        "url": ""
+      },
+      {
+        "week": 8,
+        "band": 1,
+        "what": "HSK 1 mock test",
+        "url": "https://www.chinesetest.cn"
+      },
+      {
+        "week": 19,
+        "band": 2,
+        "what": "HSK 2 mock test",
+        "url": "https://www.chinesetest.cn"
+      },
+      {
+        "week": 33,
+        "band": 3,
+        "what": "HSK 3 mock test",
+        "url": "https://www.chinesetest.cn"
+      },
+      {
+        "week": 47,
+        "band": 4,
+        "what": "HSK 4 mock test",
+        "url": "https://www.chinesetest.cn"
+      },
+      {
+        "week": 62,
+        "band": 5,
+        "what": "HSK 5 mock test",
+        "url": "https://www.chinesetest.cn"
+      },
+      {
+        "week": 78,
+        "band": 6,
+        "what": "HSK 6 mock test",
+        "url": "https://www.chinesetest.cn"
+      },
+      {
+        "week": 78,
+        "band": 6,
+        "what": "BCT B",
+        "url": "https://www.chinesetest.cn"
+      }
+    ]
+  }
+}

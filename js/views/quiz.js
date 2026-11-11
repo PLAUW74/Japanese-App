@@ -1,14 +1,22 @@
 import { current as dictFor } from '../dicts.js';
 import * as store from '../store.js';
 import { toHiragana, kataToHira } from '../kana.js';
-import { matchesReading } from '../lang/zh/pinyin.js';
-import { h, speakButton, headword, reading, meaningText, posText, sensesList, shuffle, segmented, quizSwitch, wordTitle, toMarkup, wordRuby, scriptTag, route } from '../ui.js';
+import { matchesReading, matchesReadingWithTones, toneVariants, syllables, plain as plainPinyin, marked as markedPinyin } from '../lang/zh/pinyin.js';
+import { h, ja, speakButton, headword, reading, meaningText, posText, sensesList, shuffle, segmented, quizSwitch, wordTitle, toMarkup, wordRuby, tonedPinyin, scriptTag, route } from '../ui.js';
 import { dropdown } from '../dropdown.js';
 
 const MODES = [['mixed', 'Mixed'], ['choice', 'Multiple choice'], ['typing', 'Typing']];
 // The keys stay 'ja-en' and 'en-ja' whatever the language: they are in saved settings and
 // in the key of every mistake already recorded. Only the labels follow the language.
-const directions = (name) => [['mixed', 'Mixed'], ['ja-en', `${name} → English`], ['en-ja', `English → ${name}`]];
+// Chinese adds 'read': the characters on their own, and the pinyin as the answer — the
+// question that makes the characters themselves the thing being learned.
+const directions = (lang, name) => [
+  ['mixed', 'Mixed'],
+  ['ja-en', `${name} → English`],
+  ['en-ja', `English → ${name}`],
+  ...(lang === 'zh' ? [['read', 'Characters → pinyin']] : []),
+];
+const MIXED = { ja: ['ja-en', 'en-ja'], zh: ['ja-en', 'en-ja', 'read'] };
 const COUNTS = [[1, '1'], [5, '5'], [10, '10'], [20, '20'], [50, '50'], [0, 'All']];
 const CHOICES = 4;
 const LANGUAGE_NAME = { ja: 'Japanese', zh: 'Chinese' };
@@ -136,7 +144,7 @@ export function createQuizView() {
           }, h('span', null, label), h('span', { class: 'count' }, count)))),
         ),
         h('div', { class: 'field' }, h('span', { class: 'label' }, 'Question type'), dropdown('Question type', MODES, settings.mode, (mode) => set({ mode }))),
-        h('div', { class: 'field' }, h('span', { class: 'label' }, 'Direction'), dropdown('Direction', directions(LANGUAGE_NAME[store.getLang()] || 'Word'), settings.direction, (direction) => set({ direction }))),
+        h('div', { class: 'field' }, h('span', { class: 'label' }, 'Direction'), dropdown('Direction', directions(store.getLang(), LANGUAGE_NAME[store.getLang()] || 'Word'), settings.direction, (direction) => set({ direction }))),
         // The challenge is always its 10 words, so the count only applies to practice.
         !isChallenge && h('div', { class: 'field' }, h('span', { class: 'label' }, 'Questions'), segmented('Questions', COUNTS, settings.count, (count) => set({ count }))),
         h('p', { class: 'muted' }, note),
@@ -164,11 +172,15 @@ export function createQuizView() {
       extra = await Promise.race([lookup, new Promise((resolve) => setTimeout(() => resolve([]), 4000))]);
     }
 
+    const lang = store.getLang();
     session.questions = words.map((word) => {
       const mode = settings.mode === 'mixed' ? pick(['choice', 'typing']) : settings.mode;
-      const direction = settings.direction === 'mixed' ? pick(['ja-en', 'en-ja']) : settings.direction;
+      let direction = settings.direction === 'mixed' ? pick(MIXED[lang] || MIXED.ja) : settings.direction;
+      if (direction === 'read' && lang !== 'zh') direction = 'ja-en';
       const question = { word, mode, direction };
-      if (mode === 'choice') {
+      if (mode === 'choice' && direction === 'read') {
+        question.readings = readingChoices(word, [...own, ...extra]);
+      } else if (mode === 'choice') {
         const label = direction === 'ja-en' ? meaningText : wordLabel;
         const samePos = (other) => (other.senses[0].pos[0] === word.senses[0].pos[0] ? 0 : 1);
         const candidates = [...shuffle(own), ...shuffle(extra)].sort((a, b) => samePos(a) - samePos(b));
@@ -189,6 +201,20 @@ export function createQuizView() {
     renderQuestion();
   }
 
+  // The options for a pinyin question: the right reading, two that differ from it by one
+  // tone, and one from another word with as many syllables. The tone variants make it a
+  // question about the tone as well as the sound, which is the half that slips.
+  function readingChoices(word, pool) {
+    const right = word.kana[0];
+    const options = [right, ...toneVariants(right, 2)];
+    const length = syllables(right).length;
+    const other = shuffle(pool).find((w) => w.id !== word.id && w.kana && w.kana[0]
+      && syllables(w.kana[0]).length === length && plainPinyin(w.kana[0]) !== plainPinyin(right));
+    if (other) options.push(other.kana[0]);
+    else options.push(...toneVariants(right, 3).filter((r) => !options.includes(r)).slice(0, 1));
+    return shuffle([...new Set(options)].slice(0, CHOICES));
+  }
+
   // `given` is what the learner chose or typed, in 漢字{かんじ} notation.
   function finish(correct, given) {
     const question = session.questions[session.index];
@@ -201,6 +227,16 @@ export function createQuizView() {
     const key = `word:${word.id}:${direction}`;
     if (correct) {
       store.resolveMistake(key);
+      return;
+    }
+    if (direction === 'read') {
+      store.recordMistake({
+        key, quiz: 'words',
+        prompt: headword(word),
+        answer: markedPinyin(word.kana[0]),
+        given: given || '',
+        note: meaningText(word),
+      });
       return;
     }
     const written = toMarkup(headword(word), reading(word));
@@ -251,6 +287,16 @@ export function createQuizView() {
         posText(word.senses[0]) && h('span', { class: 'pos' }, posText(word.senses[0])),
       );
     }
+    // Chinese shows the characters alone. With the pinyin above them it is the pinyin that
+    // gets read, and the characters never have to be learned; the reading, and the voice,
+    // come with the answer. (Japanese keeps its furigana: kana are not a stand-in for kanji
+    // the way pinyin is for hanzi, and the Japanese course leans on them.)
+    if (store.getLang() === 'zh') {
+      return h('div', { class: 'prompt' },
+        h('span', { class: 'label' }, direction === 'read' ? 'How is this read? Give the pinyin, tones and all.' : 'What does this mean?'),
+        h('div', { class: 'prompt-line' }, ja(headword(word), 'prompt-hanzi')),
+      );
+    }
     // The reading sits above the kanji, as in the dictionary.
     return h('div', { class: 'prompt' },
       h('span', { class: 'label' }, 'What does this mean?'),
@@ -258,7 +304,28 @@ export function createQuizView() {
     );
   }
 
+  function readingChoiceBody(question, slot) {
+    const right = question.word.kana[0];
+    const buttons = question.readings.map((option, i) => h('button', {
+      type: 'button',
+      class: 'choice',
+      onclick: () => {
+        if (session.answered) return;
+        const correct = option === right;
+        finish(correct, markedPinyin(option));
+        buttons.forEach((button, j) => {
+          button.disabled = true;
+          if (question.readings[j] === right) button.classList.add('right');
+        });
+        if (!correct) buttons[i].classList.add('wrong');
+        slot.replaceChildren(feedback(question, correct));
+      },
+    }, h('kbd', null, String(i + 1)), tonedPinyin(option)));
+    return h('div', { class: 'choices' }, buttons);
+  }
+
   function choiceBody(question, slot) {
+    if (question.readings) return readingChoiceBody(question, slot);
     const { word, direction } = question;
     const buttons = question.options.map((option, i) => h('button', {
       type: 'button',
@@ -282,7 +349,39 @@ export function createQuizView() {
     return h('div', { class: 'choices' }, buttons);
   }
 
+  function readingTypingBody(question, slot) {
+    const { word } = question;
+    const field = h('input', {
+      type: 'text', class: 'answer-input',
+      placeholder: 'Pinyin with tone numbers: ni3 hao3',
+      autocomplete: 'off', autocapitalize: 'off', spellcheck: false,
+      'aria-label': 'The pinyin, with tones',
+    });
+    const submit = (given) => {
+      if (session.answered) return;
+      const result = matchesReadingWithTones(word.kana[0], given);
+      finish(result.ok, given.trim());
+      field.disabled = true;
+      controls.hidden = true;
+      field.classList.add(result.ok ? 'right' : 'wrong');
+      const note = result.missing
+        ? 'Right syllables, but no tones. The tones are the part to learn: type them as numbers after each syllable.'
+        : !result.ok && given.trim() ? `You answered “${given.trim()}”.` : null;
+      slot.replaceChildren(feedback(question, result.ok, note));
+    };
+    const controls = h('div', { class: 'answer-controls' },
+      h('button', { type: 'submit', class: 'btn btn-primary' }, 'Check'),
+      h('button', { type: 'button', class: 'btn btn-quiet', onclick: () => submit('') }, 'I don’t know'),
+    );
+    queueMicrotask(() => field.focus());
+    return h('form', {
+      class: 'answer-form',
+      onsubmit: (event) => { event.preventDefault(); if (field.value.trim()) submit(field.value); },
+    }, field, controls);
+  }
+
   function typingBody(question, slot) {
+    if (question.direction === 'read') return readingTypingBody(question, slot);
     const { word, direction } = question;
     const toJapanese = direction === 'en-ja';
     const kanaInput = toJapanese && store.getLang() === 'ja';

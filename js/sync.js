@@ -15,8 +15,9 @@ const FLUSH_DELAY = 1200;
 const BATCH_LIMIT = 450;
 
 const paths = (lang) => (lang === 'ja'
-  ? { words: ['words'], lists: ['meta', 'lists'], answers: ['answers'] }
-  : { words: [`${lang}_words`], lists: ['meta', `${lang}_lists`], answers: [`${lang}_answers`] });
+  ? { words: ['words'], lists: ['meta', 'lists'], answers: ['answers'], marks: ['marks'] }
+  : { words: [`${lang}_words`], lists: ['meta', `${lang}_lists`],
+      answers: [`${lang}_answers`], marks: [`${lang}_marks`] });
 
 // state: 'unconfigured' | 'loading' | 'signed-out' | 'connecting' | 'synced' | 'saving' | 'offline' | 'error'
 export const status = { state: config ? 'loading' : 'unconfigured', email: '', error: '' };
@@ -101,11 +102,13 @@ function start(user) {
   const base = ['users', user.uid];
   // One of these per language; the first snapshot of each has to arrive before this device
   // can tell what the account is missing.
-  const first = Object.fromEntries(store.LANGS.map((lang) => [lang, { words: null, lists: undefined, answers: null }]));
+  const first = Object.fromEntries(store.LANGS.map((lang) =>
+    [lang, { words: null, lists: undefined, answers: null, marks: null }]));
   session = { uid: user.uid, unsubscribers: [], ready: false };
   setStatus({ state: 'connecting', email: user.email || '', error: '' });
 
-  const arrived = (part) => part.words !== null && part.lists !== undefined && part.answers !== null;
+  const arrived = (part) => part.words !== null && part.lists !== undefined
+    && part.answers !== null && part.marks !== null;
 
   // Once every language's words and lists have arrived, upload what this device has that
   // the account lacks.
@@ -115,6 +118,7 @@ function start(user) {
     for (const lang of store.LANGS) {
       store.queueNewerThan(lang, first[lang].words, first[lang].lists);
       store.queueAnswersNewerThan(lang, first[lang].answers);
+      store.queueMarksNewerThan(lang, first[lang].marks);
     }
     flush();
   };
@@ -146,6 +150,15 @@ function start(user) {
       store.applyRemote(lang, { answers: snap.docChanges().map((change) => change.doc.data()) });
       if (part.answers === null) {
         part.answers = Object.fromEntries(snap.docs.map((d) => [d.id, d.data().updatedAt || 0]));
+        maybeReady();
+      }
+    }, failed));
+
+    // How each grammar point is going.
+    session.unsubscribers.push(onSnapshot(collection(db, ...base, ...where.marks), (snap) => {
+      store.applyRemote(lang, { marks: snap.docChanges().map((change) => change.doc.data()) });
+      if (part.marks === null) {
+        part.marks = Object.fromEntries(snap.docs.map((d) => [d.id, d.data().updatedAt || 0]));
         maybeReady();
       }
     }, failed));
@@ -183,6 +196,7 @@ async function flush() {
       ...part.words.map((word) => [[...where.words, String(word.id)], word]),
       ...(part.lists ? [[where.lists, part.lists]] : []),
       ...part.answers.map((entry) => [[...where.answers, entry.page], entry]),
+      ...part.marks.map((entry) => [[...where.marks, String(entry.id)], entry]),
     );
   }
   if (!writes.length) return;

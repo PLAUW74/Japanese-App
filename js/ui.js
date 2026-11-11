@@ -345,6 +345,17 @@ function pinyinRuby(hanzi, pinyin, cls) {
   return el;
 }
 
+// Pinyin on its own, each syllable coloured by its tone, from the stored tone numbers:
+// for when the reading is the answer rather than a gloss above the characters.
+export function tonedPinyin(stored, cls) {
+  const el = h('span', { class: cls });
+  toned(stored).forEach(({ text, tone }, i) => {
+    if (i) el.append(' ');
+    el.append(h('span', { class: `tone tone${tone}` }, text));
+  });
+  return el;
+}
+
 // A word with its reading above it, however the language on show writes it. This takes the
 // word rather than two strings because it needs the reading as stored — Chinese tone
 // numbers, which say what colour each syllable is — and not the marks reading() prints.
