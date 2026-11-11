@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>Kotoba · Japanese dictionary and vocab trainer</title>
-  <meta name="description" content="Look up Japanese words, collect the ones you want to learn, and quiz yourself with spaced repetition.">
+  <title>Kotoba · Japanese and Chinese vocab trainer</title>
+  <meta name="description" content="Look up Japanese and Chinese words, collect the ones you want to learn, and quiz yourself with spaced repetition.">
   <meta name="theme-color" content="#ff634a">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="icon.svg" type="image/svg+xml">
@@ -22,18 +22,14 @@
 </head>
 <body>
   <header class="topbar">
-    <a class="brand" href="#/dictionary">
-      <span class="brand-mark" lang="ja" aria-hidden="true">言</span>
+    <!-- The brand glyph, the tabs and the language toggle are built by js/app.js from the
+         language on show (js/lang/*.js), so they change with it. -->
+    <a class="brand" id="brand" href="#/ja/dictionary">
+      <span class="brand-mark" id="brand-mark" lang="ja" aria-hidden="true">言</span>
       <span>Kotoba</span>
     </a>
-    <nav class="tabs" id="tabs" aria-label="Sections">
-      <a href="#/dictionary" data-tab="dictionary">Dictionary</a>
-      <a href="#/words" data-tab="words">My Words</a>
-      <a href="#/quiz" data-tab="quiz">Quiz <span class="tab-badge" id="due-badge" hidden></span></a>
-      <a href="#/notes" data-tab="notes">Notes</a>
-      <a href="#/reading" data-tab="reading">Reading</a>
-      <a href="#/stats" data-tab="stats">Stats</a>
-    </nav>
+    <nav class="tabs" id="tabs" aria-label="Sections"></nav>
+    <nav class="lang-toggle" id="lang-toggle" aria-label="Language"></nav>
   </header>
   <main id="view"></main>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>

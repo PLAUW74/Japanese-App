@@ -2,7 +2,7 @@
 // textbook pages, newest first) and the Reading tab (graded passages, easiest first).
 // Each page can write readings inline as 漢字{かんじ} and may come with a photo.
 import * as store from '../store.js';
-import { h, setChildren, rubyMarkup, stopSpeaking } from '../ui.js';
+import { h, setChildren, rubyMarkup, stopSpeaking, route } from '../ui.js';
 import { enhanceNote, onWordTap } from './note-tools.js';
 import { staggerIn } from '../stagger.js';
 
@@ -194,7 +194,7 @@ export function createNotesView({ dir = 'notes', title = 'Notes', item = 'note',
     const meta = kids
       ? [page.source, `${kids} ${kids === 1 ? 'page' : 'pages'}`]
       : [page.source, newestFirst && formatDate(page.added)];
-    return h('a', { class: 'entry note-card', href: `#/${dir}/${page.id}` },
+    return h('a', { class: 'entry note-card', href: route(dir, page.id) },
       page.image && h('img', { class: 'note-thumb', src: new URL(page.image, base).href, alt: '', loading: 'lazy' }),
       h('div', { class: 'note-card-body' },
         h('h2', null, rubyMarkup(page.title)),
@@ -207,7 +207,7 @@ export function createNotesView({ dir = 'notes', title = 'Notes', item = 'note',
   // A page with children (such as Homework) is a folder: it lists its pages, in index.json order.
   function renderFolder(page, kids) {
     setChildren(el,
-      h('a', { class: 'btn btn-quiet back-link', href: `#/${dir}` }, `← All ${item}s`),
+      h('a', { class: 'btn btn-quiet back-link', href: route(dir) }, `← All ${item}s`),
       h('div', { class: 'view-head' }, h('h1', null, rubyMarkup(page.title)), h('span', { class: 'muted' }, `${kids.length} ${kids.length === 1 ? 'page' : 'pages'}`)),
       h('div', { class: 'results' }, kids.map((kid) => card(kid, []))),
     );
@@ -219,7 +219,7 @@ export function createNotesView({ dir = 'notes', title = 'Notes', item = 'note',
     let pages;
     try { pages = await loadIndex(); } catch (err) { failed(); return; }
     const page = pages.find((p) => p.id === id);
-    if (!page) { location.hash = `#/${dir}`; return; }
+    if (!page) { location.hash = route(dir); return; }
     const kids = childrenOf(page, pages);
     if (kids.length) { renderFolder(page, kids); return; }
     const parent = page.parent && pages.find((p) => p.id === page.parent);
@@ -227,8 +227,8 @@ export function createNotesView({ dir = 'notes', title = 'Notes', item = 'note',
     const body = h('div', { class: 'note-body' }, h('p', { class: 'muted' }, 'Loading…'));
     setChildren(el,
       parent
-        ? h('a', { class: 'btn btn-quiet back-link', href: `#/${dir}/${parent.id}` }, h('span', null, '← '), rubyMarkup(parent.title))
-        : h('a', { class: 'btn btn-quiet back-link', href: `#/${dir}` }, `← All ${item}s`),
+        ? h('a', { class: 'btn btn-quiet back-link', href: route(dir, parent.id) }, h('span', null, '← '), rubyMarkup(parent.title))
+        : h('a', { class: 'btn btn-quiet back-link', href: route(dir) }, `← All ${item}s`),
       h('div', { class: 'view-head note-head' },
         h('div', null, h('h1', null, rubyMarkup(page.title)), h('span', { class: 'muted' }, [page.source, newestFirst && `added ${formatDate(page.added)}`].filter(Boolean).join(' · '))),
       ),

@@ -1,7 +1,7 @@
 import * as dict from '../dict.js';
 import * as store from '../store.js';
 import { toHiragana, kataToHira } from '../kana.js';
-import { h, speakButton, headword, reading, meaningText, posText, sensesList, shuffle, segmented, quizSwitch, wordTitle, toMarkup, furigana } from '../ui.js';
+import { h, speakButton, headword, reading, meaningText, posText, sensesList, shuffle, segmented, quizSwitch, wordTitle, toMarkup, furigana, route } from '../ui.js';
 import { dropdown } from '../dropdown.js';
 
 const MODES = [['mixed', 'Mixed'], ['choice', 'Multiple choice'], ['typing', 'Typing']];
@@ -75,7 +75,7 @@ export function createQuizView() {
       el.replaceChildren(head, h('div', { class: 'empty' },
         h('h2', null, 'Nothing to quiz yet'),
         h('p', { class: 'muted' }, 'Save a few words from the dictionary and they will show up here for review. The hiragana and katakana test needs no saved words.'),
-        h('a', { class: 'btn btn-primary', href: '#/dictionary' }, 'Open the dictionary'),
+        h('a', { class: 'btn btn-primary', href: route('dictionary') }, 'Open the dictionary'),
       ));
       return;
     }

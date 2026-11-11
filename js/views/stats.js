@@ -1,6 +1,6 @@
 import * as store from '../store.js';
 import * as sync from '../sync.js';
-import { h, ja, icon, headword, reading, meaningText, setChildren, segmented } from '../ui.js';
+import { h, ja, icon, headword, reading, meaningText, setChildren, segmented, route } from '../ui.js';
 import { THEMES, themeChoice, setThemeChoice, onThemeChange } from '../theme.js';
 import { countUp } from '../countup.js';
 import { barChart } from './charts.js';
@@ -131,7 +131,7 @@ export function createStatsView() {
     setChildren(el,
       h('div', { class: 'view-head' },
         h('h1', null, 'Stats'),
-        challengeLeft > 0 && h('a', { class: 'btn btn-primary', href: '#/quiz' }, `Daily challenge · ${challengeLeft} left`),
+        challengeLeft > 0 && h('a', { class: 'btn btn-primary', href: route('quiz') }, `Daily challenge · ${challengeLeft} left`),
       ),
       h('div', { class: 'tiles' },
         tile([count(streak), streak === 1 ? ' day' : ' days'], 'Study streak', streak > 0 && !log[store.dayKey()] ? 'Review today to keep it going' : null),

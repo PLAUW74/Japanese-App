@@ -42,7 +42,22 @@ export function icon(name) {
   return span;
 }
 
-export const ja = (text, cls) => h('span', { lang: 'ja', class: cls }, text);
+// ---- the language on show ----
+// js/app.js sets this when the language changes. Keeping it here means speak(), ja() and
+// route() work the same in every view, and the views stay unaware of which language they
+// are drawing. It is a plain setter rather than an import of js/lang/*.js, which would be
+// a cycle: those modules import the views, and the views import this one.
+const showing = { code: 'ja', tag: 'ja-JP', match: 'ja', label: 'Japanese' };
+
+export function setSpeech({ code, tag, match, label }) {
+  Object.assign(showing, { code, tag, match, label });
+}
+
+// A hash address inside the language on show: route('notes', id) -> '#/ja/notes/<id>'.
+export const route = (...parts) => `#/${[showing.code, ...parts.filter((p) => p != null)].join('/')}`;
+
+// Text in the language on show, so the browser picks the right font and voice for it.
+export const ja = (text, cls) => h('span', { lang: showing.tag, class: cls }, text);
 
 let toastTimer;
 export function toast(message) {
@@ -76,9 +91,9 @@ export function speak(text, { onend } = {}) {
     return false;
   }
   const voices = speechSynthesis.getVoices();
-  const voice = voices.find((v) => v.lang.replace('_', '-').toLowerCase().startsWith('ja'));
+  const voice = voices.find((v) => v.lang.replace('_', '-').toLowerCase().startsWith(showing.match));
   if (voices.length && !voice) {
-    toast('No Japanese voice is installed on this device');
+    toast(`No ${showing.label} voice is installed on this device`);
     return false;
   }
   const chunks = String(text).match(/[^。！？!?]+[。！？!?」]*/g)?.map((s) => s.trim()).filter(Boolean) || [];
@@ -90,7 +105,7 @@ export function speak(text, { onend } = {}) {
   const done = () => { if (speaking === session) finishSpeaking(); };
   chunks.forEach((chunk, i) => {
     const utterance = new SpeechSynthesisUtterance(chunk);
-    utterance.lang = 'ja-JP';
+    utterance.lang = showing.tag;
     utterance.rate = 0.9;
     if (voice) utterance.voice = voice;
     if (i === chunks.length - 1) utterance.onend = done;
@@ -435,14 +450,19 @@ export function segmented(name, options, value, onChange) {
 // The quiz picker at the top of every quiz page. Each page draws its own, so the Pagination
 // marker (js/pager.js) slides on the one that was clicked while app.js fades only the page
 // below it; the next page's picker then appears with its marker already in place.
+// The Japanese quiz pages. When Chinese grows its own set (M3), this list moves into a
+// data-only module the language adapters can both point at — it can't live in
+// js/lang/*.js, which import the views that import this file.
+const QUIZ_PAGES = [['quiz', 'My words'], ['kana', 'Hiragana & katakana'], ['verbs', 'Verb forms'], ['grammar', 'Grammar'], ['mistakes', 'Mistakes']];
+
 export function quizSwitch(active) {
-  const links = [['quiz', 'My words'], ['kana', 'Hiragana & katakana'], ['verbs', 'Verb forms'], ['grammar', 'Grammar'], ['mistakes', 'Mistakes']]
-    .map(([route, label]) => {
-      const count = route === 'mistakes' ? store.openMistakes().length : 0;
+  const links = QUIZ_PAGES
+    .map(([page, label]) => {
+      const count = page === 'mistakes' ? store.openMistakes().length : 0;
       return h('a', {
-        href: `#/${route}`,
-        class: route === active ? 'on' : '',
-        'aria-current': route === active ? 'page' : null,
+        href: route(page),
+        class: page === active ? 'on' : '',
+        'aria-current': page === active ? 'page' : null,
       }, label, count > 0 && h('span', { class: 'count' }, ` ${count}`));
     });
   const nav = h('nav', { class: 'segmented quiz-switch', 'aria-label': 'Quiz type' }, links);

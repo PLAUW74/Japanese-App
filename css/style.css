@@ -157,6 +157,27 @@ button, input, select, textarea { font: inherit; color: inherit; }
   text-align: center;
 }
 
+/* Japanese or Chinese. Deliberately quieter than the tabs: it is switched now and then,
+   not on every other click, and the coral is already carrying the current tab. */
+.lang-toggle {
+  display: flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+.lang-toggle a {
+  padding: 4px 10px;
+  border-radius: 999px;
+  color: var(--muted);
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.lang-toggle a:hover { color: var(--ink); }
+.lang-toggle a.on { background: var(--surface); color: var(--ink); box-shadow: var(--shadow); }
+
 main { max-width: 860px; margin: 0 auto; padding: 24px 16px 80px; }
 .view { display: flex; flex-direction: column; gap: 16px; }
 .view-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
@@ -803,11 +824,20 @@ ol.questions.with-play { padding-left: 3.6em; }
 .examples li { display: flex; flex-direction: column; }
 .examples .note-en { font-size: 0.9rem; }
 
+/* ---- the Chinese overview's build order ---- */
+/* Each row carries its own M-number, so the list drops the numbering it would add. */
+.milestones { list-style: none; display: grid; gap: 9px; margin: 14px 0 0; padding: 0; }
+.milestone { display: grid; grid-template-columns: 30px 1fr auto; align-items: center; gap: 10px; }
+.milestone-id { color: var(--muted); font-weight: 700; font-size: 0.85rem; }
+.milestone.is-later .milestone-what { color: var(--muted); }
+
 /* ---- small screens: navigation moves to the bottom ---- */
 
 @media (max-width: 640px) {
   /* No backdrop-filter here: it would make the top bar the anchor for the fixed tab bar below. */
-  .topbar { justify-content: center; padding-block: 8px; background: var(--bg); backdrop-filter: none; }
+  /* The tabs leave the bar for the bottom of the screen, so it holds the brand and the
+     language toggle, one at each end. */
+  .topbar { justify-content: space-between; padding-block: 8px; background: var(--bg); backdrop-filter: none; }
   .tabs {
     position: fixed;
     inset: auto 0 0 0;

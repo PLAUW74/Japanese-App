@@ -1,6 +1,6 @@
 // Makes the app work offline once it has been opened online.
 // Bump DATA after rebuilding data/ so browsers fetch the new dictionary.
-const SHELL = 'kotoba-shell-v2';
+const SHELL = 'kotoba-shell-v3';
 const DATA = 'kotoba-data-v1';
 
 self.addEventListener('install', () => self.skipWaiting());

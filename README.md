@@ -1,6 +1,13 @@
 # Kotoba
 
-A Japanese dictionary and vocab trainer that runs entirely in the browser.
+A Japanese and Chinese vocab trainer that runs entirely in the browser.
+
+The toggle at the top right switches language. Each one keeps its own words, lists, review
+schedule, mistakes and settings, and they sync to the same account; the study streak counts a
+day studied in either. The Chinese side is being built — see `CHINESE_MODULE_PROPOSAL.md` for
+the plan and the build order.
+
+The pages below are the Japanese ones.
 
 - **Dictionary**: search 218,000+ words in English, romaji, kana or kanji, with JLPT levels, kanji details and audio.
 - **My Words**: save words, sort them into your own lists and add notes.
@@ -42,13 +49,16 @@ service cloud.firestore {
 
 The config values in `js/firebase-config.js` are not secret; the rules are what keep each person's data private to them. Without a config the app runs exactly as before, storing everything in the browser.
 
+Japanese syncs to `users/{uid}/words`, `meta/lists` and `answers`, the paths it has always used, so nothing already in an account has to move. Each further language gets its own collections beside them (`zh_words`, `meta/zh_lists`, `zh_answers`). The rules above cover all of them, so there is nothing to change in Firebase.
+
 ## Layout
 
 | Path | What it is |
 | --- | --- |
 | `index.html`, `css/`, `js/` | The app |
+| `js/lang/` | One module per language: its tabs, pages, brand glyph and voice |
 | `js/dict-worker.js` | Loads the dictionary and runs searches off the main thread |
-| `js/store.js` | Saved words, lists, review schedule and history |
+| `js/store.js` | Saved words, lists, review schedule and history, kept per language |
 | `js/sync.js`, `js/firebase-config.js` | Optional syncing through Firebase |
 | `data/` | Compact dictionary files the app loads |
 | `notes/` | Study notes: `index.json` lists them, each note is an HTML file, photos are in `notes/img/` |

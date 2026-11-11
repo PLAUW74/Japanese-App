@@ -3,8 +3,7 @@ import * as sync from '../sync.js';
 import { kataToHira, toHiragana } from '../kana.js';
 import { staggerIn } from '../stagger.js';
 import {
-  h, ja, icon, toast, speakButton, badges, statusBadge, sensesList, headword, reading, meaningText,
-  wordEditor, confirmButton, formsPanel, wordTitle, setChildren
+  h, ja, icon, toast, speakButton, badges, statusBadge, sensesList, headword, reading, meaningText, wordEditor, confirmButton, formsPanel, wordTitle, setChildren, route
 } from '../ui.js';
 
 const SORTS = {
@@ -131,7 +130,7 @@ export function createVocabView() {
       h('span', { class: 'muted' }, sync.status.email
         ? `Your words sync to ${sync.status.email}.`
         : sync.status.state === 'signed-out'
-          ? h('span', null, 'Your words are stored in this browser only. ', h('a', { href: '#/stats' }, 'Sign in on Stats'), ' to sync them between devices.')
+          ? h('span', null, 'Your words are stored in this browser only. ', h('a', { href: route('stats') }, 'Sign in on Stats'), ' to sync them between devices.')
           : 'Your words are stored in this browser only.'),
       h('button', {
         type: 'button',
@@ -178,7 +177,7 @@ export function createVocabView() {
       body = h('div', { class: 'empty' },
         h('h2', null, 'No words saved yet'),
         h('p', { class: 'muted' }, 'Search the dictionary and press Save on any word to start your collection.'),
-        h('a', { class: 'btn btn-primary', href: '#/dictionary' }, 'Open the dictionary'),
+        h('a', { class: 'btn btn-primary', href: route('dictionary') }, 'Open the dictionary'),
       );
     } else if (words.length === 0) {
       body = h('p', { class: 'muted empty-line' }, needle ? `No saved words match “${filter.trim()}”.` : 'This list is empty. Open a word and tick this list to add it.');
@@ -189,7 +188,7 @@ export function createVocabView() {
     setChildren(el,
       h('div', { class: 'view-head' },
         h('h1', null, 'My Words'),
-        challengeLeft > 0 && h('a', { class: 'btn btn-primary', href: '#/quiz' }, `Daily challenge · ${challengeLeft} left`),
+        challengeLeft > 0 && h('a', { class: 'btn btn-primary', href: route('quiz') }, `Daily challenge · ${challengeLeft} left`),
       ),
       listBar(state),
       list && listTools(list),
