@@ -133,7 +133,11 @@ export function createZhDictionaryView() {
       // row to sync, as if it had been added from a search.
       const entries = await dict.get(wanted);
       for (const entry of entries) store.addWord(entry);
-      toast(`Saved ${entries.length} ${entries.length === 1 ? 'word' : 'words'} to My Words`);
+      // The daily challenge feeds new words in a set number a day, so a whole band saved
+      // at once becomes a queue rather than one overwhelming day.
+      const perDay = store.getState().settings.newPerDay;
+      toast(`Saved ${entries.length} ${entries.length === 1 ? 'word' : 'words'}`
+        + (perDay ? `. They come through ${perDay} a day in the daily challenge.` : ' to My Words'));
     } catch (err) {
       toast('Those words could not be saved');
     } finally {
@@ -217,7 +221,10 @@ export function createZhDictionaryView() {
       h('div', { class: 'card setup' },
         h('div', { class: 'field' }, h('span', { class: 'label' }, 'Browse a band'), picker),
         h('p', { class: 'muted' }, bandTotal
-          ? `${bandTotal} words in HSK ${band}. Showing ${bandWords.length}, of which ${saved} are in My Words.`
+          ? `${bandTotal} words in HSK ${band}. Showing ${bandWords.length}, of which ${saved} are in My Words. `
+            + (store.getState().settings.newPerDay
+              ? `Saving a whole band is fine: the daily challenge brings in ${store.getState().settings.newPerDay} new words a day.`
+              : '')
           : 'Loading…'),
         bandTotal > 0 && h('div', { class: 'editor-actions' },
           h('button', {

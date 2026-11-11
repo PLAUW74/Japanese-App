@@ -31,11 +31,14 @@ const LANG_SETTINGS = {
     verbSource: 'n5', verbTarget: 'te', verbMode: 'type', verbCount: 10,
     grammarLevel: 'both', grammarTopic: 'all', grammarCount: 10,
   },
-  // HSK bands 1-6 are 5,456 words in 78 weeks, so the Chinese side needs a far bigger
-  // daily helping than the Japanese one. Separate new-card and review limits come with
-  // the Chinese SRS itself (M3); this is the single cap until then.
+  // The Chinese daily challenge has two limits rather than one. With new words and reviews
+  // competing for the same places, saving a band put forty brand-new words into a day,
+  // and later on the reviews of a 78-week plan (around eighty a day) would not have fitted.
+  // 12 new words a day is what the study plan (data/zh/plan.json) works out to; reviews
+  // are capped high, and 0 means no cap.
   zh: {
-    challengeSize: 40,
+    newPerDay: 12,
+    reviewsPerDay: 100,
     band: 1,
   },
 };
@@ -285,73 +288,127 @@ export const isDue = (word, now = Date.now()) => word.srs.due <= now;
 export const dueWords = (now = Date.now()) => allWords().filter((w) => isDue(w, now));
 
 // ---- daily challenge ----
-// Instead of facing every due word at once, the learner gets a helping a day: the most
-// overdue ones, picked the first time the day's challenge is asked for and kept for the rest
-// of the day. A word counts as done once it has been answered today, right or wrong. When
-// all are done, another helping can be added. The pick lives in this device's settings.
-// How big a helping is depends on the language (settings.challengeSize).
+// Instead of facing every due word at once, the learner gets a helping a day, picked the
+// first time the day's challenge is asked for and kept for the rest of the day once they
+// start on it. A word counts as done once it has been answered today, right or wrong. When
+// all are done, more can be added. The pick lives in this device's settings.
+//
+// A language either caps the helping as a whole (settings.challengeSize: the most overdue
+// words, saved-but-unstudied ones included, which is how Japanese has always worked) or caps
+// new words and reviews separately (settings.newPerDay and reviewsPerDay: Chinese). Split,
+// a saved band becomes a queue the challenge works through a set number of words a day,
+// and reviews never wait behind new words.
 export const CHALLENGE_SIZE = 10;
 
-const challengeSize = (lang = current) => bucket(lang).settings.challengeSize || CHALLENGE_SIZE;
+function limits(lang = current) {
+  const { settings } = bucket(lang);
+  if (typeof settings.newPerDay === 'number') {
+    return { split: true, newWords: settings.newPerDay, reviews: settings.reviewsPerDay || Infinity };
+  }
+  return { split: false, size: settings.challengeSize || CHALLENGE_SIZE };
+}
 
+// A word that has never been answered: saved, not yet studied.
+const isNew = (word) => !word.stats.correct && !word.stats.wrong;
 const reviewedToday = (word, now) => word.stats.last >= startOfDay(now);
+const byDue = (a, b) => a.srs.due - b.srs.due;
+const idsOf = (words) => words.map((word) => word.id);
 
+// The words still open today, not already in the pick, most overdue first. A new word
+// falls due the moment it is saved, so among new words this is the order they were saved.
+const open = (now, taken) => dueWords(now)
+  .filter((word) => !taken.includes(word.id) && !reviewedToday(word, now))
+  .sort(byDue);
+
+// The day's helping: split, the most overdue reviews first and then the new words.
 function pickDue(now, taken) {
-  return dueWords(now)
-    .filter((word) => !taken.includes(word.id) && !reviewedToday(word, now))
-    .sort((a, b) => a.srs.due - b.srs.due)
-    .slice(0, challengeSize())
-    .map((word) => word.id);
+  const words = open(now, taken);
+  const cap = limits();
+  if (!cap.split) return idsOf(words.slice(0, cap.size));
+  return idsOf([
+    ...words.filter((word) => !isNew(word)).slice(0, cap.reviews),
+    ...words.filter(isNew).slice(0, cap.newWords),
+  ]);
 }
 
-// A challenge worth less than a full helping, that the learner has not started. Growing it
-// is fair; growing one already under way would move the finish line while they worked.
-function shortAndUnstarted(pick, now) {
-  const words = bucket().words;
-  const picked = pick.ids.map((id) => words[id]).filter(Boolean);
-  return picked.length < challengeSize() && !picked.some((word) => reviewedToday(word, now));
+// What "more" adds once the day's helping is done. Split, the reviews still waiting come
+// first, and only when there are none does another day's worth of new words.
+function nextBatch(now, taken) {
+  const cap = limits();
+  if (!cap.split) return { ids: pickDue(now, taken), kind: 'words' };
+  const words = open(now, taken);
+  const reviews = words.filter((word) => !isNew(word)).slice(0, cap.reviews);
+  if (reviews.length) return { ids: idsOf(reviews), kind: 'reviews' };
+  return { ids: idsOf(words.filter(isNew).slice(0, cap.newWords)), kind: 'new' };
 }
+
+// Which of a set of ids are new words right now. Kept with the pick, because a new word
+// stops being new the moment it is answered and today's count of new words should not.
+const newAmong = (list) => list.filter((id) => bucket().words[id] && isNew(bucket().words[id]));
+
+// Not a word of the pick answered yet: until then it can still change — to take in words
+// saved since, or a new limit — without moving anything under the learner's feet.
+function unstarted(pick, now) {
+  const words = bucket().words;
+  return !pick.ids.some((id) => words[id] && reviewedToday(words[id], now));
+}
+
+const sameIds = (a, b) => a.length === b.length && a.every((id, i) => id === b[i]);
 
 function todaysPick(now) {
   const day = dayKey(now);
-  const { settings, words } = bucket();
+  const { settings } = bucket();
   let pick = settings.challenge;
   if (!pick || pick.day !== day) {
-    pick = { day, ids: pickDue(now, []) };
+    const ids = pickDue(now, []);
+    pick = { day, ids, newIds: newAmong(ids) };
     settings.challenge = pick;
     commit(true);
-  } else if (!pick.ids.some((id) => words[id]) || shortAndUnstarted(pick, now)) {
-    // Picked when nothing was waiting, or when less was waiting than a full helping and
-    // none of it has been answered yet. Either way the day's words are still open, so take
-    // them again: saving a band of words should give a full challenge, not the one word
-    // that happened to be saved first.
+  } else if (unstarted(pick, now)) {
+    // Saving a band, or changing a limit, before starting shows in today's challenge
+    // straight away.
     const ids = pickDue(now, []);
-    if (ids.length) {
+    if (!sameIds(ids, pick.ids)) {
       pick.ids = ids;
+      pick.newIds = newAmong(ids);
       commit(true);
     }
   }
   return pick;
 }
 
-// { words, done, left, more }: today's words, how many are done, the ones still to do, and
-// whether another helping could be added. Never the total number due.
+// { words, done, left, more, next, newWords, reviews, queued, split }: today's words, how
+// many are done, the ones still to do, whether more could be added and what that would be,
+// how many of today's are new and how many reviews, and how many saved new words are left
+// for the days after. Never the total number due.
 export function dailyChallenge(now = Date.now()) {
   const pick = todaysPick(now);
   const words = pick.ids.map((id) => bucket().words[id]).filter(Boolean);
   const left = words.filter((word) => !reviewedToday(word, now));
+  // A pick made before the counts were kept has no newIds; for those, what is new now.
+  const wasNew = new Set(pick.newIds || newAmong(pick.ids));
+  const newWords = words.filter((word) => wasNew.has(word.id)).length;
+  const next = left.length === 0 ? nextBatch(now, pick.ids) : { ids: [], kind: '' };
+  const picked = new Set(pick.ids);
   return {
     words,
     done: words.length - left.length,
     left,
-    more: left.length === 0 && pickDue(now, pick.ids).length > 0,
-    size: challengeSize(),
+    more: next.ids.length > 0,
+    next: { count: next.ids.length, kind: next.kind },
+    newWords,
+    reviews: words.length - newWords,
+    queued: allWords().filter((word) => isNew(word) && !picked.has(word.id)).length,
+    split: limits().split,
+    size: words.length,
   };
 }
 
 export function extendChallenge(now = Date.now()) {
   const pick = todaysPick(now);
-  pick.ids = pick.ids.concat(pickDue(now, pick.ids));
+  const batch = nextBatch(now, pick.ids);
+  pick.ids = pick.ids.concat(batch.ids);
+  pick.newIds = (pick.newIds || []).concat(batch.kind === 'new' ? batch.ids : newAmong(batch.ids));
   commit();
 }
 
@@ -609,9 +666,12 @@ export function markCounts(ids) {
 
 // ---- settings and backup ----
 
-export function saveSettings(patch) {
+// Quietly by default: most settings only matter to the screen that changed them, and it
+// redraws itself. One that changes what is due today (the daily limits) has to tell the
+// rest — the Quiz tab's badge counts what is left of the day.
+export function saveSettings(patch, { notify = false } = {}) {
   Object.assign(bucket().settings, patch);
-  commit(true);
+  commit(!notify);
 }
 
 export const exportData = () => JSON.stringify(state, null, 2);
