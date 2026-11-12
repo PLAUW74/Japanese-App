@@ -95,6 +95,14 @@
         "route": "grammar"
       },
       {
+        "id": "write",
+        "label": "Write with it",
+        "minutes": 10,
+        "kind": "app",
+        "route": "write",
+        "note": "Two or three sentences using the grammar point, corrected by Claude"
+      },
+      {
         "id": "listen",
         "label": "Listening",
         "minutes": 15,

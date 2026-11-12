@@ -6,7 +6,7 @@
 // English beside it.
 import * as store from '../store.js';
 import { grammar, CATEGORY_EN, NAME_EN, wikiLink } from '../lang/zh/content.js';
-import { h, setChildren, icon, segmented, toast } from '../ui.js';
+import { h, setChildren, icon, segmented, toast, route } from '../ui.js';
 import { staggerIn } from '../stagger.js';
 
 const BANDS = [1, 2, 3, 4, 5, 6];
@@ -71,7 +71,10 @@ export function createZhGrammarView() {
           ),
           h('div', { class: 'muted small' }, heading !== name ? heading : (CATEGORY_EN[category] || category)),
         ),
-        statusButton(point),
+        h('div', { class: 'grammar-actions' },
+          statusButton(point),
+          h('a', { class: 'btn btn-quiet btn-small', href: route('write', id), title: 'Write a sentence using this, and get it corrected' }, 'Write with this'),
+        ),
       ),
       patterns.length > 0 && h('div', { class: 'chips' }, patterns.map((pattern, i) => {
         // Where it goes, said before it is clicked: the article's own title, or that it is

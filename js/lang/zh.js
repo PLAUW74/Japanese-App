@@ -5,6 +5,7 @@
 // so everything built on a saved word works without knowing which language it is.
 import { createZhPlanView } from '../views/zh-plan.js';
 import { createZhGrammarView } from '../views/zh-grammar.js';
+import { createZhWriteView } from '../views/zh-write.js';
 import { createZhDictionaryView } from '../views/zh-dictionary.js';
 import { createVocabView } from '../views/vocab.js';
 import { createQuizView } from '../views/quiz.js';
@@ -27,6 +28,7 @@ export default {
     { route: 'words', label: 'My Words' },
     { route: 'quiz', label: 'Quiz', badge: true },
     { route: 'grammar', label: 'Grammar' },
+    { route: 'write', label: 'Write' },
     { route: 'plan', label: 'Plan' },
     { route: 'stats', label: 'Stats' },
   ],
@@ -37,6 +39,7 @@ export default {
     quiz: createQuizView,
     mistakes: createMistakesView,
     grammar: createZhGrammarView,
+    write: createZhWriteView,
     plan: createZhPlanView,
     stats: createStatsView,
   },

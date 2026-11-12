@@ -29,6 +29,11 @@
   --radius: 14px;
   --font: system-ui, -apple-system, "Segoe UI", Roboto, "Hiragino Sans", "Yu Gothic UI", "Meiryo", sans-serif;
   --font-ja: "Hiragino Sans", "Yu Gothic UI", "Meiryo", "Noto Sans JP", system-ui, sans-serif;
+  /* Simplified Chinese needs a Chinese font first. Left to the default list, Windows reaches
+     Yu Gothic (Japanese) before any Chinese font, and characters Japanese doesn't use — 买,
+     东, 济 — fall back to another font in the middle of a line, at a different weight. */
+  --font-zh: "Microsoft YaHei UI", "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB",
+    "Noto Sans SC", "Noto Sans CJK SC", "Source Han Sans SC", system-ui, sans-serif;
   color-scheme: light;
 }
 
@@ -75,7 +80,8 @@ body {
   font: 16px/1.5 var(--font);
 }
 
-[lang="ja"] { font-family: var(--font-ja); }
+[lang|="ja"] { font-family: var(--font-ja); }
+[lang|="zh"] { font-family: var(--font-zh); }
 [hidden] { display: none !important; }
 
 h1, h2, h4, p { margin: 0; }
@@ -607,7 +613,7 @@ rt { font-size: 0.5em; font-weight: 400; color: var(--muted); user-select: none;
 .choice:disabled { cursor: default; }
 .choice.right { border-color: var(--good); background: var(--good-soft); }
 .choice.wrong { border-color: var(--bad); background: var(--bad-soft); }
-.choice[lang="ja"] { font-size: 1.15rem; }
+.choice[lang|="ja"], .choice[lang|="zh"] { font-size: 1.15rem; }
 kbd {
   display: grid;
   place-items: center;
@@ -705,7 +711,7 @@ kbd {
 .note-body h4 { margin: 10px 0 0; font-size: 0.95rem; text-transform: none; letter-spacing: 0; color: var(--ink); }
 .note-body p { margin: 0; }
 .note-body rt { font-size: 0.55em; }
-.note-body [lang="ja"], .note-body td { cursor: pointer; }
+.note-body [lang|="ja"], .note-body td { cursor: pointer; }
 .note-en { color: var(--muted); }
 .note-body .rule { font-weight: 600; color: var(--accent-text); }
 .note-body .tip { padding: 10px 14px; border-radius: 10px; background: var(--amber-soft); color: var(--ink); font-size: 0.92rem; }
@@ -713,15 +719,15 @@ kbd {
 
 .story { gap: 18px; }
 .story .para { display: flex; flex-direction: column; gap: 4px; }
-.story p[lang="ja"] { font-size: 1.2rem; line-height: 2.3; }
-.story p[lang="ja"] rt { font-size: 0.5em; }
+.story p[lang|="ja"] { font-size: 1.2rem; line-height: 2.3; }
+.story p[lang|="ja"] rt { font-size: 0.5em; }
 .note-body details > summary { width: fit-content; cursor: pointer; color: var(--muted); font-size: 0.85rem; }
 .note-body details[open] > summary { margin-bottom: 4px; }
 .note-body details > p { color: var(--muted); }
 .questions { margin: 0; padding-left: 1.4em; display: flex; flex-direction: column; gap: 12px; }
-.questions li > [lang="ja"] { font-size: 1.05rem; line-height: 2.1; }
-.questions details > p[lang="ja"] { color: var(--ink); line-height: 2.1; }
-.questions li > p[lang="ja"] + p[lang="ja"] { margin-top: 4px; }
+.questions li > [lang|="ja"] { font-size: 1.05rem; line-height: 2.1; }
+.questions details > p[lang|="ja"] { color: var(--ink); line-height: 2.1; }
+.questions li > p[lang|="ja"] + p[lang|="ja"] { margin-top: 4px; }
 
 .note-body .example { color: var(--muted); }
 
@@ -758,7 +764,7 @@ ol.questions.with-play { padding-left: 3.6em; }
 .answer-box { position: relative; margin-top: 4px; }
 .answer-box.blurred { min-height: 2.8em; }
 .answer-box.blurred .answer-content { filter: blur(7px); user-select: none; }
-.answer-content > p[lang="ja"] { line-height: 2.1; color: var(--ink); }
+.answer-content > p[lang|="ja"] { line-height: 2.1; color: var(--ink); }
 .answer-reveal {
   position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
   border: 1px dashed var(--accent); border-radius: 8px; background: color-mix(in srgb, var(--surface) 55%, transparent);
@@ -872,6 +878,53 @@ ol.questions.with-play { padding-left: 3.6em; }
 .grammar-point.mark-mature:hover { opacity: 1; }
 .grammar-point .chip { text-decoration: none; }
 
+.grammar-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
+
+/* ---- choices in the notes, to tap like circling on paper ---- */
+.pick-opt {
+  display: inline;
+  padding: 1px 6px;
+  margin: 0 1px;
+  border: 2px solid transparent;
+  border-radius: 999px;
+  background: none;
+  color: inherit;
+  font: inherit;
+  line-height: inherit;
+  cursor: pointer;
+  -webkit-box-decoration-break: clone;
+  box-decoration-break: clone;
+}
+.pick-opt:hover { border-color: var(--line); border-style: dashed; }
+.pick-opt.picked { border-color: var(--accent-text); border-style: solid; }
+.pick-opt.picked.right { border-color: var(--good); background: var(--good-soft); }
+.pick-opt.picked.wrong { border-color: var(--bad); background: var(--bad-soft); }
+.pick-opt.reveal { border-color: var(--good); border-style: dashed; }
+
+/* ---- writing ---- */
+.write-focus { width: 100%; }
+.write-text { font-size: 1.25rem; line-height: 1.7; min-height: 110px; margin-top: 4px; }
+.write-stats { margin: 6px 0 0; }
+.write-flags { display: grid; gap: 10px; }
+.write-flag { display: grid; gap: 6px; }
+.write-steps { margin: 0 0 12px; padding-left: 20px; display: grid; gap: 10px; }
+.write-steps li { line-height: 2; }
+.write-prompt-box { margin-bottom: 12px; }
+.write-prompt-box summary { cursor: pointer; color: var(--accent-text); font-size: 0.9rem; }
+.write-prompt { margin-top: 8px; font: 0.82rem/1.5 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.write-reply { min-height: 120px; }
+
+.journal { margin-top: 26px; }
+.journal-entry { display: grid; gap: 8px; }
+.journal-entry.is-new { border-color: var(--accent-text); }
+.journal-text { margin: 0; font-size: 1.15rem; line-height: 1.7; }
+.journal-corrected { padding: 8px 12px; border-radius: 10px; background: var(--good-soft); }
+.journal-corrected p { margin: 4px 0 0; }
+.journal-corrected p[lang] { font-size: 1.15rem; line-height: 1.7; color: var(--ink); }
+.journal-fixes { margin: 0; padding-left: 20px; display: grid; gap: 4px; }
+.journal-fixes s { color: var(--bad); }
+.journal-reply { white-space: pre-wrap; font-size: 0.9rem; }
+
 /* ---- the plan's daily blocks ---- */
 .block-row {
   display: grid;
@@ -922,8 +975,10 @@ ol.questions.with-play { padding-left: 3.6em; }
     background: var(--surface);
     border-top: 1px solid var(--line);
   }
-  .tabs { padding-inline: 2px; }
-  .tabs a { padding: 8px 6px; font-size: 0.8rem; gap: 3px; }
+  /* Chinese has seven tabs; with the desktop gap they overrun a 375px screen and the last
+     one falls off the edge. space-around spreads them, so no gap is needed. */
+  .tabs { padding-inline: 2px; gap: 0; }
+  .tabs a { padding: 8px 5px; font-size: 0.8rem; gap: 3px; }
   .tab-badge { min-width: 16px; padding: 0 4px; line-height: 16px; font-size: 0.65rem; }
   .note-table { font-size: 0.9rem; }
   .note-table td, .note-table th { padding: 5px 6px; }
@@ -934,6 +989,11 @@ ol.questions.with-play { padding-left: 3.6em; }
   .missed-row { grid-template-columns: 1fr auto; }
   .missed-row .muted:not(.small) { grid-column: 1 / -1; grid-row: 2; }
   .toolbar { flex-direction: column; }
+}
+
+/* Phones narrower than 360px: seven tabs only fit a little smaller. */
+@media (max-width: 359px) {
+  .tabs a { padding: 8px 3px; font-size: 0.72rem; }
 }
 
 /* ---- typing: Motion Prompt #006 · Typewriter / タイプライター ---- */

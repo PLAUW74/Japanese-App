@@ -7,6 +7,11 @@ schedule, mistakes and settings, and they sync to the same account; the study st
 day studied in either. The Chinese side is being built — see `CHINESE_MODULE_PROPOSAL.md` for
 the plan and the build order.
 
+The Chinese side has a dictionary of the HSK 3.0 word list with tone-coloured pinyin, My
+Words and the quiz (including a characters → pinyin question), the grammar syllabus as a
+checklist linked to the Chinese Grammar Wiki, a writing page that checks your text against
+your HSK band and gets it corrected by Claude through a copied prompt, and the study plan.
+
 The pages below are the Japanese ones.
 
 - **Dictionary**: search 218,000+ words in English, romaji, kana or kanji, with JLPT levels, kanji details and audio.

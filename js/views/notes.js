@@ -4,6 +4,7 @@
 import * as store from '../store.js';
 import { h, setChildren, rubyMarkup, stopSpeaking, route } from '../ui.js';
 import { enhanceNote, onWordTap } from './note-tools.js';
+import { CHOICE_GROUP, parseGroup, answerKeys, itemAnswers } from '../note-questions.js';
 import { staggerIn } from '../stagger.js';
 
 // Notes can write readings inline as 漢字{かんじ}; turn those into furigana.
@@ -94,6 +95,91 @@ function makeGapsEditable(root, key) {
   return inputs;
 }
 
+// Multiple-choice questions — （ a. … b. … ） and ｛…・…｝ — become options to tap, the way
+// one would circle them on paper. A tapped option is marked right or wrong against the
+// item's answer, and the right one is outlined when the pick was wrong. What was picked is
+// saved per page beside the typed answers, so it syncs the same way.
+// Run before the readings are drawn: a group then sits in a single text node.
+function makeChoicesTappable(root, key) {
+  const groups = [];   // { el, buttons, right }
+  for (const li of root.querySelectorAll('ol.questions > li')) {
+    const p = li.querySelector(':scope > p');
+    const details = li.querySelector('details');
+    if (!p || p.querySelector('.gap')) continue;
+    const nodes = [];
+    const walker = document.createTreeWalker(p, NodeFilter.SHOW_TEXT);
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+      if (new RegExp(CHOICE_GROUP.source).test(node.nodeValue)) nodes.push(node);
+    }
+    if (!nodes.length) continue;
+    const found = nodes.flatMap((node) => node.nodeValue.match(new RegExp(CHOICE_GROUP.source, 'g')));
+    const keys = details ? answerKeys(itemAnswers(details), found) : null;
+    let n = 0;
+    for (const node of nodes) {
+      const pieces = [];
+      let at = 0;
+      for (const match of node.nodeValue.matchAll(new RegExp(CHOICE_GROUP.source, 'g'))) {
+        pieces.push(node.nodeValue.slice(at, match.index));
+        const braced = match[0].startsWith('｛');
+        const options = parseGroup(match[0]);
+        const right = keys ? keys[n] : null;
+        const index = groups.length;
+        const buttons = options.map((option) => h('button', {
+          type: 'button',
+          class: 'pick-opt',
+          'data-key': option.key,
+          'aria-pressed': 'false',
+          onclick: () => pick(index, option.key),
+        }, braced ? option.text : `${option.key}. ${option.text}`));
+        const el = h('span', { class: 'pick-group', role: 'group', 'aria-label': 'Choose one' },
+          braced ? '｛' : '（ ',
+          buttons.flatMap((button, i) => (i ? [braced ? '・' : '　', button] : [button])),
+          braced ? '｝' : ' ）');
+        groups.push({ el, buttons, right });
+        pieces.push(el);
+        at = match.index + match[0].length;
+        n += 1;
+      }
+      pieces.push(node.nodeValue.slice(at));
+      node.replaceWith(...pieces);
+    }
+  }
+  if (!groups.length) return null;
+
+  const page = `${key}~picks`;
+  const picks = [...store.getAnswers(page)];
+
+  function draw(index) {
+    const { buttons, right } = groups[index];
+    const chosen = picks[index] || '';
+    for (const button of buttons) {
+      const isChosen = button.dataset.key === chosen;
+      button.classList.toggle('picked', isChosen);
+      button.classList.toggle('right', isChosen && !!right && chosen === right);
+      button.classList.toggle('wrong', isChosen && !!right && chosen !== right);
+      // A wrong pick shows which one it should have been.
+      button.classList.toggle('reveal', !!chosen && !!right && chosen !== right && button.dataset.key === right);
+      button.setAttribute('aria-pressed', String(isChosen));
+    }
+  }
+
+  function pick(index, choice) {
+    // Tapping the circled option again takes the circle off.
+    picks[index] = picks[index] === choice ? '' : choice;
+    draw(index);
+    store.setAnswers(page, groups.map((g, i) => picks[i] || ''));
+  }
+
+  groups.forEach((g, i) => draw(i));
+  return {
+    // What was picked on another device, shown when it arrives.
+    refresh() {
+      const stored = store.getAnswers(page);
+      groups.forEach((g, i) => { picks[i] = stored[i] || ''; draw(i); });
+    },
+  };
+}
+
 // Shows answers that arrived from another device, leaving the box being typed in alone.
 function refreshGaps(inputs, key) {
   const values = store.getAnswers(key);
@@ -116,6 +202,7 @@ export function createNotesView({ dir = 'notes', title = 'Notes', item = 'note',
   let filter = '';
   let openId = null;
   let gapPage = null; // { key, inputs } for the open page, if it has blanks
+  let pickPage = null; // { refresh } for the open page, if it has choices to tap
 
   let index = null;
   function loadIndex() {
@@ -243,8 +330,10 @@ export function createNotesView({ dir = 'notes', title = 'Notes', item = 'note',
 
     try {
       body.innerHTML = await loadBody(page);
-      addReadings(body);
       const key = pageKey(dir, page.id);
+      const picks = makeChoicesTappable(body, key);
+      if (picks && openId === id) pickPage = picks;
+      addReadings(body);
       migrateOldAnswers(dir, page.id, key);
       const inputs = makeGapsEditable(body, key);
       if (inputs && openId === id) gapPage = { key, inputs };
@@ -264,6 +353,7 @@ export function createNotesView({ dir = 'notes', title = 'Notes', item = 'note',
     stopSpeaking();
     openId = id || null;
     gapPage = null;
+    pickPage = null;
     enterNext = true; // a list or folder drawn for this visit slides in; a note page ignores it
     if (openId) renderPage(openId);
     else renderList();
@@ -272,6 +362,9 @@ export function createNotesView({ dir = 'notes', title = 'Notes', item = 'note',
   return {
     el,
     onShow: show,
-    onStore: () => { if (gapPage) refreshGaps(gapPage.inputs, gapPage.key); },
+    onStore: () => {
+      if (gapPage) refreshGaps(gapPage.inputs, gapPage.key);
+      if (pickPage) pickPage.refresh();
+    },
   };
 }

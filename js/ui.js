@@ -313,8 +313,11 @@ export function furigana(written, wordReading, cls) {
 // above its kanji.
 const MARKED = /([㐀-鿿々〆ヶ]+)\{([^}]+)\}/g;
 
+// Tagged as the language on show: the same markup carries Japanese notes and Chinese
+// mistakes, and a Chinese sentence tagged Japanese is drawn in a Japanese font that lacks
+// the simplified characters (买, 东, 济), which then fall back to another font mid-line.
 export function rubyMarkup(text, cls) {
-  const el = h('span', { lang: 'ja', class: cls });
+  const el = h('span', { lang: showing.tag, class: cls });
   let at = 0;
   for (const match of text.matchAll(MARKED)) {
     el.append(text.slice(at, match.index), h('ruby', null, match[1], h('rt', null, match[2])));

@@ -67,3 +67,6 @@ export const get = (ids) => call('get', { ids });
 export const band = (level, offset = 0, limit = 100) => call('band', { level, offset, limit });
 // Every id in a band, for saving the lot in one go.
 export const bandIds = (level) => call('bandIds', { level });
+// [{ text, band, pinyin, id } | { text, other: true }]: Chinese text split into the words
+// of the HSK list, longest match first. Band 0 means a character on no listed word.
+export const segment = (text) => call('segment', { text });

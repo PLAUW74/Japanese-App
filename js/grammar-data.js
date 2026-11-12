@@ -14,6 +14,8 @@ export const TOPICS = {
   giving: 'Giving & receiving',
   expressions: 'Opinions & guesses',
   order: 'Word order (★)',
+  // Read from the homework pages in notes/ rather than written here (js/note-questions.js).
+  notes: 'From your notes',
 };
 
 const pick = (topic) => (level, q, options, en, why) => ({ type: 'pick', topic, level, q, options, en, why });

@@ -55,6 +55,7 @@ const blankLang = (code) => ({
   vocab: {},     // this device's word id -> { wrong, right, at, entry }: words met inside quiz questions
   answers: {},   // note page -> { values, updatedAt }: what was typed into its blanks
   marks: {},     // id -> { status, updatedAt }: a short value kept against an id
+  journal: {},   // id -> { createdAt, text, focus, reply, corrected, fixes, updatedAt }: writing
   settings: { ...BASE_SETTINGS, ...LANG_SETTINGS[code] },
 });
 
@@ -129,11 +130,20 @@ export function setLang(lang) {
   return true;
 }
 
+// Collections of documents kept under their own id, where the newer copy of each wins:
+// marks (how a grammar point is going, the plan's start date) and the writing journal.
+// They are stored, synced and merged by the same code. js/sync.js reads this list.
+export const KEYED = ['marks', 'journal'];
+
 // What has changed locally since sync last took it, per language.
-const freshDirty = () => ({ words: new Set(), lists: false, device: false, answers: new Set(), marks: new Set() });
+const freshDirty = () => ({
+  words: new Set(), lists: false, device: false, answers: new Set(),
+  ...Object.fromEntries(KEYED.map((name) => [name, new Set()])),
+});
 const dirty = Object.fromEntries(LANGS.map((code) => [code, freshDirty()]));
 const dirtyListeners = new Set();
-const langDirty = (d) => d.words.size > 0 || d.lists || d.device || d.answers.size > 0 || d.marks.size > 0;
+const langDirty = (d) => d.words.size > 0 || d.lists || d.device || d.answers.size > 0
+  || KEYED.some((name) => d[name].size > 0);
 const isDirty = () => LANGS.some((code) => langDirty(dirty[code]));
 
 function commit(silent = false) {
@@ -664,6 +674,38 @@ export function markCounts(ids) {
   return out;
 }
 
+// ---- the writing journal ----
+// What the learner writes, and the correction they brought back for it. An entry is
+// removed by marking it deleted rather than dropping it, or another device would sync it
+// straight back.
+
+export const journalEntries = () => Object.entries(bucket().journal)
+  .filter(([, entry]) => !entry.deleted)
+  .map(([id, entry]) => ({ id, ...entry }))
+  .sort((a, b) => b.createdAt - a.createdAt);
+
+export const journalEntry = (id) => {
+  const entry = bucket().journal[id];
+  return entry && !entry.deleted ? { id, ...entry } : null;
+};
+
+// Saves a new entry or changes one; returns its id.
+export function saveJournalEntry({ id, ...fields }) {
+  const key = id || `j${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+  const before = bucket().journal[key] || { createdAt: Date.now() };
+  bucket().journal[key] = { ...before, ...fields, updatedAt: Date.now() };
+  dirty[current].journal.add(key);
+  commit();
+  return key;
+}
+
+export function deleteJournalEntry(id) {
+  if (!bucket().journal[id]) return;
+  bucket().journal[id] = { deleted: true, updatedAt: Date.now() };
+  dirty[current].journal.add(id);
+  commit();
+}
+
 // ---- settings and backup ----
 
 // Quietly by default: most settings only matter to the screen that changed them, and it
@@ -727,6 +769,13 @@ export function importData(json) {
         dirty[lang].device = true;
       }
     }
+    for (const name of KEYED) {
+      for (const [id, entry] of Object.entries(part[name] || {})) {
+        if (own[name][id] || !entry || typeof entry !== 'object') continue;
+        own[name][id] = entry;
+        dirty[lang][name].add(id);
+      }
+    }
   }
   commit();
   return added;
@@ -762,7 +811,8 @@ export function takeDirty() {
         : { id: Number(id) || id, deleted: true, updatedAt: own.deleted[id] || Date.now() }),
       lists: mine.lists ? { lists: own.lists, updatedAt: own.listsAt } : null,
       answers: [...mine.answers].filter((page) => own.answers[page]).map((page) => ({ page, ...own.answers[page] })),
-      marks: [...mine.marks].filter((id) => own.marks[id]).map((id) => ({ id, ...own.marks[id] })),
+      ...Object.fromEntries(KEYED.map((name) => [name,
+        [...mine[name]].filter((id) => own[name][id]).map((id) => ({ id, ...own[name][id] }))])),
       device: mine.device,
     };
     if (mine.device) anyDevice = true;
@@ -770,7 +820,7 @@ export function takeDirty() {
     mine.lists = false;
     mine.device = false;
     mine.answers.clear();
-    mine.marks.clear();
+    for (const name of KEYED) mine[name].clear();
   }
   return { langs, device: anyDevice ? deviceDoc() : null };
 }
@@ -797,7 +847,7 @@ export function restoreDirty(taken) {
     if (part.lists) dirty[lang].lists = true;
     if (part.device) dirty[lang].device = true;
     for (const entry of part.answers || []) dirty[lang].answers.add(entry.page);
-    for (const entry of part.marks || []) dirty[lang].marks.add(String(entry.id));
+    for (const name of KEYED) for (const entry of part[name] || []) dirty[lang][name].add(String(entry.id));
   }
 }
 
@@ -810,10 +860,10 @@ export function queueAnswersNewerThan(lang, remote) {
   commit(true);
 }
 
-// The same for how each item is going. `remote` maps item id -> updatedAt.
-export function queueMarksNewerThan(lang, remote) {
-  for (const [id, entry] of Object.entries(bucket(lang).marks)) {
-    if ((entry.updatedAt || 0) > (remote[id] ?? -1)) dirty[lang].marks.add(id);
+// The same for one of the KEYED collections. `remote` maps id -> updatedAt.
+export function queueKeyedNewerThan(lang, name, remote) {
+  for (const [id, entry] of Object.entries(bucket(lang)[name])) {
+    if ((entry.updatedAt || 0) > (remote[id] ?? -1)) dirty[lang][name].add(id);
   }
   commit(true);
 }
@@ -839,7 +889,8 @@ export function queueNewerThan(lang, remoteWords, remoteListsAt) {
 
 // Applies changes from the account. The newer copy of each word wins. `others` is not
 // language-specific: one document per device holds them all.
-export function applyRemote(lang, { words = [], lists = null, others = null, answers = [], marks = [] }) {
+export function applyRemote(lang, changes) {
+  const { words = [], lists = null, others = null, answers = [] } = changes;
   const own = bucket(lang);
   let changed = false;
   for (const doc of answers) {
@@ -849,12 +900,14 @@ export function applyRemote(lang, { words = [], lists = null, others = null, ans
     own.answers[doc.page] = { values: doc.values, updatedAt: doc.updatedAt };
     changed = true;
   }
-  for (const doc of marks) {
-    if (!doc.id) continue;
-    const local = own.marks[doc.id];
-    if ((doc.updatedAt || 0) <= ((local && local.updatedAt) || 0)) continue;
-    own.marks[doc.id] = { status: doc.status || '', updatedAt: doc.updatedAt };
-    changed = true;
+  for (const name of KEYED) {
+    for (const { id, ...doc } of changes[name] || []) {
+      if (!id) continue;
+      const local = own[name][id];
+      if ((doc.updatedAt || 0) <= ((local && local.updatedAt) || 0)) continue;
+      own[name][id] = doc;
+      changed = true;
+    }
   }
   for (const doc of words) {
     const id = String(doc.id);

@@ -14,10 +14,14 @@ const SDK = 'https://www.gstatic.com/firebasejs/10.14.1';
 const FLUSH_DELAY = 1200;
 const BATCH_LIMIT = 450;
 
-const paths = (lang) => (lang === 'ja'
-  ? { words: ['words'], lists: ['meta', 'lists'], answers: ['answers'], marks: ['marks'] }
-  : { words: [`${lang}_words`], lists: ['meta', `${lang}_lists`],
-      answers: [`${lang}_answers`], marks: [`${lang}_marks`] });
+// The KEYED collections (marks, the journal) follow the same rule: plain for Japanese,
+// prefixed with the language code for the rest.
+const paths = (lang) => ({
+  ...(lang === 'ja'
+    ? { words: ['words'], lists: ['meta', 'lists'], answers: ['answers'] }
+    : { words: [`${lang}_words`], lists: ['meta', `${lang}_lists`], answers: [`${lang}_answers`] }),
+  ...Object.fromEntries(store.KEYED.map((name) => [name, [lang === 'ja' ? name : `${lang}_${name}`]])),
+});
 
 // state: 'unconfigured' | 'loading' | 'signed-out' | 'connecting' | 'synced' | 'saving' | 'offline' | 'error'
 export const status = { state: config ? 'loading' : 'unconfigured', email: '', error: '' };
@@ -103,12 +107,12 @@ function start(user) {
   // One of these per language; the first snapshot of each has to arrive before this device
   // can tell what the account is missing.
   const first = Object.fromEntries(store.LANGS.map((lang) =>
-    [lang, { words: null, lists: undefined, answers: null, marks: null }]));
+    [lang, { words: null, lists: undefined, answers: null, ...Object.fromEntries(store.KEYED.map((n) => [n, null])) }]));
   session = { uid: user.uid, unsubscribers: [], ready: false };
   setStatus({ state: 'connecting', email: user.email || '', error: '' });
 
   const arrived = (part) => part.words !== null && part.lists !== undefined
-    && part.answers !== null && part.marks !== null;
+    && part.answers !== null && store.KEYED.every((name) => part[name] !== null);
 
   // Once every language's words and lists have arrived, upload what this device has that
   // the account lacks.
@@ -118,7 +122,7 @@ function start(user) {
     for (const lang of store.LANGS) {
       store.queueNewerThan(lang, first[lang].words, first[lang].lists);
       store.queueAnswersNewerThan(lang, first[lang].answers);
-      store.queueMarksNewerThan(lang, first[lang].marks);
+      for (const name of store.KEYED) store.queueKeyedNewerThan(lang, name, first[lang][name]);
     }
     flush();
   };
@@ -154,14 +158,17 @@ function start(user) {
       }
     }, failed));
 
-    // How each grammar point is going.
-    session.unsubscribers.push(onSnapshot(collection(db, ...base, ...where.marks), (snap) => {
-      store.applyRemote(lang, { marks: snap.docChanges().map((change) => change.doc.data()) });
-      if (part.marks === null) {
-        part.marks = Object.fromEntries(snap.docs.map((d) => [d.id, d.data().updatedAt || 0]));
-        maybeReady();
-      }
-    }, failed));
+    // Marks (how each grammar point is going) and the writing journal: documents kept by
+    // id. The id is the document's name, so it is put back on what arrives.
+    for (const name of store.KEYED) {
+      session.unsubscribers.push(onSnapshot(collection(db, ...base, ...where[name]), (snap) => {
+        store.applyRemote(lang, { [name]: snap.docChanges().map((change) => ({ id: change.doc.id, ...change.doc.data() })) });
+        if (part[name] === null) {
+          part[name] = Object.fromEntries(snap.docs.map((d) => [d.id, d.data().updatedAt || 0]));
+          maybeReady();
+        }
+      }, failed));
+    }
   }
 
   // One document per device, holding every language; the store splits it up on arrival.
@@ -196,7 +203,7 @@ async function flush() {
       ...part.words.map((word) => [[...where.words, String(word.id)], word]),
       ...(part.lists ? [[where.lists, part.lists]] : []),
       ...part.answers.map((entry) => [[...where.answers, entry.page], entry]),
-      ...part.marks.map((entry) => [[...where.marks, String(entry.id)], entry]),
+      ...store.KEYED.flatMap((name) => (part[name] || []).map((entry) => [[...where[name], String(entry.id)], entry])),
     );
   }
   if (!writes.length) return;

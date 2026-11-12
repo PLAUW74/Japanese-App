@@ -18,6 +18,10 @@ const pinyinUmlaut = [];// and with ü kept, so a typed ü beats the u spelling
 const toneText = [];    // and their tones, '44', for a query that gives them
 const glossText = [];   // all glosses of a row, lowercased, one per line
 const idToRow = new Map();
+// Every written form on the list -> the easiest band it is taught in, and its reading
+// there: what the writing page checks a learner's text against.
+const byHanzi = new Map();
+let longest = 1;
 
 async function fetchText(url) {
   const res = await fetch(url);
@@ -48,6 +52,9 @@ async function load() {
   for (let i = 0; i < rows.length; i++) {
     const row = rows[i];
     idToRow.set(row[0], i);
+    const known = byHanzi.get(row[1]);
+    if (!known || row[5] < known.band) byHanzi.set(row[1], { band: row[5], pinyin: row[2], id: row[0] });
+    longest = Math.max(longest, [...row[1]].length);
     hanziText.push(row[1]);
     pinyinText.push(plain(row[2]));
     pinyinUmlaut.push(row[2].replace(/[1-5]/g, '').replace(/\s+/g, ''));
@@ -173,25 +180,64 @@ function random(count, exclude = [], band = 0) {
 
 const get = (ids) => ids.map((id) => idToRow.get(Number(id))).filter((i) => i != null).map(decode);
 
+// Splits Chinese text into the words of the list, longest match first: 我们是朋友 becomes
+// 我们 / 是 / 朋友. A character no listed word starts with stands alone with band 0 — not on
+// the HSK 1-6 list at all. Anything that is not a character (punctuation, Latin letters,
+// spaces) passes through as `other`. Longest-first matching is not a full segmenter — it
+// can join the end of one word to the start of the next — but over a learner's sentences
+// and a 5,000-word list it gets the words right far more often than not, and it only has
+// to be good enough to flag a word for a second look.
+function segment(text) {
+  const chars = [...String(text || '')];
+  const out = [];
+  let i = 0;
+  while (i < chars.length) {
+    if (!HANZI.test(chars[i])) {
+      let j = i;
+      while (j < chars.length && !HANZI.test(chars[j])) j += 1;
+      out.push({ text: chars.slice(i, j).join(''), other: true });
+      i = j;
+      continue;
+    }
+    let found = null;
+    for (let length = Math.min(longest, chars.length - i); length >= 1; length -= 1) {
+      const piece = chars.slice(i, i + length);
+      if (piece.some((ch) => !HANZI.test(ch))) continue;
+      const hit = byHanzi.get(piece.join(''));
+      if (hit) { found = { text: piece.join(''), ...hit }; break; }
+    }
+    if (!found) found = { text: chars[i], band: 0 };
+    out.push(found);
+    i += [...found.text].length;
+  }
+  return out;
+}
+
 const HANDLERS = {
   search: ({ query }) => search(query),
   random: ({ count, exclude, band: level }) => random(count, exclude, level),
   get: ({ ids }) => get(ids),
   band: ({ level, offset, limit }) => band(level, offset, limit),
   bandIds: ({ level }) => bandIds(level),
+  segment: ({ text }) => segment(text),
 };
 
-onmessage = ({ data }) => {
+const loaded = load();
+loaded.then(
+  () => postMessage({ type: 'ready', count: rows.length, date: listDate }),
+  (err) => postMessage({ type: 'failed', message: err.message }),
+);
+
+// The worker starts on the first call, so that call arrives while the list is still
+// loading. Every request waits for it: answered early, a search finds nothing and a
+// sentence splits into single characters that all look unknown.
+onmessage = async ({ data }) => {
   const handler = HANDLERS[data.type];
   if (!handler) return;
   try {
+    await loaded;
     postMessage({ type: 'reply', id: data.id, result: handler(data) });
   } catch (err) {
     postMessage({ type: 'reply', id: data.id, error: err.message });
   }
 };
-
-load().then(
-  () => postMessage({ type: 'ready', count: rows.length, date: listDate }),
-  (err) => postMessage({ type: 'failed', message: err.message }),
-);
