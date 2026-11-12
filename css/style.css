@@ -880,6 +880,28 @@ ol.questions.with-play { padding-left: 3.6em; }
 
 .grammar-actions { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; }
 
+/* ---- grammar lessons ---- */
+a.grammar-name { color: inherit; text-decoration: none; display: block; }
+a.grammar-name:hover { color: var(--accent-text); }
+.lesson { display: grid; gap: 14px; }
+.lesson-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.lesson-kicker { margin: 0 0 4px; text-transform: uppercase; letter-spacing: 0.05em; }
+.lesson-title { margin: 0; font-size: 1.6rem; line-height: 1.25; }
+.lesson-summary { font-size: 1.08rem; line-height: 1.7; margin: 0; }
+.lesson-section h2 { font-size: 1.1rem; margin: 10px 0 6px; }
+.lesson-section p { line-height: 1.7; margin: 0 0 8px; }
+.lesson-pattern { display: inline-block; padding: 8px 12px; border-radius: 10px; background: var(--accent-soft); }
+.lesson-pattern .label { margin-right: 6px; }
+.lesson-examples { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 10px; }
+.lesson-example { padding: 10px 12px; border-left: 3px solid var(--line); background: var(--surface-2); border-radius: 0 10px 10px 0; }
+.lesson-example-line { display: flex; align-items: center; gap: 8px; }
+.lesson-zh { font-size: 1.3rem; line-height: 1.5; }
+.lesson-pinyin { color: var(--accent-text); margin: 2px 0; }
+.lesson-mistakes { margin: 0; padding-left: 20px; display: grid; gap: 6px; line-height: 1.6; }
+.lesson-further summary { cursor: pointer; color: var(--muted); font-size: 0.9rem; }
+.lesson-further .chips { margin-top: 8px; }
+.lesson-nav { display: flex; justify-content: space-between; margin: 14px 0 0; }
+
 /* ---- choices in the notes, to tap like circling on paper ---- */
 .pick-opt {
   display: inline;

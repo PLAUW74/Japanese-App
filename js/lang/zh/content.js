@@ -27,6 +27,19 @@ export const tasks = () => load('tasks', 'tasks');
 // The study plan: phases, daily blocks and checkpoints.
 export const plan = () => load('plan', 'plan');
 
+// Lessons written for the app, one per grammar point, keyed by the point's id
+// (data/zh/lessons-hsk<band>.json). A band without lessons yet gives {}.
+const lessonFiles = new Map();
+export function lessons(band) {
+  if (!lessonFiles.has(band)) {
+    const wanted = fetch(new URL(`../../../data/zh/lessons-hsk${band}.json`, import.meta.url))
+      .then((res) => (res.ok ? res.json() : { lessons: {} }))
+      .then((data) => data.lessons || {}, () => ({}));
+    lessonFiles.set(band, wanted);
+  }
+  return lessonFiles.get(band);
+}
+
 // What the syllabus's own category names mean, so the checklist reads in English without
 // throwing away the Chinese the syllabus is written in.
 export const CATEGORY_EN = {

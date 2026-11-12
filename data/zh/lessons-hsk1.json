@@ -1,0 +1,3221 @@
+{
+ "band": 1,
+ "note": "Lessons written for this app, one per HSK 1 grammar point in data/zh/grammar.json, keyed by its id.",
+ "lessons": {
+  "g1-1": {
+   "title": "The prefixes 小 and 第",
+   "summary": "Chinese builds many words by putting a small, fixed piece in front of another word. At HSK 1 there are two you will meet constantly: 小 in front of a surname, as a friendly way to address someone, and 第 in front of a number, to turn it into an ordinal (first, second, third).",
+   "sections": [
+    {
+     "heading": "小 + surname: a friendly name",
+     "text": "Put 小 (xiǎo, little) before someone's surname to address or talk about a friend, a classmate or a younger colleague: 小王, 小李, 小张. It sounds warm and informal. Use it for people your own age or younger; for someone older or senior you would use 老 + surname, or their title (王老师).",
+     "pattern": "小 + surname",
+     "examples": [
+      [
+       "小王是我的同学。",
+       "Xiǎo Wáng shì wǒ de tóngxué.",
+       "Xiao Wang is my classmate."
+      ],
+      [
+       "小李，你好！",
+       "Xiǎo Lǐ, nǐ hǎo!",
+       "Hi, Xiao Li!"
+      ],
+      [
+       "小张今天不来。",
+       "Xiǎo Zhāng jīntiān bù lái.",
+       "Xiao Zhang isn't coming today."
+      ]
+     ]
+    },
+    {
+     "heading": "第 + number: first, second, third",
+     "text": "第 (dì) turns a number into an ordinal. When a noun follows, it still needs its measure word, so the full pattern is 第 + number + measure word + noun. 第一 is 'first', 第二 'second', 第一次 'the first time', 第二天 'the next day'.",
+     "pattern": "第 + number (+ measure word + noun)",
+     "examples": [
+      [
+       "这是我第一次来北京。",
+       "Zhè shì wǒ dì yī cì lái Běijīng.",
+       "This is my first time in Beijing."
+      ],
+      [
+       "他是第一个到学校的。",
+       "Tā shì dì yī ge dào xuéxiào de.",
+       "He was the first to arrive at school."
+      ],
+      [
+       "第二天我们去了商店。",
+       "Dì èr tiān wǒmen qùle shāngdiàn.",
+       "The next day we went to the shops."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Months and dates don't take 第: January is 一月, not 第一月; the 1st of the month is 一号, not 第一号.",
+    "Don't drop the measure word after 第 + number: 第一个人, not 第一人 (in everyday speech).",
+    "Don't use 小 + surname for your boss or someone much older: it would sound over-familiar."
+   ],
+   "tip": "第二 means 'second' and 二 is 'two'. The ordinal always says 第二, never 第两."
+  },
+  "g1-2": {
+   "title": "The suffixes 们 and 边",
+   "summary": "Two small endings do a lot of work. 们 makes words for people plural (我们, 老师们), and 边 turns 前, 后, 里, 外, 上, 下 and friends into location words that can stand on their own (前边, 里边).",
+   "sections": [
+    {
+     "heading": "们: more than one person",
+     "text": "Add 们 (men, neutral tone) to a pronoun or to a noun for people: 我们 we, 你们 you all, 他们 they, 老师们 teachers, 同学们 classmates, 朋友们 friends. With pronouns it is required; with other people nouns it is optional and often left out, because Chinese nouns don't have to show number at all.",
+     "pattern": "pronoun / people noun + 们",
+     "examples": [
+      [
+       "同学们，你们好！",
+       "Tóngxuémen, nǐmen hǎo!",
+       "Hello, everyone! (to a class)"
+      ],
+      [
+       "我们都是学生。",
+       "Wǒmen dōu shì xuésheng.",
+       "We are all students."
+      ],
+      [
+       "他们去哪儿了？",
+       "Tāmen qù nǎr le?",
+       "Where did they go?"
+      ]
+     ]
+    },
+    {
+     "heading": "边: a side, a place",
+     "text": "边 (bian, usually neutral tone in speech) joins a direction word to make a place word: 前边 front, 后边 behind, 里边 inside, 外边 outside, 上边 on top, 下边 underneath, 左边 left, 右边 right, 旁边 beside. These can be used on their own (里边有人 someone's inside) or after a noun (学校前边 in front of the school).",
+     "pattern": "前 / 后 / 里 / 外 / 上 / 下 / 左 / 右 / 旁 + 边",
+     "examples": [
+      [
+       "学校前边有一个商店。",
+       "Xuéxiào qiánbian yǒu yí ge shāngdiàn.",
+       "There's a shop in front of the school."
+      ],
+      [
+       "书在桌子上边。",
+       "Shū zài zhuōzi shàngbian.",
+       "The book is on the table."
+      ],
+      [
+       "外边很冷。",
+       "Wàibian hěn lěng.",
+       "It's cold outside."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Never use 们 together with a number: 三个学生, not 三个学生们.",
+    "们 is for people only: 书们 or 桌子们 are wrong. (它们, 'they' for animals or things, is the one exception.)",
+    "您 normally has no plural: say 你们 or 各位, not 您们."
+   ],
+   "tip": "If the sentence already tells you there's more than one (a number, 都, 很多), leave 们 off."
+  },
+  "g1-3": {
+   "title": "Location words: 上, 下, 里, 外, 前, 后",
+   "summary": "To say where something is, Chinese puts a location word after the noun: 桌子上 'on the table', literally 'table-top'; 家里 'at home', 'home-inside'. The same words 前 and 后 also work for time: 三天前 'three days ago'.",
+   "sections": [
+    {
+     "heading": "Noun + location word",
+     "text": "English puts the position first (on the table); Chinese puts it last (桌子上). The location word is usually said lightly: 桌子上 zhuōzi shang, 家里 jiā li. With 在 the whole phrase comes before the verb or after 在 as 'be at'.",
+     "pattern": "(在) + noun + 上 / 下 / 里 / 外 / 前 / 后",
+     "examples": [
+      [
+       "手机在桌子上。",
+       "Shǒujī zài zhuōzi shang.",
+       "The phone is on the table."
+      ],
+      [
+       "他在家里看书。",
+       "Tā zài jiā li kàn shū.",
+       "He's reading at home."
+      ],
+      [
+       "门外有一个人。",
+       "Mén wài yǒu yí ge rén.",
+       "There's someone outside the door."
+      ]
+     ]
+    },
+    {
+     "heading": "前 and 后 for time",
+     "text": "After a time phrase or an action, 前 means 'before / ago' and 后 means 'after / later'. Note the order is the reverse of English: 'three days ago' is 三天前, 'after eating' is 吃饭后.",
+     "pattern": "time / action + 前 (before, ago) · 后 (after, later)",
+     "examples": [
+      [
+       "三天前我去了北京。",
+       "Sān tiān qián wǒ qùle Běijīng.",
+       "I went to Beijing three days ago."
+      ],
+      [
+       "吃饭后我们去看电影。",
+       "Chī fàn hòu wǒmen qù kàn diànyǐng.",
+       "After eating we'll go and see a film."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Countries and cities don't take 里: 在中国, 在北京, not 在中国里.",
+    "On their own (without a noun before them) these words need 边: 里边有人, not 里有人.",
+    "Word order: 桌子上, never 上桌子 for 'on the table'."
+   ],
+   "tip": "Think of the location word as a little noun meaning 'top', 'inside', 'front': 桌子上 is 'the table's top'."
+  },
+  "g1-4": {
+   "title": "会 and 能: can",
+   "summary": "English 'can' covers several meanings that Chinese splits. 会 (huì) is 'can' because you have learned how; 能 (néng) is 'can' because you are able to, or circumstances allow it.",
+   "sections": [
+    {
+     "heading": "会: a learned skill",
+     "text": "Use 会 for things you had to learn: languages, driving, swimming, cooking. 我会说汉语 'I can speak Chinese' means I know how. 会 can also mean 'will (probably)' about the future: 明天会下雨 'it will rain tomorrow'.",
+     "pattern": "subject + 会 + verb",
+     "examples": [
+      [
+       "我会说一点儿汉语。",
+       "Wǒ huì shuō yìdiǎnr Hànyǔ.",
+       "I can speak a little Chinese."
+      ],
+      [
+       "你会开车吗？",
+       "Nǐ huì kāi chē ma?",
+       "Can you drive?"
+      ],
+      [
+       "明天会下雨。",
+       "Míngtiān huì xià yǔ.",
+       "It's going to rain tomorrow."
+      ]
+     ]
+    },
+    {
+     "heading": "能: able to, allowed to",
+     "text": "Use 能 when something makes an action possible or impossible: time, health, rules, ability in a particular situation. 我明天能来 'I can come tomorrow' (I'm free). 能 is also used to ask for help: 你能帮我吗？",
+     "pattern": "subject + 能 + verb",
+     "examples": [
+      [
+       "我明天能来。",
+       "Wǒ míngtiān néng lái.",
+       "I can come tomorrow."
+      ],
+      [
+       "你能帮我吗？",
+       "Nǐ néng bāng wǒ ma?",
+       "Can you help me?"
+      ],
+      [
+       "我要开车，不能喝酒。",
+       "Wǒ yào kāi chē, bù néng hē jiǔ.",
+       "I'm driving, so I can't drink."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "'I can speak Chinese' is 我会说汉语, not 我能说汉语 (unless you mean you're physically able to right now).",
+    "Negate with 不: 不会 (don't know how), 不能 (can't, not allowed). Never 没会 or 没能 for simple 'can't'."
+   ],
+   "tip": "Ask yourself: did I have to learn this? If yes, 会. If it's about whether I'm able to right now, 能."
+  },
+  "g1-5": {
+   "title": "想 and 要: want to",
+   "summary": "Both 想 (xiǎng) and 要 (yào) express wanting. 想 is softer, 'would like to'; 要 is firmer, 'want to / am going to', and can also take a noun directly: 我要一杯水 'I want a glass of water'.",
+   "sections": [
+    {
+     "heading": "想 + verb: would like to",
+     "text": "想 before a verb is a polite, gentle 'want to' or 'would like to'. It is the most common way to talk about wishes and plans. 想 before a person or place means 'miss': 我想家 'I'm homesick'.",
+     "pattern": "subject + 想 + verb (+ object)",
+     "examples": [
+      [
+       "我想去中国。",
+       "Wǒ xiǎng qù Zhōngguó.",
+       "I'd like to go to China."
+      ],
+      [
+       "你想吃什么？",
+       "Nǐ xiǎng chī shénme?",
+       "What would you like to eat?"
+      ],
+      [
+       "我很想妈妈。",
+       "Wǒ hěn xiǎng māma.",
+       "I really miss my mum."
+      ]
+     ]
+    },
+    {
+     "heading": "要 + verb or noun: want, will",
+     "text": "要 + verb is a stronger 'want to', and often simply 'am going to': 明天我要去北京. 要 + noun asks for or orders something: 我要一个苹果. In shops and restaurants 要 is what you'll use.",
+     "pattern": "subject + 要 + verb · subject + 要 + noun",
+     "examples": [
+      [
+       "我要喝水。",
+       "Wǒ yào hē shuǐ.",
+       "I want some water."
+      ],
+      [
+       "我要一杯茶。",
+       "Wǒ yào yì bēi chá.",
+       "I'd like a cup of tea."
+      ],
+      [
+       "明天我要去北京。",
+       "Míngtiān wǒ yào qù Běijīng.",
+       "I'm going to Beijing tomorrow."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "To say you don't want to do something, use 不想: 我不想去. 不要 means 'don't!' (a command), not 'I don't want to'.",
+    "想 + noun means 'miss', not 'want': 我想咖啡 is 'I miss coffee'. To order coffee, 我要咖啡."
+   ],
+   "tip": "Ordering or asking for things: 要. Talking about wishes and plans: 想 is the safe, polite choice."
+  },
+  "g1-6": {
+   "title": "可以: may, can (permission)",
+   "summary": "可以 (kěyǐ) is 'may' or 'can' in the sense of being allowed to. It's how you ask permission, give permission, and say something is possible.",
+   "sections": [
+    {
+     "heading": "Asking and giving permission",
+     "text": "Put 可以 before the verb, and add 吗 to ask. The usual answers are 可以 (yes, go ahead) or 不行 / 不可以 (no). 可以 can also stand alone as an answer.",
+     "pattern": "subject + 可以 + verb (+ 吗?)",
+     "examples": [
+      [
+       "我可以坐这儿吗？",
+       "Wǒ kěyǐ zuò zhèr ma?",
+       "May I sit here?"
+      ],
+      [
+       "可以，请坐。",
+       "Kěyǐ, qǐng zuò.",
+       "Yes, please sit down."
+      ],
+      [
+       "你可以用我的手机。",
+       "Nǐ kěyǐ yòng wǒ de shǒujī.",
+       "You can use my phone."
+      ]
+     ]
+    },
+    {
+     "heading": "Not allowed",
+     "text": "不可以 means 'not allowed / mustn't'. It's common on signs and rules. In conversation people often answer a request with 不行 instead.",
+     "pattern": "不可以 + verb",
+     "examples": [
+      [
+       "这里不可以吃东西。",
+       "Zhèlǐ bù kěyǐ chī dōngxi.",
+       "You can't eat here."
+      ],
+      [
+       "现在不可以进去。",
+       "Xiànzài bù kěyǐ jìnqu.",
+       "You can't go in right now."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "For a learned skill use 会, not 可以: 我会游泳 'I can swim', not 我可以游泳 (that means 'I'm allowed to swim')."
+   ],
+   "tip": "可以吗？ on its own after a suggestion means 'Is that OK?': 我们明天去，可以吗？"
+  },
+  "g1-7": {
+   "title": "Separable verbs: 睡觉, 上课, 说话…",
+   "summary": "Some Chinese verbs are really a verb plus its own object glued together: 睡觉 is 'sleep-a-sleep', 上课 is 'attend-class'. Because they already contain an object, they can't take another one directly, and other words can slip in between the two halves.",
+   "sections": [
+    {
+     "heading": "Verb + object in one word",
+     "text": "The HSK 1 ones are 看病 (see a doctor), 睡觉 (sleep), 说话 (talk), 上课 (have class), 下课 (finish class), 上班 (go to work), 下班 (finish work) and 生病 (fall ill). Used plainly, they behave like any verb.",
+     "examples": [
+      [
+       "他在睡觉。",
+       "Tā zài shuì jiào.",
+       "He's sleeping."
+      ],
+      [
+       "我每天八点上班。",
+       "Wǒ měi tiān bā diǎn shàng bān.",
+       "I start work at eight every day."
+      ],
+      [
+       "下课了！",
+       "Xià kè le!",
+       "Class is over!"
+      ]
+     ]
+    },
+    {
+     "heading": "Things go between, not after",
+     "text": "Because the second half is already an object, a second object can't follow. Instead, the person goes before with a preposition (跟他说话 'talk with him'), and descriptions go in the middle (上汉语课 'have a Chinese class').",
+     "pattern": "跟 / 和 + person + 说话 · 上 + … + 课",
+     "examples": [
+      [
+       "我想跟你说话。",
+       "Wǒ xiǎng gēn nǐ shuō huà.",
+       "I'd like to talk to you."
+      ],
+      [
+       "我们今天上汉语课。",
+       "Wǒmen jīntiān shàng Hànyǔ kè.",
+       "We have Chinese class today."
+      ],
+      [
+       "他生病了，去医院看病。",
+       "Tā shēng bìng le, qù yīyuàn kàn bìng.",
+       "He's ill and has gone to see a doctor."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "说话他 or 说话跟他 are wrong: the person goes before: 跟他说话.",
+    "睡觉八个小时 is wrong: say 睡了八个小时 (or 睡了八个小时的觉)."
+   ],
+   "tip": "When a dictionary shows a verb as two syllables with the second one a noun (觉, 课, 班, 话, 病), expect it to split."
+  },
+  "g1-8": {
+   "title": "Question words: 什么, 谁, 哪儿, 几, 多少, 怎么…",
+   "summary": "Chinese question words don't move to the front of the sentence the way English ones do. They sit exactly where the answer will go: 你去哪儿？ 'You go where?' → 我去北京 'I go Beijing'. And a question with a question word never takes 吗.",
+   "sections": [
+    {
+     "heading": "Who, what, which, where",
+     "text": "谁 (shéi) who · 什么 (shénme) what · 哪 (nǎ) + measure word, which · 哪儿 / 哪里 (nǎr / nǎlǐ) where · 哪些 which ones. Replace the unknown part of the sentence with the question word and keep the order the same.",
+     "pattern": "keep the sentence order; put the question word where the answer goes",
+     "examples": [
+      [
+       "他是谁？",
+       "Tā shì shéi?",
+       "Who is he?"
+      ],
+      [
+       "你叫什么名字？",
+       "Nǐ jiào shénme míngzi?",
+       "What's your name?"
+      ],
+      [
+       "你是哪国人？",
+       "Nǐ shì nǎ guó rén?",
+       "Which country are you from?"
+      ],
+      [
+       "洗手间在哪儿？",
+       "Xǐshǒujiān zài nǎr?",
+       "Where's the toilet?"
+      ]
+     ]
+    },
+    {
+     "heading": "How many, how much: 几, 多少, 多",
+     "text": "几 (jǐ) expects a small number (usually under ten) and needs a measure word: 几个人？ 几点？ 多少 (duōshao) is for any number and the measure word is optional: 多少钱？ 多 + adjective asks 'how…': 多大 how old (for adults and children past babyhood), 多远 how far.",
+     "examples": [
+      [
+       "你家有几口人？",
+       "Nǐ jiā yǒu jǐ kǒu rén?",
+       "How many people are in your family?"
+      ],
+      [
+       "这个多少钱？",
+       "Zhège duōshao qián?",
+       "How much is this?"
+      ],
+      [
+       "你今年多大？",
+       "Nǐ jīnnián duō dà?",
+       "How old are you?"
+      ]
+     ]
+    },
+    {
+     "heading": "How: 怎么 and 怎么样",
+     "text": "怎么 (zěnme) + verb asks how to do something: 怎么去？ 怎么说？ It can also mean 'how come': 你怎么不吃？ 怎么样 (zěnmeyàng) asks how something is, or makes a suggestion: 你的汉语怎么样？ 我们明天去，怎么样？",
+     "examples": [
+      [
+       "去火车站怎么走？",
+       "Qù huǒchēzhàn zěnme zǒu?",
+       "How do I get to the train station?"
+      ],
+      [
+       "这个用汉语怎么说？",
+       "Zhège yòng Hànyǔ zěnme shuō?",
+       "How do you say this in Chinese?"
+      ],
+      [
+       "我们明天去，怎么样？",
+       "Wǒmen míngtiān qù, zěnmeyàng?",
+       "Let's go tomorrow. How does that sound?"
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Never add 吗 to a question-word question: 你去哪儿？ not 你去哪儿吗？",
+    "Don't move the question word to the front: 你喜欢什么？ not 什么你喜欢？",
+    "几 needs a measure word: 几个人, not 几人 (except fixed ones like 几点, 几岁, 几天)."
+   ],
+   "tip": "Answer by swapping the question word for the answer and keeping everything else: 你吃什么？ → 我吃米饭。"
+  },
+  "g1-9": {
+   "title": "Personal pronouns: 我, 你, 您, 他, 她, 它, 大家",
+   "summary": "Chinese pronouns are simpler than English ones: they don't change for 'I/me' or 'he/him', and 他, 她 and 它 are all pronounced tā. Add 们 for the plural.",
+   "sections": [
+    {
+     "heading": "The pronouns",
+     "text": "我 wǒ I/me · 你 nǐ you · 您 nín you (polite) · 他 tā he/him · 她 tā she/her · 它 tā it · 大家 dàjiā everyone. Plurals with 们: 我们, 你们, 他们, 她们, 它们. The same word is subject or object: 我喜欢他 / 他喜欢我.",
+     "examples": [
+      [
+       "我认识她，她是我的老师。",
+       "Wǒ rènshi tā, tā shì wǒ de lǎoshī.",
+       "I know her; she's my teacher."
+      ],
+      [
+       "您好！请进。",
+       "Nín hǎo! Qǐng jìn.",
+       "Hello! Please come in."
+      ],
+      [
+       "大家好！",
+       "Dàjiā hǎo!",
+       "Hello, everyone!"
+      ]
+     ]
+    },
+    {
+     "heading": "My, your, his: add 的",
+     "text": "Possessives are pronoun + 的: 我的书 my book, 他的手机 his phone. With family members, close relationships and your own institutions the 的 is usually dropped: 我妈妈, 我朋友, 我们学校.",
+     "pattern": "pronoun + 的 + noun",
+     "examples": [
+      [
+       "这是我的手机。",
+       "Zhè shì wǒ de shǒujī.",
+       "This is my phone."
+      ],
+      [
+       "我妈妈是医生。",
+       "Wǒ māma shì yīshēng.",
+       "My mum is a doctor."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Use 您 for older people, customers and anyone you want to be respectful to; 你 for friends and peers.",
+    "In speech you can't hear the difference between 他, 她 and 它: context does the work."
+   ],
+   "tip": "大家 takes a plural meaning but no 们: 大家好, not 大家们好."
+  },
+  "g1-10": {
+   "title": "This and that: 这, 那, 这儿, 那儿, 这些, 有的",
+   "summary": "这 (zhè) is 'this' and 那 (nà) is 'that'. Add 儿 or 里 for 'here' and 'there', 些 for 'these' and 'those'. Before a noun they need a measure word: 这本书 'this book'.",
+   "sections": [
+    {
+     "heading": "This / that + measure word + noun",
+     "text": "Directly before a noun, 这 and 那 need a measure word: 这本书, 那个人, 这件衣服. A number can sit in between: 那三个学生 'those three students'. As the subject of 是, 这 and 那 can stand alone: 这是我的书. In speech 这个 and 那个 are often said zhèige and nèige.",
+     "pattern": "这 / 那 (+ number) + measure word + noun",
+     "examples": [
+      [
+       "这本书很好。",
+       "Zhè běn shū hěn hǎo.",
+       "This book is good."
+      ],
+      [
+       "那个人是谁？",
+       "Nàge rén shì shéi?",
+       "Who's that person?"
+      ],
+      [
+       "这是我朋友。",
+       "Zhè shì wǒ péngyou.",
+       "This is my friend."
+      ]
+     ]
+    },
+    {
+     "heading": "Here, there, these, those",
+     "text": "这儿 / 这里 here · 那儿 / 那里 there (这儿 is more northern and spoken, 这里 more general). 这些 these · 那些 those, for more than one; no extra measure word is needed: 这些书.",
+     "examples": [
+      [
+       "请坐这儿。",
+       "Qǐng zuò zhèr.",
+       "Please sit here."
+      ],
+      [
+       "那些人都是我的同学。",
+       "Nàxiē rén dōu shì wǒ de tóngxué.",
+       "Those people are all my classmates."
+      ]
+     ]
+    },
+    {
+     "heading": "Some: 有的 and 有些",
+     "text": "有的 and 有些 mean 'some (of them)'. A pair of 有的 sets two groups side by side: 有的…，有的… 'some…, others…'.",
+     "examples": [
+      [
+       "有的人喜欢喝茶，有的人喜欢喝咖啡。",
+       "Yǒude rén xǐhuan hē chá, yǒude rén xǐhuan hē kāfēi.",
+       "Some people like tea, others like coffee."
+      ],
+      [
+       "有些菜我不喜欢吃。",
+       "Yǒuxiē cài wǒ bù xǐhuan chī.",
+       "There are some dishes I don't like."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "这书 and 那人 are wrong in normal speech: 这本书, 那个人.",
+    "Don't add 们 to 这些 or 那些: they are already plural."
+   ],
+   "tip": "If you don't know the right measure word, 个 is the safe default: 这个, 那个."
+  },
+  "g1-11": {
+   "title": "Numbers: 零 to 千, 二 and 两, 半",
+   "summary": "Chinese numbers are completely regular: once you know one to ten, you can build any number. The two things to watch are 二 versus 两 (both 'two') and 半 (half).",
+   "sections": [
+    {
+     "heading": "Building numbers",
+     "text": "零 líng 0 · 一 yī 1 · 二 èr 2 · 三 sān 3 · 四 sì 4 · 五 wǔ 5 · 六 liù 6 · 七 qī 7 · 八 bā 8 · 九 jiǔ 9 · 十 shí 10 · 百 bǎi 100 · 千 qiān 1,000. Eleven is ten-one (十一), twenty is two-ten (二十), 25 is 二十五. 105 needs 零 for the gap: 一百零五.",
+     "examples": [
+      [
+       "我们班有二十五个学生。",
+       "Wǒmen bān yǒu èrshíwǔ ge xuésheng.",
+       "There are 25 students in our class."
+      ],
+      [
+       "这个一百零五块。",
+       "Zhège yìbǎi líng wǔ kuài.",
+       "This is 105 yuan."
+      ]
+     ]
+    },
+    {
+     "heading": "二 or 两?",
+     "text": "Use 两 (liǎng) before a measure word: 两个人, 两本书, 两点 (two o'clock). Use 二 (èr) when counting, in numbers with more digits (十二, 二十), in ordinals (第二) and in phone numbers and years. Before 百 and 千 both are heard: 两百 / 二百.",
+     "pattern": "两 + measure word · 二 in counting, 十二, 二十, 第二",
+     "examples": [
+      [
+       "我有两个哥哥。",
+       "Wǒ yǒu liǎng ge gēge.",
+       "I have two older brothers."
+      ],
+      [
+       "今天十二号。",
+       "Jīntiān shí'èr hào.",
+       "Today is the 12th."
+      ]
+     ]
+    },
+    {
+     "heading": "半: half",
+     "text": "半 (bàn) before a measure word is 'half a…': 半个苹果. After a measure word it's 'and a half': 一个半 'one and a half', 三个半小时 'three and a half hours'.",
+     "examples": [
+      [
+       "我吃了半个苹果。",
+       "Wǒ chīle bàn ge píngguǒ.",
+       "I ate half an apple."
+      ],
+      [
+       "我学了一年半汉语。",
+       "Wǒ xuéle yì nián bàn Hànyǔ.",
+       "I've studied Chinese for a year and a half."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "二个人 is wrong: 两个人.",
+    "一 changes tone: yī alone and in counting, yí before a 4th tone (一个 yí ge), yì before the other tones (一本 yì běn).",
+    "In phone and room numbers 一 is often read yāo, so it isn't confused with 七."
+   ],
+   "tip": "Practise saying prices and phone numbers aloud: they are where you'll use numbers most."
+  },
+  "g1-12": {
+   "title": "Measure words: 个, 本, 家, 口, 块, 件, 只, 元",
+   "summary": "In Chinese a number (or 这 / 那) can't go straight in front of a noun: a measure word goes in between, like 'a cup of' or 'a piece of' in English, but for everything. 三本书 is literally 'three volume book'.",
+   "sections": [
+    {
+     "heading": "The pattern",
+     "text": "Number / 这 / 那 / 几 + measure word + noun. Each noun has its usual measure word, and 个 (ge) is the general one that works for people and many objects when you're unsure.",
+     "pattern": "number + measure word + noun",
+     "examples": [
+      [
+       "我买了三本书。",
+       "Wǒ mǎile sān běn shū.",
+       "I bought three books."
+      ],
+      [
+       "他是一个好老师。",
+       "Tā shì yí ge hǎo lǎoshī.",
+       "He's a good teacher."
+      ]
+     ]
+    },
+    {
+     "heading": "The HSK 1 measure words",
+     "text": "个 people and general objects · 本 books, magazines · 家 shops, restaurants, companies (一家饭馆) · 口 people in a family (我家有四口人) · 件 clothes and matters (一件衣服, 一件事) · 只 animals and one of a pair (一只狗, 一只手) · 块 and 元 money: 块 in speech, 元 in writing (十块钱 / 十元).",
+     "examples": [
+      [
+       "我家有四口人。",
+       "Wǒ jiā yǒu sì kǒu rén.",
+       "There are four people in my family."
+      ],
+      [
+       "这家饭馆很好。",
+       "Zhè jiā fànguǎn hěn hǎo.",
+       "This restaurant is good."
+      ],
+      [
+       "我想买一件衣服。",
+       "Wǒ xiǎng mǎi yí jiàn yīfu.",
+       "I want to buy a piece of clothing."
+      ],
+      [
+       "她有一只猫。",
+       "Tā yǒu yì zhī māo.",
+       "She has a cat."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "三书, 一人, 这书 are all wrong: 三本书, 一个人, 这本书.",
+    "口 is only for counting family members; for people in general use 个: 教室里有十个人."
+   ],
+   "tip": "Learn each new noun with its measure word, as one chunk: 一本书, 一件衣服, 一只猫."
+  },
+  "g1-13": {
+   "title": "Borrowed measure words: 杯",
+   "summary": "Containers can be used as measure words for what's inside them: 一杯茶 'a cup of tea', 两杯水 'two glasses of water'. At HSK 1 the one to know is 杯 (bēi), cup or glass.",
+   "sections": [
+    {
+     "heading": "Container as measure word",
+     "text": "The container noun takes the place of the measure word: number + 杯 + drink. Unlike English, there's no 'of'. 杯 covers cups, mugs and glasses.",
+     "pattern": "number + 杯 + drink",
+     "examples": [
+      [
+       "请给我一杯水。",
+       "Qǐng gěi wǒ yì bēi shuǐ.",
+       "A glass of water, please."
+      ],
+      [
+       "他喝了两杯茶。",
+       "Tā hēle liǎng bēi chá.",
+       "He drank two cups of tea."
+      ],
+      [
+       "你要几杯咖啡？",
+       "Nǐ yào jǐ bēi kāfēi?",
+       "How many coffees would you like?"
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Don't add 个: 一杯茶, not 一个杯茶. (一个杯子 is 'a cup', the object itself.)",
+    "No 的 between: 一杯茶, not 一杯的茶."
+   ],
+   "tip": "The same trick works later with 碗 (bowl): 一碗米饭 'a bowl of rice'."
+  },
+  "g1-14": {
+   "title": "Time measure words: 天, 年, 岁, 点, 分, 号, 日",
+   "summary": "Some time words are measure words themselves, so they go straight after the number with no 个: 三天 'three days', 五年 'five years', 八岁 'eight years old', 九点 'nine o'clock'.",
+   "sections": [
+    {
+     "heading": "Straight after the number",
+     "text": "天 day · 年 year · 岁 years of age · 点 o'clock · 分 minute · 号 day of the month (spoken) · 日 day of the month (written). Because they already count, adding 个 is wrong.",
+     "pattern": "number + 天 / 年 / 岁 / 点 / 分 / 号 / 日",
+     "examples": [
+      [
+       "我在北京住了两年。",
+       "Wǒ zài Běijīng zhùle liǎng nián.",
+       "I lived in Beijing for two years."
+      ],
+      [
+       "我儿子八岁了。",
+       "Wǒ érzi bā suì le.",
+       "My son is eight."
+      ],
+      [
+       "现在九点十分。",
+       "Xiànzài jiǔ diǎn shí fēn.",
+       "It's ten past nine."
+      ],
+      [
+       "今天十月九号。",
+       "Jīntiān shí yuè jiǔ hào.",
+       "Today is the 9th of October."
+      ]
+     ]
+    },
+    {
+     "heading": "The ones that do take 个",
+     "text": "Not every time word works this way. 小时 (hour) and usually 星期 (week) and 月 (month, when counting) need 个: 一个小时, 两个星期, 三个月. Compare 三月 'March' with 三个月 'three months'.",
+     "examples": [
+      [
+       "我每天学习一个小时。",
+       "Wǒ měi tiān xuéxí yí ge xiǎoshí.",
+       "I study for an hour every day."
+      ],
+      [
+       "三月我在中国住了三个星期。",
+       "Sān yuè wǒ zài Zhōngguó zhùle sān ge xīngqī.",
+       "In March I stayed in China for three weeks."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "三个天 and 两个年 are wrong: 三天, 两年.",
+    "一个小时 needs 个: 一小时 is written style; in speech say 一个小时.",
+    "三月 is March; three months is 三个月."
+   ],
+   "tip": "If the word can follow a number without 个 in a date or a clock time, it's a measure word itself."
+  },
+  "g1-15": {
+   "title": "Degree adverbs: 很, 非常, 太, 真, 有点儿",
+   "summary": "These words say how much: very, extremely, too, really, a bit. They go directly before an adjective. One of them, 很, is also needed in plain descriptions where English would just say 'is'.",
+   "sections": [
+    {
+     "heading": "很: very, and the linking word",
+     "text": "An adjective can be the whole predicate in Chinese, with no 是 (see the lesson on adjective sentences). In a plain statement it normally takes 很 (hěn), even when you don't mean 'very': 我很好 'I'm fine'. A bare adjective with no 很 sounds like a comparison: 这个好 'this one is better (than that one)'.",
+     "pattern": "subject + 很 + adjective",
+     "examples": [
+      [
+       "我很好，谢谢。",
+       "Wǒ hěn hǎo, xièxie.",
+       "I'm fine, thanks."
+      ],
+      [
+       "今天很冷。",
+       "Jīntiān hěn lěng.",
+       "It's cold today."
+      ]
+     ]
+    },
+    {
+     "heading": "非常 and 真: extremely, really",
+     "text": "非常 (fēicháng) is stronger than 很: 'extremely'. 真 (zhēn) is 'really' with feeling, mostly in exclamations about what you see or think: 你的汉语真好！",
+     "examples": [
+      [
+       "这个饭馆非常好。",
+       "Zhège fànguǎn fēicháng hǎo.",
+       "This restaurant is excellent."
+      ],
+      [
+       "你的汉语真好！",
+       "Nǐ de Hànyǔ zhēn hǎo!",
+       "Your Chinese is really good!"
+      ]
+     ]
+    },
+    {
+     "heading": "太…了: too, so",
+     "text": "太 (tài) is usually paired with 了 at the end: 太贵了 'too expensive'. It can mean 'too much' (a complaint) or, in exclamations like 太好了, simply 'so / great!'",
+     "pattern": "太 + adjective + 了",
+     "examples": [
+      [
+       "这件衣服太贵了。",
+       "Zhè jiàn yīfu tài guì le.",
+       "This piece of clothing is too expensive."
+      ],
+      [
+       "太好了！",
+       "Tài hǎo le!",
+       "Great!"
+      ]
+     ]
+    },
+    {
+     "heading": "有点儿: a bit (and not in a good way)",
+     "text": "有点儿 (yǒudiǎnr) before an adjective means 'a bit', and it usually carries a mild complaint: 有点儿冷 'a bit cold', 有点儿贵 'a bit pricey'. It's not used with pleasant adjectives.",
+     "pattern": "有点儿 + adjective (something undesirable)",
+     "examples": [
+      [
+       "我今天有点儿累。",
+       "Wǒ jīntiān yǒudiǎnr lèi.",
+       "I'm a bit tired today."
+      ],
+      [
+       "这个有点儿贵。",
+       "Zhège yǒudiǎnr guì.",
+       "This is a bit expensive."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Don't add 是 before an adjective: 她很漂亮, not 她是很漂亮 or 她是漂亮.",
+    "有点儿好 or 有点儿漂亮 sounds wrong: 有点儿 is for things you'd rather were otherwise.",
+    "真 doesn't go in front of a noun description: 很好的人, not 真好的人."
+   ],
+   "tip": "When describing anything, reach for 很 first; it makes the sentence sound complete and natural."
+  },
+  "g1-16": {
+   "title": "都: all, both",
+   "summary": "都 (dōu) means 'all' or 'both'. Unlike English 'all', it doesn't go in front of the noun: it sits after the subject, just before the verb, and refers back to the group already mentioned.",
+   "sections": [
+    {
+     "heading": "Subject + 都 + verb",
+     "text": "Name the group first (我们, 他们, 这些书), then put 都 before the verb or adjective. 都 always looks back to what came before it.",
+     "pattern": "group + 都 + verb / adjective",
+     "examples": [
+      [
+       "我们都是学生。",
+       "Wǒmen dōu shì xuésheng.",
+       "We are all students."
+      ],
+      [
+       "他们都去了。",
+       "Tāmen dōu qù le.",
+       "They all went."
+      ],
+      [
+       "这些菜都很好吃。",
+       "Zhèxiē cài dōu hěn hǎochī.",
+       "All these dishes are delicious."
+      ]
+     ]
+    },
+    {
+     "heading": "都不 and 不都",
+     "text": "The order of 都 and 不 changes the meaning. 都不 is 'none of them': 我们都不去 'none of us are going'. 不都 is 'not all of them': 我们不都去 'not all of us are going'.",
+     "examples": [
+      [
+       "他们都不喝酒。",
+       "Tāmen dōu bù hē jiǔ.",
+       "None of them drink alcohol."
+      ],
+      [
+       "他们不都是中国人。",
+       "Tāmen bù dōu shì Zhōngguó rén.",
+       "Not all of them are Chinese."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "都我们是学生 is wrong: 我们都是学生.",
+    "Don't put 都 at the end like English 'all': 他们来了都 is wrong; 他们都来了."
+   ],
+   "tip": "To say 'both of us' or 'all three of them', put the number after the pronoun: 我们两个人都…"
+  },
+  "g1-17": {
+   "title": "在 and 正在: doing right now",
+   "summary": "Put 在 (zài) or 正在 (zhèngzài) before a verb to say an action is in progress: 'is doing'. 正在 stresses 'right at this moment'.",
+   "sections": [
+    {
+     "heading": "在 / 正在 + verb",
+     "text": "This is the Chinese 'present continuous'. The verb itself doesn't change. 呢 is often added at the end in speech (see the lesson on 在…呢).",
+     "pattern": "subject + 在 / 正在 + verb (+ object)",
+     "examples": [
+      [
+       "我在看书。",
+       "Wǒ zài kàn shū.",
+       "I'm reading."
+      ],
+      [
+       "他正在吃饭。",
+       "Tā zhèngzài chī fàn.",
+       "He's eating right now."
+      ],
+      [
+       "你在做什么？",
+       "Nǐ zài zuò shénme?",
+       "What are you doing?"
+      ]
+     ]
+    },
+    {
+     "heading": "Not doing it",
+     "text": "To say someone isn't doing something at the moment, use 没在 + verb, or simply 没 + verb.",
+     "pattern": "没 (在) + verb",
+     "examples": [
+      [
+       "他没在睡觉，他在看电视。",
+       "Tā méi zài shuì jiào, tā zài kàn diànshì.",
+       "He isn't sleeping; he's watching TV."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Don't use 不在 for 'isn't doing': 不在 means 'isn't here / isn't at'. Say 没在 + verb.",
+    "在 here is not the word for 'at': 我在看书 has no place in it. (When a place follows, 在 means 'at': 我在家.)"
+   ],
+   "tip": "在 has three jobs: 'be at' (我在家), 'at' before a place (在家吃饭) and 'is doing' (在吃饭). The word after it tells you which."
+  },
+  "g1-18": {
+   "title": "再: again (next time)",
+   "summary": "再 (zài) means 'again' for something that hasn't happened yet: in requests, plans and promises. 再见 'goodbye' is literally 'see again'.",
+   "sections": [
+    {
+     "heading": "再 + verb: do it again",
+     "text": "Put 再 before the verb. Because it looks forward, it's used with requests (请再说一次), plans (明天再来) and offers (再喝一杯).",
+     "pattern": "再 + verb",
+     "examples": [
+      [
+       "请再说一次。",
+       "Qǐng zài shuō yí cì.",
+       "Please say it once more."
+      ],
+      [
+       "你明天再来吧。",
+       "Nǐ míngtiān zài lái ba.",
+       "Come back tomorrow."
+      ],
+      [
+       "我想再喝一杯茶。",
+       "Wǒ xiǎng zài hē yì bēi chá.",
+       "I'd like another cup of tea."
+      ]
+     ]
+    },
+    {
+     "heading": "Later, then",
+     "text": "再 can also mean 'and then / later', putting one action off until after another: 吃了饭再去 'go after eating'.",
+     "examples": [
+      [
+       "我们吃了饭再去。",
+       "Wǒmen chīle fàn zài qù.",
+       "Let's go after we've eaten."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "For something that already happened again, Chinese uses 又 (yòu), not 再: 他昨天又来了 'he came again yesterday'. You'll meet 又 at HSK 2."
+   ],
+   "tip": "Ask someone to repeat: 请再说一次 is one of the most useful sentences you can learn."
+  },
+  "g1-19": {
+   "title": "也 and 还: also, too, in addition",
+   "summary": "也 (yě) is 'also / too'. 还 (hái) is 'also / in addition', adding one more thing. Both go before the verb, never at the end of the sentence like English 'too'.",
+   "sections": [
+    {
+     "heading": "也: also, too, either",
+     "text": "也 goes after the subject and before the verb or adjective. With a negative it means 'either': 我也不去 'I'm not going either'.",
+     "pattern": "subject + 也 + verb / adjective",
+     "examples": [
+      [
+       "我也是学生。",
+       "Wǒ yě shì xuésheng.",
+       "I'm a student too."
+      ],
+      [
+       "他喜欢喝茶，我也喜欢。",
+       "Tā xǐhuan hē chá, wǒ yě xǐhuan.",
+       "He likes tea, and so do I."
+      ],
+      [
+       "我也不知道。",
+       "Wǒ yě bù zhīdào.",
+       "I don't know either."
+      ]
+     ]
+    },
+    {
+     "heading": "还: and also, on top of that",
+     "text": "还 adds something more to what was just said, often about the same person: 'and also'. (还 also means 'still', which you'll practise later.)",
+     "pattern": "…，(subject +) 还 + verb …",
+     "examples": [
+      [
+       "他有一个哥哥，还有一个妹妹。",
+       "Tā yǒu yí ge gēge, hái yǒu yí ge mèimei.",
+       "He has an older brother, and a younger sister too."
+      ],
+      [
+       "我买了水果，还买了茶。",
+       "Wǒ mǎile shuǐguǒ, hái mǎile chá.",
+       "I bought fruit, and tea as well."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "我是学生也 is wrong: 也 never ends a sentence. 我也是学生.",
+    "也我是学生 is wrong: 也 comes after the subject.",
+    "Use 也 when a second person does the same thing (他去，我也去); use 还 when the same person does one more thing."
+   ],
+   "tip": "Short answer 'me too': 我也是. 'Me neither': 我也不…"
+  },
+  "g1-20": {
+   "title": "Negatives: 不, 没 (有), 不要",
+   "summary": "Chinese has two everyday words for 'not'. 不 (bù) negates the present, the future, habits, wishes and adjectives. 没 (méi) negates things that happened (didn't) and 有 (doesn't have). 不要 is 'don't!'.",
+   "sections": [
+    {
+     "heading": "不: not (now, later, usually)",
+     "text": "Use 不 for what is, will be, or usually happens: 我不喝酒 (I don't drink), 我明天不去 (I won't go tomorrow), 他不是老师, 不贵 (not expensive). 不 is said bú before a 4th tone: 不是 bú shì, 不去 bú qù.",
+     "pattern": "不 + verb / adjective",
+     "examples": [
+      [
+       "我不喝咖啡。",
+       "Wǒ bù hē kāfēi.",
+       "I don't drink coffee."
+      ],
+      [
+       "他不是老师。",
+       "Tā bú shì lǎoshī.",
+       "He isn't a teacher."
+      ],
+      [
+       "明天我不去。",
+       "Míngtiān wǒ bú qù.",
+       "I'm not going tomorrow."
+      ]
+     ]
+    },
+    {
+     "heading": "没 (有): didn't, doesn't have",
+     "text": "Use 没 or 没有 for actions that didn't happen: 我昨天没去. And always use 没 with 有: 我没有钱 'I don't have any money'. 不有 doesn't exist.",
+     "pattern": "没 (有) + verb · 没有 + noun",
+     "examples": [
+      [
+       "我昨天没去学校。",
+       "Wǒ zuótiān méi qù xuéxiào.",
+       "I didn't go to school yesterday."
+      ],
+      [
+       "我没有时间。",
+       "Wǒ méiyǒu shíjiān.",
+       "I don't have time."
+      ],
+      [
+       "他还没吃饭。",
+       "Tā hái méi chī fàn.",
+       "He hasn't eaten yet."
+      ]
+     ]
+    },
+    {
+     "heading": "不要: don't!",
+     "text": "不要 + verb tells someone not to do something.",
+     "pattern": "不要 + verb",
+     "examples": [
+      [
+       "不要说话。",
+       "Bú yào shuō huà.",
+       "Don't talk."
+      ],
+      [
+       "不要喝太多。",
+       "Bú yào hē tài duō.",
+       "Don't drink too much."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "不有 is always wrong: 没有.",
+    "With 没 the 了 goes: 我没吃饭, not 我没吃饭了.",
+    "我昨天不去 is wrong for 'I didn't go yesterday': past events take 没: 我昨天没去."
+   ],
+   "tip": "Ask: did it (not) happen? → 没. Is it (not) the case, or won't it happen? → 不."
+  },
+  "g1-21": {
+   "title": "在 + place: where something happens",
+   "summary": "To say where you do something, put 在 + place before the verb: 我在家吃饭 'I eat at home', literally 'I at home eat'. The place always comes before the action in Chinese.",
+   "sections": [
+    {
+     "heading": "Subject + 在 + place + verb",
+     "text": "English puts the place at the end (I study at school); Chinese puts it before the verb (我在学校学习). Time, if there is one, goes before the place: 我明天在家学习.",
+     "pattern": "subject + (time) + 在 + place + verb",
+     "examples": [
+      [
+       "我在家吃饭。",
+       "Wǒ zài jiā chī fàn.",
+       "I eat at home."
+      ],
+      [
+       "他在学校学习汉语。",
+       "Tā zài xuéxiào xuéxí Hànyǔ.",
+       "He studies Chinese at school."
+      ],
+      [
+       "我明天在饭馆等你。",
+       "Wǒ míngtiān zài fànguǎn děng nǐ.",
+       "I'll wait for you at the restaurant tomorrow."
+      ]
+     ]
+    },
+    {
+     "heading": "在 as the main verb: be at",
+     "text": "With no other verb, 在 itself means 'to be (at a place)': 我在家 'I'm at home'. Negative: 不在 'isn't here / isn't in'.",
+     "pattern": "subject + 在 + place",
+     "examples": [
+      [
+       "老师在教室里。",
+       "Lǎoshī zài jiàoshì li.",
+       "The teacher is in the classroom."
+      ],
+      [
+       "王先生不在。",
+       "Wáng xiānsheng bú zài.",
+       "Mr Wang isn't in."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "我吃饭在家 is wrong: the place goes before the verb: 我在家吃饭.",
+    "For 'is located at' don't use 是: 他在北京, not 他是北京 (which would mean 'he is Beijing')."
+   ],
+   "tip": "Chinese order is roughly: who → when → where → what. 我 / 明天 / 在家 / 学习。"
+  },
+  "g1-22": {
+   "title": "和 and 对 as prepositions: with, to",
+   "summary": "和 (hé) before a person can mean 'with': 我和朋友去 'I go with a friend'. 对 (duì) before a person means 'to / towards': 他对我很好 'he is good to me'. Both phrases go before the verb.",
+   "sections": [
+    {
+     "heading": "和 + person + verb: with",
+     "text": "Doing something together with someone: 和 + person + (一起) + verb. 一起 'together' is often added. 跟 (gēn) is used in exactly the same way, especially in the north.",
+     "pattern": "subject + 和 + person + (一起) + verb",
+     "examples": [
+      [
+       "我和朋友一起去看电影。",
+       "Wǒ hé péngyou yìqǐ qù kàn diànyǐng.",
+       "I'm going to see a film with a friend."
+      ],
+      [
+       "我想和你说话。",
+       "Wǒ xiǎng hé nǐ shuō huà.",
+       "I'd like to talk with you."
+      ]
+     ]
+    },
+    {
+     "heading": "对 + person: to, towards",
+     "text": "对 introduces who an attitude or action is directed at: 对我很好 'good to me', 对他说 'say to him'.",
+     "pattern": "subject + 对 + person + adjective / verb",
+     "examples": [
+      [
+       "老师对我们很好。",
+       "Lǎoshī duì wǒmen hěn hǎo.",
+       "The teacher is very good to us."
+      ],
+      [
+       "他对我说：“谢谢你。”",
+       "Tā duì wǒ shuō: “Xièxie nǐ.”",
+       "He said to me, 'Thank you.'"
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "我去看电影和朋友 is wrong: the 'with' phrase goes before the verb: 我和朋友去看电影.",
+    "他很好对我 is wrong: 他对我很好."
+   ],
+   "tip": "我和他 at the start of a sentence can mean 'he and I' (both doing it) or 'I, with him': the meaning is the same in practice."
+  },
+  "g1-23": {
+   "title": "和: and (between nouns)",
+   "summary": "和 (hé) means 'and', but only between nouns and pronouns: 爸爸和妈妈, 我和你. It doesn't join verbs, adjectives or sentences the way English 'and' does.",
+   "sections": [
+    {
+     "heading": "Noun + 和 + noun",
+     "text": "Use 和 to join people or things. With a list of three or more, Chinese uses the pause comma 、 between the others and 和 before the last: 茶、咖啡和水.",
+     "pattern": "noun + 和 + noun",
+     "examples": [
+      [
+       "我爸爸和妈妈都是老师。",
+       "Wǒ bàba hé māma dōu shì lǎoshī.",
+       "My dad and mum are both teachers."
+      ],
+      [
+       "我要一杯茶和一个苹果。",
+       "Wǒ yào yì bēi chá hé yí ge píngguǒ.",
+       "I'd like a cup of tea and an apple."
+      ],
+      [
+       "我喜欢茶、咖啡和水。",
+       "Wǒ xǐhuan chá, kāfēi hé shuǐ.",
+       "I like tea, coffee and water."
+      ]
+     ]
+    },
+    {
+     "heading": "Joining actions: no 和",
+     "text": "To join two actions, Chinese just puts them side by side, or uses 也 or 还: 我喜欢看书，也喜欢看电视 'I like reading and watching TV'.",
+     "examples": [
+      [
+       "我喜欢看书，也喜欢看电视。",
+       "Wǒ xǐhuan kàn shū, yě xǐhuan kàn diànshì.",
+       "I like reading and watching TV."
+      ],
+      [
+       "他会说汉语，还会说英语。",
+       "Tā huì shuō Hànyǔ, hái huì shuō Yīngyǔ.",
+       "He can speak Chinese and English."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "我吃饭和看书 is wrong: 和 can't join verb phrases.",
+    "她很漂亮和很高 is wrong: join adjectives with 又…又… (HSK 2) or just 她很漂亮，也很高.",
+    "Never start a sentence with 和 to mean 'And…'."
+   ],
+   "tip": "If you can put 'and' between two things you could point at, 和 works. If they are actions, use 也 or 还."
+  },
+  "g1-24": {
+   "title": "的: of, 's, and describing words",
+   "summary": "的 (de) links a describer to the noun it describes: possession (我的书 'my book'), and descriptions (很好的朋友 'a very good friend'). The describer always comes first.",
+   "sections": [
+    {
+     "heading": "Possession: A 的 B",
+     "text": "A 的 B is 'A's B' or 'B of A': 老师的手机 'the teacher's phone', 我的名字 'my name'. With family, close relations and institutions you belong to, 的 is usually dropped: 我妈妈, 我们学校.",
+     "pattern": "owner + 的 + thing",
+     "examples": [
+      [
+       "这是老师的手机。",
+       "Zhè shì lǎoshī de shǒujī.",
+       "This is the teacher's phone."
+      ],
+      [
+       "我的名字叫小王。",
+       "Wǒ de míngzi jiào Xiǎo Wáng.",
+       "My name is Xiao Wang."
+      ]
+     ]
+    },
+    {
+     "heading": "Description: adjective + 的 + noun",
+     "text": "With a longer description (很 + adjective, a two-syllable adjective, a phrase), use 的: 很好的朋友, 漂亮的衣服. With short, common one-syllable adjectives it's usually dropped: 好朋友, 大饭馆.",
+     "pattern": "description + 的 + noun",
+     "examples": [
+      [
+       "他是我很好的朋友。",
+       "Tā shì wǒ hěn hǎo de péngyou.",
+       "He's a very good friend of mine."
+      ],
+      [
+       "我想买一件漂亮的衣服。",
+       "Wǒ xiǎng mǎi yí jiàn piàoliang de yīfu.",
+       "I want to buy a nice piece of clothing."
+      ]
+     ]
+    },
+    {
+     "heading": "的 without the noun",
+     "text": "When it's clear what you mean, the noun after 的 can be dropped: 这本书是我的 'this book is mine'.",
+     "examples": [
+      [
+       "这本书是我的。",
+       "Zhè běn shū shì wǒ de.",
+       "This book is mine."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Order: describer first. 'A friend of mine' is 我的朋友, not 朋友的我.",
+    "Don't overuse 的 with family: 我妈妈 is more natural than 我的妈妈 in speech."
+   ],
+   "tip": "Read 的 as a little arrow pointing to the noun it belongs to: 我的 → 书."
+  },
+  "g1-25": {
+   "title": "了 after a verb: done, completed",
+   "summary": "Put 了 (le) right after a verb to show the action is completed: 我买了一本书 'I bought a book'. It's about completion, not exactly 'past tense': Chinese verbs don't change form.",
+   "sections": [
+    {
+     "heading": "Verb + 了 + (amount +) object",
+     "text": "This 了 is most natural when the object has a number or some detail: 我喝了两杯茶, 他买了三本书. A bare object (我吃了饭) can sound unfinished, as if more is coming.",
+     "pattern": "subject + verb + 了 + number + measure word + noun",
+     "examples": [
+      [
+       "我买了一本书。",
+       "Wǒ mǎile yì běn shū.",
+       "I bought a book."
+      ],
+      [
+       "他喝了两杯茶。",
+       "Tā hēle liǎng bēi chá.",
+       "He drank two cups of tea."
+      ],
+      [
+       "昨天我看了一个电影。",
+       "Zuótiān wǒ kànle yí ge diànyǐng.",
+       "I saw a film yesterday."
+      ]
+     ]
+    },
+    {
+     "heading": "Didn't and did you?",
+     "text": "The negative is 没 + verb, and 了 disappears: 我没买. Questions add 吗 or 没有 at the end: 你买了吗？ 你买了没有？",
+     "pattern": "没 + verb · …了吗？ · …了没有？",
+     "examples": [
+      [
+       "我没买。",
+       "Wǒ méi mǎi.",
+       "I didn't buy it."
+      ],
+      [
+       "你吃饭了吗？",
+       "Nǐ chī fàn le ma?",
+       "Have you eaten?"
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "我没买了 is wrong: no 了 with 没.",
+    "了 isn't used for past habits or states: 我以前常常去 (I used to go often) has no 了.",
+    "了 isn't 'past tense': it can describe the future too: 明天吃了饭我们去 'tomorrow, after we've eaten, we'll go'."
+   ],
+   "tip": "For the other 了, at the end of a sentence for a change of situation, see the lesson on 了 for change."
+  },
+  "g1-26": {
+   "title": "Sentence-final particles: 吗, 吧, 呢, 了",
+   "summary": "Short particles at the end of a sentence change what it does: 吗 turns it into a yes/no question, 吧 makes a suggestion, 呢 asks 'and you?' or shows something is ongoing, and 了 marks a change.",
+   "sections": [
+    {
+     "heading": "吗: yes / no question",
+     "text": "Add 吗 (ma) to any statement to ask it as a yes/no question. The word order doesn't change.",
+     "pattern": "statement + 吗？",
+     "examples": [
+      [
+       "你是学生吗？",
+       "Nǐ shì xuésheng ma?",
+       "Are you a student?"
+      ],
+      [
+       "你喜欢中国菜吗？",
+       "Nǐ xǐhuan Zhōngguó cài ma?",
+       "Do you like Chinese food?"
+      ]
+     ]
+    },
+    {
+     "heading": "吧: let's…, how about…",
+     "text": "吧 (ba) softens a sentence into a suggestion or gentle request: 我们走吧 'let's go', 你坐吧 'do sit down'.",
+     "pattern": "suggestion + 吧",
+     "examples": [
+      [
+       "我们走吧。",
+       "Wǒmen zǒu ba.",
+       "Let's go."
+      ],
+      [
+       "你明天来吧。",
+       "Nǐ míngtiān lái ba.",
+       "Why don't you come tomorrow."
+      ]
+     ]
+    },
+    {
+     "heading": "呢: three uses",
+     "text": "1) After a noun or pronoun: 'and…? / what about…?': 我很好，你呢？ 2) In a question-word question, a softer, more thoughtful tone: 我们去哪儿呢？ 3) At the end of a statement: the action is ongoing: 他在睡觉呢 (see the lessons on ongoing actions).",
+     "examples": [
+      [
+       "我很好，你呢？",
+       "Wǒ hěn hǎo, nǐ ne?",
+       "I'm fine. And you?"
+      ],
+      [
+       "我们去哪儿吃饭呢？",
+       "Wǒmen qù nǎr chī fàn ne?",
+       "So where shall we eat?"
+      ],
+      [
+       "他在睡觉呢。",
+       "Tā zài shuì jiào ne.",
+       "He's sleeping."
+      ]
+     ]
+    },
+    {
+     "heading": "了: something has changed",
+     "text": "了 at the very end of a sentence says the situation is new or different now: 下雨了 'it's started raining', 我二十岁了 'I'm twenty now'. See the lesson on 了 for change.",
+     "examples": [
+      [
+       "下雨了。",
+       "Xià yǔ le.",
+       "It's raining (now)."
+      ],
+      [
+       "我不去了。",
+       "Wǒ bú qù le.",
+       "I'm not going after all."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Don't use 吗 with a question word: 你叫什么名字？ not 你叫什么名字吗？",
+    "Don't use 吗 with an A-not-A question: 你去不去？ not 你去不去吗？"
+   ],
+   "tip": "你呢？ is the easiest way to keep a conversation going: answer, then hand the question back."
+  },
+  "g1-27": {
+   "title": "喂: hello? (on the phone)",
+   "summary": "喂 is the word you say when you pick up the phone or call someone: 'hello?'. On the phone it's usually said wéi; said wèi it's a sharp 'hey!' to get attention, which can sound rude.",
+   "sections": [
+    {
+     "heading": "Answering and starting a call",
+     "text": "Pick up with 喂 (wéi), often followed by 你好 or a question about who's there.",
+     "examples": [
+      [
+       "喂，你好！",
+       "Wéi, nǐ hǎo!",
+       "Hello?"
+      ],
+      [
+       "喂，请问王老师在吗？",
+       "Wéi, qǐngwèn Wáng lǎoshī zài ma?",
+       "Hello, may I ask if Teacher Wang is there?"
+      ],
+      [
+       "喂，是小李吗？",
+       "Wéi, shì Xiǎo Lǐ ma?",
+       "Hello, is that Xiao Li?"
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Shouting 喂！(wèi) at a waiter or stranger is impolite. Use 服务员 for a waiter, or 你好 / 请问 to start politely."
+   ],
+   "tip": "请问 'may I ask' is the polite way to open a question to anyone: 请问，火车站在哪儿？"
+  },
+  "g1-28": {
+   "title": "Phrases of equal parts (联合短语)",
+   "summary": "A coordinate phrase joins two or more equal parts: 'dad and mum', 'teachers and students'. Between nouns Chinese uses 和, or nothing at all for familiar pairs.",
+   "sections": [
+    {
+     "heading": "With and without 和",
+     "text": "Nouns of equal standing are joined with 和: 老师和学生. Very familiar pairs are often just put side by side with no 和 at all: 爸爸妈妈, 哥哥姐姐. In lists, the pause comma 、 separates the items.",
+     "pattern": "A + 和 + B · AB (familiar pairs)",
+     "examples": [
+      [
+       "老师和学生都来了。",
+       "Lǎoshī hé xuésheng dōu lái le.",
+       "The teachers and students have all come."
+      ],
+      [
+       "我爸爸妈妈在北京工作。",
+       "Wǒ bàba māma zài Běijīng gōngzuò.",
+       "My mum and dad work in Beijing."
+      ],
+      [
+       "桌子上有书、手机和水。",
+       "Zhuōzi shang yǒu shū, shǒujī hé shuǐ.",
+       "On the table there's a book, a phone and some water."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Remember 和 only joins nouns and pronouns; for actions use 也 or 还 (see the lesson on 和 as 'and')."
+   ],
+   "tip": "A coordinate phrase acts as one unit, so 都 often follows it: 我和他都…"
+  },
+  "g1-29": {
+   "title": "Describer + head (偏正短语)",
+   "summary": "The single most important word-order rule in Chinese: the describing part always comes before the thing it describes. 好朋友 'good friend', 我的书 'my book', 很好 'very good', 不去 'not go'.",
+   "sections": [
+    {
+     "heading": "Describing a noun",
+     "text": "Adjectives, possessors, numbers and longer descriptions all go before the noun, often with 的: 新衣服, 中国菜, 老师的手机, 三个学生.",
+     "pattern": "describer (+ 的) + noun",
+     "examples": [
+      [
+       "他是我的好朋友。",
+       "Tā shì wǒ de hǎo péngyou.",
+       "He's my good friend."
+      ],
+      [
+       "我很喜欢吃中国菜。",
+       "Wǒ hěn xǐhuan chī Zhōngguó cài.",
+       "I really like Chinese food."
+      ]
+     ]
+    },
+    {
+     "heading": "Describing a verb or adjective",
+     "text": "Adverbs go before the verb or adjective they modify: 很好, 不去, 都来, 也是, 在看书.",
+     "pattern": "adverb + verb / adjective",
+     "examples": [
+      [
+       "他们都来了。",
+       "Tāmen dōu lái le.",
+       "They've all come."
+      ],
+      [
+       "今天天气很好。",
+       "Jīntiān tiānqì hěn hǎo.",
+       "The weather is very good today."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "English puts some describers after the noun ('a friend of mine', 'the man in the shop'); Chinese never does: 我的朋友, 商店里的人."
+   ],
+   "tip": "If you're unsure where a word goes, move it earlier: in Chinese, describers lead."
+  },
+  "g1-30": {
+   "title": "Verb + object (动宾短语)",
+   "summary": "A verb and the thing it acts on: 喝茶 'drink tea', 看书 'read', 学习汉语 'study Chinese'. As in English, the verb comes first.",
+   "sections": [
+    {
+     "heading": "Verb first, then object",
+     "text": "Chinese is verb–object like English. Many common activities are verb + object pairs that are used together so often they feel like one word: 吃饭 'eat (a meal)', 看书 'read', 打电话 'make a phone call'.",
+     "pattern": "verb + object",
+     "examples": [
+      [
+       "我每天早上喝茶。",
+       "Wǒ měi tiān zǎoshang hē chá.",
+       "I drink tea every morning."
+      ],
+      [
+       "我在学习汉语。",
+       "Wǒ zài xuéxí Hànyǔ.",
+       "I'm studying Chinese."
+      ],
+      [
+       "我给妈妈打电话。",
+       "Wǒ gěi māma dǎ diànhuà.",
+       "I phone my mum."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Some English verbs have no object but their Chinese equivalent needs one: 'eat' is usually 吃饭, 'read' 看书. 我在吃 alone sounds incomplete."
+   ],
+   "tip": "Learn activities as pairs: 吃饭, 喝水, 看书, 写字, 说汉语."
+  },
+  "g1-31": {
+   "title": "Subject + predicate inside a sentence (主谓短语)",
+   "summary": "A small 'sentence within a sentence': a subject-and-predicate unit used as part of a bigger sentence. Very common in descriptions like 他身体很好 'he is in good health' (literally 'he, body very good').",
+   "sections": [
+    {
+     "heading": "Topic + (subject + predicate)",
+     "text": "Chinese often names a topic first, then says something about one part of it: 他身体很好 'as for him, health is good'. 我们学校学生很多 'our school has lots of students'.",
+     "pattern": "topic + subject + predicate",
+     "examples": [
+      [
+       "他身体很好。",
+       "Tā shēntǐ hěn hǎo.",
+       "He's in good health."
+      ],
+      [
+       "我们学校学生很多。",
+       "Wǒmen xuéxiào xuésheng hěn duō.",
+       "Our school has a lot of students."
+      ]
+     ]
+    },
+    {
+     "heading": "As an object",
+     "text": "The whole subject-and-predicate unit can be the object of verbs like 知道 'know' and 喜欢 'like'.",
+     "pattern": "知道 / 喜欢 + (subject + predicate)",
+     "examples": [
+      [
+       "我知道你是老师。",
+       "Wǒ zhīdào nǐ shì lǎoshī.",
+       "I know you're a teacher."
+      ],
+      [
+       "我不知道他去哪儿了。",
+       "Wǒ bù zhīdào tā qù nǎr le.",
+       "I don't know where he's gone."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "No 'that' is needed: 我知道你是老师, not 我知道那你是老师."
+   ],
+   "tip": "Topic-first sentences (他身体很好) sound very natural in Chinese; try them instead of 他的身体很好."
+  },
+  "g1-32": {
+   "title": "Number + measure word (数量短语)",
+   "summary": "A number and its measure word make a unit, 三个, 一本, 两杯, that goes before a noun, or stands on its own when the noun is already clear.",
+   "sections": [
+    {
+     "heading": "Before the noun",
+     "text": "The number-measure unit comes before the noun: 三个学生, 一杯茶. 这 / 那 / 几 can take the number's place: 这本, 几个.",
+     "pattern": "number + measure word + noun",
+     "examples": [
+      [
+       "我有两本汉语书。",
+       "Wǒ yǒu liǎng běn Hànyǔ shū.",
+       "I have two Chinese books."
+      ],
+      [
+       "教室里有十个学生。",
+       "Jiàoshì li yǒu shí ge xuésheng.",
+       "There are ten students in the classroom."
+      ]
+     ]
+    },
+    {
+     "heading": "On its own",
+     "text": "Once the noun is known, the number-measure unit can stand alone: 你要几个？ 我要两个.",
+     "examples": [
+      [
+       "苹果你要几个？我要两个。",
+       "Píngguǒ nǐ yào jǐ ge? Wǒ yào liǎng ge.",
+       "How many apples do you want? Two."
+      ],
+      [
+       "这本书很好，那本也不错。",
+       "Zhè běn shū hěn hǎo, nà běn yě búcuò.",
+       "This book is good, and that one's not bad either."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Don't drop the measure word when the noun is dropped: 我要两个, not 我要两."
+   ],
+   "tip": "The measure word is what lets the noun disappear: keep it."
+  },
+  "g1-33": {
+   "title": "Preposition + object (介宾短语)",
+   "summary": "A preposition with its object, 在家, 和朋友, 对我, makes a phrase that says where, with whom or towards whom. In Chinese it goes before the verb, not after.",
+   "sections": [
+    {
+     "heading": "Before the verb",
+     "text": "English: 'I eat with friends at home'. Chinese: 我在家和朋友吃饭, 'I at home with friends eat'. The preposition phrase sits between the subject and the verb.",
+     "pattern": "subject + preposition + object + verb",
+     "examples": [
+      [
+       "我在家看电视。",
+       "Wǒ zài jiā kàn diànshì.",
+       "I watch TV at home."
+      ],
+      [
+       "我和朋友去饭馆。",
+       "Wǒ hé péngyou qù fànguǎn.",
+       "I'm going to a restaurant with a friend."
+      ],
+      [
+       "他对我很好。",
+       "Tā duì wǒ hěn hǎo.",
+       "He's good to me."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "我看电视在家 is wrong: 我在家看电视.",
+    "Several preposition phrases can stack before the verb: 我明天在家和朋友吃饭."
+   ],
+   "tip": "Picture the verb as the last stop: everything that sets the scene (when, where, with whom) comes first."
+  },
+  "g1-34": {
+   "title": "Location phrases (方位短语)",
+   "summary": "A noun plus a location word, 桌子上, 家里, 学校前边, works as a single place phrase. It's the 'where' in 有 sentences, and the object of 在.",
+   "sections": [
+    {
+     "heading": "As the object of 在",
+     "text": "在 + location phrase says where someone or something is, or where an action happens.",
+     "pattern": "在 + noun + 上 / 里 / 前边…",
+     "examples": [
+      [
+       "你的书在桌子上。",
+       "Nǐ de shū zài zhuōzi shang.",
+       "Your book is on the table."
+      ],
+      [
+       "我在教室里等你。",
+       "Wǒ zài jiàoshì li děng nǐ.",
+       "I'll wait for you in the classroom."
+      ]
+     ]
+    },
+    {
+     "heading": "As the start of a 有 sentence",
+     "text": "To say what is at a place, the location phrase comes first, then 有: 桌子上有一本书 'there's a book on the table'. (See the lesson on 有 for existence.)",
+     "pattern": "location phrase + 有 + thing",
+     "examples": [
+      [
+       "桌子上有一本书。",
+       "Zhuōzi shang yǒu yì běn shū.",
+       "There's a book on the table."
+      ],
+      [
+       "学校前边有很多车。",
+       "Xuéxiào qiánbian yǒu hěn duō chē.",
+       "There are lots of cars in front of the school."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Don't put 在 at the start of a 有 sentence: 桌子上有一本书, not 在桌子上有一本书 (heard, but not standard)."
+   ],
+   "tip": "The location phrase is like a mini noun meaning 'the table-top' or 'inside the house': treat it as a place name."
+  },
+  "g1-35": {
+   "title": "The subject",
+   "summary": "The subject is who or what the sentence is about. It's usually a noun, a pronoun, or a noun phrase, and it comes first, before the verb. Chinese often leaves it out when it's obvious.",
+   "sections": [
+    {
+     "heading": "Nouns and noun phrases as subject",
+     "text": "Any noun or noun phrase can be the subject: 我, 王老师, 这本书, 我的朋友.",
+     "pattern": "subject + predicate",
+     "examples": [
+      [
+       "这本书很好。",
+       "Zhè běn shū hěn hǎo.",
+       "This book is good."
+      ],
+      [
+       "我的朋友是老师。",
+       "Wǒ de péngyou shì lǎoshī.",
+       "My friend is a teacher."
+      ]
+     ]
+    },
+    {
+     "heading": "Leaving the subject out",
+     "text": "When it's clear from context, the subject is often dropped, especially in answers: 你去吗？ — 去。 'Are you going?' 'Yes (I'm going).'",
+     "examples": [
+      [
+       "你去吗？去。",
+       "Nǐ qù ma? Qù.",
+       "Are you going? Yes."
+      ],
+      [
+       "吃饭了吗？吃了。",
+       "Chī fàn le ma? Chī le.",
+       "Have you eaten? Yes."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Don't add an 'it' subject that English needs: 'It's raining' is 下雨了, not 它下雨了."
+   ],
+   "tip": "Short answers are just the verb: 是, 去, 有, 会, 喜欢."
+  },
+  "g1-36": {
+   "title": "Nouns and numbers as the predicate",
+   "summary": "For age, dates, days, times, prices and where someone is from, Chinese can use a noun or a number as the whole predicate, with no 是: 今天星期一, 我三十岁, 这个十块钱.",
+   "sections": [
+    {
+     "heading": "No 是 needed",
+     "text": "With these kinds of information the noun or number goes straight after the subject. Adding 是 is also correct but less common in speech for ages and prices.",
+     "pattern": "subject + noun / number (+ measure word)",
+     "examples": [
+      [
+       "今天星期一。",
+       "Jīntiān xīngqīyī.",
+       "Today is Monday."
+      ],
+      [
+       "我三十岁。",
+       "Wǒ sānshí suì.",
+       "I'm thirty."
+      ],
+      [
+       "现在八点。",
+       "Xiànzài bā diǎn.",
+       "It's eight o'clock."
+      ],
+      [
+       "这个苹果五块钱。",
+       "Zhège píngguǒ wǔ kuài qián.",
+       "This apple is five yuan."
+      ]
+     ]
+    },
+    {
+     "heading": "But the negative needs 不是",
+     "text": "To negate, put 不是 in: 今天不是星期一.",
+     "pattern": "subject + 不是 + noun / number",
+     "examples": [
+      [
+       "今天不是星期一。",
+       "Jīntiān bú shì xīngqīyī.",
+       "Today isn't Monday."
+      ],
+      [
+       "我不是三十岁，我二十九岁。",
+       "Wǒ bú shì sānshí suì, wǒ èrshíjiǔ suì.",
+       "I'm not thirty, I'm twenty-nine."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "今天不星期一 is wrong: the negative needs 是: 今天不是星期一."
+   ],
+   "tip": "Ask the same way: 今天星期几？ 你多大？ 这个多少钱？ — no 是 there either."
+  },
+  "g1-37": {
+   "title": "Verbs and adjectives as the predicate",
+   "summary": "Most predicates are verbs (我喝茶) or adjectives (她很高). The important difference from English: an adjective predicate needs no 'be' verb — 她很高 'she (is) tall', never 她是高.",
+   "sections": [
+    {
+     "heading": "Verb predicates",
+     "text": "Subject + verb (+ object). The verb never changes form for person or time: 我去, 他去, 昨天去, 明天去.",
+     "pattern": "subject + verb (+ object)",
+     "examples": [
+      [
+       "我喝茶。",
+       "Wǒ hē chá.",
+       "I drink tea."
+      ],
+      [
+       "他明天去北京。",
+       "Tā míngtiān qù Běijīng.",
+       "He's going to Beijing tomorrow."
+      ]
+     ]
+    },
+    {
+     "heading": "Adjective predicates: no 是",
+     "text": "In Chinese the adjective itself works as the verb, so 是 isn't used. In a plain statement add 很 (see the lesson on degree adverbs).",
+     "pattern": "subject + 很 + adjective",
+     "examples": [
+      [
+       "她很漂亮。",
+       "Tā hěn piàoliang.",
+       "She's beautiful."
+      ],
+      [
+       "我今天很忙。",
+       "Wǒ jīntiān hěn máng.",
+       "I'm busy today."
+      ],
+      [
+       "这个饭馆不贵。",
+       "Zhège fànguǎn bú guì.",
+       "This restaurant isn't expensive."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "她是漂亮 and 我是忙 are the most common beginner mistakes: drop 是, add 很.",
+    "Negate an adjective with 不 alone: 不贵, not 不很贵 (which means 'not very expensive')."
+   ],
+   "tip": "If the English has 'is' + adjective, the Chinese has 很 + adjective."
+  },
+  "g1-38": {
+   "title": "The object",
+   "summary": "The object is what the verb acts on. It follows the verb and is usually a noun, a pronoun or a noun phrase: 我认识他, 他买了三本书.",
+   "sections": [
+    {
+     "heading": "After the verb",
+     "text": "As in English, the object comes after the verb. Pronouns don't change: 我 is both 'I' and 'me'.",
+     "pattern": "subject + verb + object",
+     "examples": [
+      [
+       "我认识他。",
+       "Wǒ rènshi tā.",
+       "I know him."
+      ],
+      [
+       "他喜欢中国菜。",
+       "Tā xǐhuan Zhōngguó cài.",
+       "He likes Chinese food."
+      ],
+      [
+       "我买了三本汉语书。",
+       "Wǒ mǎile sān běn Hànyǔ shū.",
+       "I bought three Chinese books."
+      ]
+     ]
+    },
+    {
+     "heading": "Moving the object to the front",
+     "text": "To emphasise the object, it can move to the very start as a topic: 这本书我看了 'This book, I've read'.",
+     "examples": [
+      [
+       "这个菜我不喜欢。",
+       "Zhège cài wǒ bù xǐhuan.",
+       "This dish, I don't like."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Separable verbs like 睡觉 and 说话 can't take a further object (see that lesson)."
+   ],
+   "tip": "Fronting the object (这个我知道) is natural in speech when you're picking out one thing."
+  },
+  "g1-39": {
+   "title": "Describing a noun (定语)",
+   "summary": "Everything that describes a noun comes before it: whose it is, how many, what kind. When several describers stack up, they follow a fixed order: 那三个很好的朋友 'those three very good friends'.",
+   "sections": [
+    {
+     "heading": "Kinds of describer",
+     "text": "Nouns (中国朋友 'Chinese friend', 汉语书 'Chinese book'), adjective phrases (很大的饭馆), and number-measure phrases (三个学生) all go before the noun. Adjective phrases take 的; short nouns and one-syllable adjectives usually don't.",
+     "pattern": "describer (+ 的) + noun",
+     "examples": [
+      [
+       "我有很多中国朋友。",
+       "Wǒ yǒu hěn duō Zhōngguó péngyou.",
+       "I have lots of Chinese friends."
+      ],
+      [
+       "这是一个很大的饭馆。",
+       "Zhè shì yí ge hěn dà de fànguǎn.",
+       "This is a very big restaurant."
+      ]
+     ]
+    },
+    {
+     "heading": "The order when they stack",
+     "text": "Owner → this/that → number + measure word → description → noun: 我的那三本汉语书 'those three Chinese books of mine'.",
+     "pattern": "owner (的) + 这/那 + number + measure word + description + noun",
+     "examples": [
+      [
+       "那三个很好的朋友都是我的同学。",
+       "Nà sān ge hěn hǎo de péngyou dōu shì wǒ de tóngxué.",
+       "Those three very good friends are all my classmates."
+      ],
+      [
+       "我的那两本书在哪儿？",
+       "Wǒ de nà liǎng běn shū zài nǎr?",
+       "Where are those two books of mine?"
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "很好朋友 is wrong: with 很 you need 的: 很好的朋友. (Or drop 很: 好朋友.)",
+    "The number-measure goes before the description: 三个好朋友, not 好三个朋友."
+   ],
+   "tip": "Say the order out loud a few times: 'mine — those — three — good — friends': 我的那三个好朋友."
+  },
+  "g1-40": {
+   "title": "Describing the action (状语): time, place, manner",
+   "summary": "Words that tell you when, where or how an action happens go before the verb, never after it: 我明天在家学习 'I'll study at home tomorrow', literally 'I tomorrow at home study'.",
+   "sections": [
+    {
+     "heading": "Adverbs before the verb",
+     "text": "Adverbs like 很, 都, 也, 不, 常常 come right before the verb or adjective.",
+     "examples": [
+      [
+       "我常常喝茶。",
+       "Wǒ chángcháng hē chá.",
+       "I often drink tea."
+      ],
+      [
+       "他们也去。",
+       "Tāmen yě qù.",
+       "They're going too."
+      ]
+     ]
+    },
+    {
+     "heading": "Time and place",
+     "text": "Time comes before place, and both come before the verb. The time word can go before or after the subject: 我明天… or 明天我…",
+     "pattern": "(time +) subject + (time) + 在 + place + verb",
+     "examples": [
+      [
+       "我明天在家学习。",
+       "Wǒ míngtiān zài jiā xuéxí.",
+       "I'll study at home tomorrow."
+      ],
+      [
+       "明天下午我在学校等你。",
+       "Míngtiān xiàwǔ wǒ zài xuéxiào děng nǐ.",
+       "Tomorrow afternoon I'll wait for you at school."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "我学习在家明天 follows English order and is wrong: 我明天在家学习.",
+    "Time words don't go at the end: 我去北京明天 is wrong."
+   ],
+   "tip": "Chinese tells the story in order: first when, then where, then what happens."
+  },
+  "g1-41": {
+   "title": "How many times: verb + number + 次",
+   "summary": "To say how many times an action happens, put number + 次 (cì, 'time') after the verb: 去了两次 'went twice', 看了三次 'watched it three times'.",
+   "sections": [
+    {
+     "heading": "Verb + (了) + number + 次",
+     "text": "The count goes after the verb (and after 了, if there is one). 一次 is 'once', 两次 'twice', 几次 'how many times'.",
+     "pattern": "verb + (了) + number + 次",
+     "examples": [
+      [
+       "这个电影我看了两次。",
+       "Zhège diànyǐng wǒ kànle liǎng cì.",
+       "I've watched this film twice."
+      ],
+      [
+       "请再说一次。",
+       "Qǐng zài shuō yí cì.",
+       "Please say it once more."
+      ],
+      [
+       "你去了几次北京？",
+       "Nǐ qùle jǐ cì Běijīng?",
+       "How many times have you been to Beijing?"
+      ]
+     ]
+    },
+    {
+     "heading": "Where the object goes",
+     "text": "With an ordinary noun object, 次 usually comes before it: 去了两次北京. With a pronoun object, 次 comes after it: 我找了他三次 'I looked for him three times'.",
+     "examples": [
+      [
+       "我去了两次中国。",
+       "Wǒ qùle liǎng cì Zhōngguó.",
+       "I've been to China twice."
+      ],
+      [
+       "我给他打了三次电话。",
+       "Wǒ gěi tā dǎle sān cì diànhuà.",
+       "I called him three times."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "我两次去了北京 puts the count in the wrong place: 我去了两次北京.",
+    "Two times is 两次, not 二次."
+   ],
+   "tip": "第一次 is 'the first time' (an ordinal); 一次 is 'once' (a count)."
+  },
+  "g1-42": {
+   "title": "Sentences with a verb (动词谓语句)",
+   "summary": "The basic Chinese sentence: subject + verb + object, the same order as English: 我喝茶 'I drink tea'. The verb never changes form; time and place words go in front of it.",
+   "sections": [
+    {
+     "heading": "Subject + verb + object",
+     "text": "No conjugation, no tense endings: 我去, 你去, 他去 all use the same 去. When something happened is shown by time words (昨天, 明天) and particles like 了, not by changing the verb.",
+     "pattern": "subject + (time) + (place) + verb + object",
+     "examples": [
+      [
+       "我喝茶。",
+       "Wǒ hē chá.",
+       "I drink tea."
+      ],
+      [
+       "他昨天去了医院。",
+       "Tā zuótiān qùle yīyuàn.",
+       "He went to the hospital yesterday."
+      ],
+      [
+       "我们明天在家吃饭。",
+       "Wǒmen míngtiān zài jiā chī fàn.",
+       "We'll eat at home tomorrow."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Don't try to mark tense on the verb: 他去了 (he went) and 他会去 (he will go) get their meaning from 了 and 会, not from a different form of 去."
+   ],
+   "tip": "Build sentences outward from the verb: what → plus where → plus when."
+  },
+  "g1-43": {
+   "title": "Sentences with an adjective (形容词谓语句)",
+   "summary": "To describe something, Chinese uses subject + (adverb) + adjective, with no 'is': 天气很好 'the weather is good'. In a plain statement the adverb is usually 很.",
+   "sections": [
+    {
+     "heading": "Subject + 很 + adjective",
+     "text": "The adjective is the predicate. 很 makes it a plain description; without it the sentence suggests a comparison (这个好，那个不好 'this one's good, that one isn't').",
+     "pattern": "subject + 很 / 非常 / 太…了 + adjective",
+     "examples": [
+      [
+       "天气很好。",
+       "Tiānqì hěn hǎo.",
+       "The weather is nice."
+      ],
+      [
+       "这个苹果非常大。",
+       "Zhège píngguǒ fēicháng dà.",
+       "This apple is really big."
+      ],
+      [
+       "我今天太累了。",
+       "Wǒ jīntiān tài lèi le.",
+       "I'm so tired today."
+      ]
+     ]
+    },
+    {
+     "heading": "Negative and question",
+     "text": "Negative: 不 + adjective, with no 很: 不贵, 不忙. Question: add 吗, or use adjective-不-adjective: 贵不贵？",
+     "examples": [
+      [
+       "这个不贵。",
+       "Zhège bú guì.",
+       "This isn't expensive."
+      ],
+      [
+       "你忙不忙？",
+       "Nǐ máng bu máng?",
+       "Are you busy?"
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "天气是好 is wrong: 天气很好.",
+    "In an A-not-A question there's no 很: 贵不贵？ not 很贵不贵？"
+   ],
+   "tip": "When an English sentence is 'X is + adjective', the Chinese is 'X 很 + adjective'."
+  },
+  "g1-44": {
+   "title": "Sentences with a noun predicate (名词谓语句)",
+   "summary": "For dates, days, times, ages, prices and hometowns, a noun or number phrase can be the predicate with no verb at all: 今天十号 'today is the 10th', 他北京人 'he's from Beijing'.",
+   "sections": [
+    {
+     "heading": "Where you'll use it",
+     "text": "Dates (今天十号), days of the week (明天星期六), clock time (现在三点), age (她二十岁), price (这个十块), origin (他上海人). 是 can be added, and is common with origin: 他是上海人.",
+     "pattern": "subject + date / time / age / price",
+     "examples": [
+      [
+       "明天星期六。",
+       "Míngtiān xīngqīliù.",
+       "Tomorrow is Saturday."
+      ],
+      [
+       "现在下午三点。",
+       "Xiànzài xiàwǔ sān diǎn.",
+       "It's three in the afternoon."
+      ],
+      [
+       "我女儿五岁。",
+       "Wǒ nǚ'ér wǔ suì.",
+       "My daughter is five."
+      ]
+     ]
+    },
+    {
+     "heading": "Negative: 不是",
+     "text": "The negative always brings 是 back: 明天不是星期六.",
+     "examples": [
+      [
+       "明天不是星期六，是星期五。",
+       "Míngtiān bú shì xīngqīliù, shì xīngqīwǔ.",
+       "Tomorrow isn't Saturday, it's Friday."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "明天不星期六 is wrong: 明天不是星期六."
+   ],
+   "tip": "These are exactly the sentences you'll use most in daily life: practise saying today's date and the time aloud."
+  },
+  "g1-45": {
+   "title": "Sentences without a subject (非主谓句)",
+   "summary": "Some complete sentences have no subject at all: weather (下雨了 'it's raining'), greetings and thanks (谢谢！), commands (请坐！) and one-word reactions (好！ 对！).",
+   "sections": [
+    {
+     "heading": "Common subject-less sentences",
+     "text": "Weather and natural events don't need an 'it': 下雨了, 刮风了. Greetings, thanks and short answers stand alone. Commands normally have no subject either.",
+     "examples": [
+      [
+       "下雨了。",
+       "Xià yǔ le.",
+       "It's raining."
+      ],
+      [
+       "谢谢！",
+       "Xièxie!",
+       "Thank you!"
+      ],
+      [
+       "请坐。",
+       "Qǐng zuò.",
+       "Please sit down."
+      ],
+      [
+       "对！",
+       "Duì!",
+       "Right!"
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "它下雨了 is wrong: there's no 'it' in weather sentences."
+   ],
+   "tip": "Short answers are often just one word: 好 (OK), 对 (right), 是 (yes, that's right), 没有 (no / didn't)."
+  },
+  "g1-46": {
+   "title": "Statements (陈述句)",
+   "summary": "A statement tells something. It ends with a full stop 。 and can be positive (我是学生) or negative (我不是学生). Most of what you say is statements.",
+   "sections": [
+    {
+     "heading": "Positive and negative",
+     "text": "Make a statement negative with 不 (present, future, habits, adjectives, 是) or 没 (past actions, 有). The rest of the sentence stays the same.",
+     "examples": [
+      [
+       "我是英国人。",
+       "Wǒ shì Yīngguó rén.",
+       "I'm British."
+      ],
+      [
+       "我不是中国人。",
+       "Wǒ bú shì Zhōngguó rén.",
+       "I'm not Chinese."
+      ],
+      [
+       "我昨天没去学校。",
+       "Wǒ zuótiān méi qù xuéxiào.",
+       "I didn't go to school yesterday."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Chinese uses the hollow full stop 。 and the pause comma 、 between list items; the ordinary comma ， separates clauses."
+   ],
+   "tip": "A statement turns into a yes/no question just by adding 吗 (see the next lesson)."
+  },
+  "g1-47": {
+   "title": "Yes/no questions with 吗 (是非问句)",
+   "summary": "The easiest question in Chinese: take any statement and add 吗 (ma) at the end. Nothing else changes: 你是学生 → 你是学生吗？",
+   "sections": [
+    {
+     "heading": "Statement + 吗",
+     "text": "Unlike English, there's no word-order change and no 'do' or 'does'. The answer repeats the verb (or adjective), not 'yes' or 'no': 是 / 不是, 去 / 不去, 有 / 没有.",
+     "pattern": "statement + 吗？",
+     "examples": [
+      [
+       "你是学生吗？是。",
+       "Nǐ shì xuésheng ma? Shì.",
+       "Are you a student? Yes."
+      ],
+      [
+       "你喜欢喝茶吗？不喜欢。",
+       "Nǐ xǐhuan hē chá ma? Bù xǐhuan.",
+       "Do you like tea? No."
+      ],
+      [
+       "你有时间吗？有。",
+       "Nǐ yǒu shíjiān ma? Yǒu.",
+       "Do you have time? Yes."
+      ]
+     ]
+    },
+    {
+     "heading": "Checking with 好吗 / 可以吗 / 对吗",
+     "text": "Add a short tag to a statement to ask for agreement: …，好吗？ 'OK?', …，可以吗？ 'is that all right?', …，对吗？ 'right?'.",
+     "examples": [
+      [
+       "我们明天去，好吗？",
+       "Wǒmen míngtiān qù, hǎo ma?",
+       "Let's go tomorrow, OK?"
+      ],
+      [
+       "你是王老师，对吗？",
+       "Nǐ shì Wáng lǎoshī, duì ma?",
+       "You're Teacher Wang, right?"
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Don't answer with just 'yes': Chinese has no single word for it. Repeat the verb: 去 / 不去.",
+    "No 吗 if the sentence already has a question word or an A-not-A form."
+   ],
+   "tip": "Rising intonation without 吗 (你去北京？) shows surprise: 'You're going to Beijing?'"
+  },
+  "g1-48": {
+   "title": "Questions with a question word (特指问句)",
+   "summary": "These ask for a specific piece of information: who, what, where, when, how many. The question word goes exactly where the answer will go, and there's no 吗.",
+   "sections": [
+    {
+     "heading": "Answer slot = question word",
+     "text": "Start from the answer you expect and swap in the question word: 我去北京 → 你去哪儿？ 他是王老师 → 他是谁？ 我八点上班 → 你几点上班？",
+     "pattern": "same order as the statement, question word in the answer's place",
+     "examples": [
+      [
+       "你几点上班？我八点上班。",
+       "Nǐ jǐ diǎn shàng bān? Wǒ bā diǎn shàng bān.",
+       "What time do you start work? Eight."
+      ],
+      [
+       "你在哪儿工作？我在医院工作。",
+       "Nǐ zài nǎr gōngzuò? Wǒ zài yīyuàn gōngzuò.",
+       "Where do you work? At a hospital."
+      ],
+      [
+       "你什么时候去中国？明年去。",
+       "Nǐ shénme shíhou qù Zhōngguó? Míngnián qù.",
+       "When are you going to China? Next year."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "你去哪儿吗？ is wrong: no 吗 with a question word.",
+    "Time questions go before the verb, like time answers: 你什么时候去？ not 你去什么时候？"
+   ],
+   "tip": "See the lesson on question words for which word to use: 谁, 什么, 哪儿, 几, 多少, 怎么, 怎么样."
+  },
+  "g1-49": {
+   "title": "Verb-not-verb questions (正反问句)",
+   "summary": "Another way to ask yes/no: say the verb or adjective, then 不 plus the same word: 你去不去？ 'are you going or not?'. It's very common in speech and never takes 吗.",
+   "sections": [
+    {
+     "heading": "A 不 A",
+     "text": "Repeat the verb or adjective with 不 in between: 是不是, 去不去, 好不好, 贵不贵. The 不 is said lightly. With 有, use 没: 有没有.",
+     "pattern": "verb / adjective + 不 + verb / adjective",
+     "examples": [
+      [
+       "你是不是老师？",
+       "Nǐ shì bu shì lǎoshī?",
+       "Are you a teacher?"
+      ],
+      [
+       "你明天来不来？",
+       "Nǐ míngtiān lái bu lái?",
+       "Are you coming tomorrow?"
+      ],
+      [
+       "你有没有时间？",
+       "Nǐ yǒu méiyǒu shíjiān?",
+       "Do you have time?"
+      ]
+     ]
+    },
+    {
+     "heading": "Two-syllable verbs",
+     "text": "With a two-syllable verb you can repeat just the first syllable: 喜不喜欢, or the whole word: 喜欢不喜欢. For completed actions, add 没有 at the end: 你吃饭了没有？",
+     "examples": [
+      [
+       "你喜不喜欢喝茶？",
+       "Nǐ xǐ bu xǐhuan hē chá?",
+       "Do you like tea?"
+      ],
+      [
+       "你吃饭了没有？",
+       "Nǐ chī fàn le méiyǒu?",
+       "Have you eaten (yet)?"
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "你去不去吗？ is wrong: never add 吗.",
+    "There's no 很, 都 or 也 in front of the A-not-A: 你也去不去 is wrong."
+   ],
+   "tip": "A-not-A questions sound a little more direct than 吗 questions; both are fine in conversation."
+  },
+  "g1-50": {
+   "title": "Requests and commands (祈使句)",
+   "summary": "To ask or tell someone to do something: 请 + verb is polite ('please'), 不要 + verb is 'don't', and verb + 吧 makes a friendly suggestion.",
+   "sections": [
+    {
+     "heading": "请: please",
+     "text": "请 (qǐng) goes before the verb: 请坐 'please sit', 请进 'please come in', 请喝茶 'please have some tea'.",
+     "pattern": "请 + verb",
+     "examples": [
+      [
+       "请进。",
+       "Qǐng jìn.",
+       "Please come in."
+      ],
+      [
+       "请喝茶。",
+       "Qǐng hē chá.",
+       "Please have some tea."
+      ]
+     ]
+    },
+    {
+     "heading": "不要: don't",
+     "text": "不要 + verb tells someone not to do something. 别 (bié) means the same and is more casual.",
+     "pattern": "不要 / 别 + verb",
+     "examples": [
+      [
+       "不要在这儿吃东西。",
+       "Bú yào zài zhèr chī dōngxi.",
+       "Don't eat here."
+      ],
+      [
+       "别说话。",
+       "Bié shuō huà.",
+       "Don't talk."
+      ]
+     ]
+    },
+    {
+     "heading": "吧: let's, why don't you",
+     "text": "Verb + 吧 softens an instruction into a suggestion: 我们走吧 'let's go', 你休息吧 'why don't you rest'.",
+     "pattern": "(我们 / 你) + verb + 吧",
+     "examples": [
+      [
+       "我们走吧。",
+       "Wǒmen zǒu ba.",
+       "Let's go."
+      ],
+      [
+       "你坐吧。",
+       "Nǐ zuò ba.",
+       "Go ahead and sit down."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Don't put 请 at the end like English 'please': 请坐, not 坐请."
+   ],
+   "tip": "With strangers, start with 请. With friends, verb + 吧 sounds warm and natural."
+  },
+  "g1-51": {
+   "title": "Exclamations (感叹句)",
+   "summary": "To express strong feeling: 太 + adjective + 了！ 'so…!', 真 + adjective！ 'really…!'. They end with an exclamation mark.",
+   "sections": [
+    {
+     "heading": "太…了！ and 真…！",
+     "text": "太…了 is the most common exclamation: 太好了！ 太贵了！ 真 + adjective is another: 真漂亮！ 你的汉语真好！",
+     "pattern": "太 + adjective + 了！ · 真 + adjective！",
+     "examples": [
+      [
+       "太好了！",
+       "Tài hǎo le!",
+       "Great!"
+      ],
+      [
+       "这个饭馆的菜太好吃了！",
+       "Zhège fànguǎn de cài tài hǎochī le!",
+       "The food at this restaurant is so good!"
+      ],
+      [
+       "今天真冷！",
+       "Jīntiān zhēn lěng!",
+       "It's really cold today!"
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Don't forget 了 with 太 in exclamations: 太好了！, not just 太好！ (which sounds cut off)."
+   ],
+   "tip": "太好了！ is the go-to reply to good news."
+  },
+  "g1-52": {
+   "title": "是 sentences: A is B (是字句)",
+   "summary": "是 (shì) links two nouns: 'A is B'. It says who or what something is, or what group it belongs to: 我是学生, 他是我哥哥. It's not used before adjectives.",
+   "sections": [
+    {
+     "heading": "Noun + 是 + noun",
+     "text": "Identity (这是我的手机 'this is my phone') and category (他是老师 'he's a teacher'). Negative: 不是. Question: 是…吗？ or 是不是…？",
+     "pattern": "A + 是 + B · A + 不是 + B",
+     "examples": [
+      [
+       "我是学生。",
+       "Wǒ shì xuésheng.",
+       "I'm a student."
+      ],
+      [
+       "他是我哥哥。",
+       "Tā shì wǒ gēge.",
+       "He's my older brother."
+      ],
+      [
+       "这不是我的书。",
+       "Zhè bú shì wǒ de shū.",
+       "This isn't my book."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "是 is not for adjectives: 我很忙, not 我是忙.",
+    "是 is not for location: 他在家, not 他是家.",
+    "No article is needed: 我是学生 is more natural than 我是一个学生."
+   ],
+   "tip": "If both sides of 'is' are nouns, use 是. If the right side is a description, use 很 + adjective."
+  },
+  "g1-53": {
+   "title": "有 sentences: have (有字句)",
+   "summary": "有 (yǒu) means 'to have': 我有一个哥哥 'I have an older brother'. Its negative is always 没有, never 不有.",
+   "sections": [
+    {
+     "heading": "Owner + 有 + thing",
+     "text": "The thing owned often comes with a number and measure word: 我有两本书. Questions: 你有…吗？ or 你有没有…？",
+     "pattern": "owner + 有 + (number + measure word) + thing",
+     "examples": [
+      [
+       "我有一个哥哥。",
+       "Wǒ yǒu yí ge gēge.",
+       "I have an older brother."
+      ],
+      [
+       "你有时间吗？",
+       "Nǐ yǒu shíjiān ma?",
+       "Do you have time?"
+      ],
+      [
+       "我没有钱。",
+       "Wǒ méiyǒu qián.",
+       "I don't have any money."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "不有 is always wrong: 没有.",
+    "Answer the question with 有 or 没有, not 是."
+   ],
+   "tip": "有 also means 'there is' when a place comes first: see the lesson on 有 for existence."
+  },
+  "g1-54": {
+   "title": "Place + 是 + noun: what is at a place",
+   "summary": "Place + 是 + noun identifies what is at a particular spot: 学校旁边是一个饭馆 'next to the school is a restaurant'. It's used when you're saying exactly what occupies that place.",
+   "sections": [
+    {
+     "heading": "Place + 是 + thing",
+     "text": "Start with the location phrase, then 是, then what's there. It answers 'what is it that's there?', and usually implies that's the (only) thing there.",
+     "pattern": "location + 是 + noun",
+     "examples": [
+      [
+       "学校旁边是一个饭馆。",
+       "Xuéxiào pángbiān shì yí ge fànguǎn.",
+       "Next to the school is a restaurant."
+      ],
+      [
+       "我前边是王老师。",
+       "Wǒ qiánbian shì Wáng lǎoshī.",
+       "In front of me is Teacher Wang."
+      ],
+      [
+       "桌子上是我的书。",
+       "Zhuōzi shang shì wǒ de shū.",
+       "What's on the table is my book."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Compare 有: 桌子上有一本书 'there is a book on the table' (introducing something). 是 identifies what is there."
+   ],
+   "tip": "Use 有 to introduce something new; use 是 to say which thing it is."
+  },
+  "g1-55": {
+   "title": "Place + 有 + thing: there is",
+   "summary": "To say 'there is / there are', Chinese starts with the place, then 有: 桌子上有一本书 'there's a book on the table'. The thing being introduced is usually new information, often with a number.",
+   "sections": [
+    {
+     "heading": "Place + 有 + number + measure word + noun",
+     "text": "The place comes first (not 'there is… on the table' but 'on the table has…'). Negative: 没有. Question: 有…吗？",
+     "pattern": "location + 有 + (number + measure word) + noun",
+     "examples": [
+      [
+       "桌子上有一本书。",
+       "Zhuōzi shang yǒu yì běn shū.",
+       "There's a book on the table."
+      ],
+      [
+       "学校里有很多学生。",
+       "Xuéxiào li yǒu hěn duō xuésheng.",
+       "There are lots of students in the school."
+      ],
+      [
+       "这儿附近有没有饭馆？",
+       "Zhèr fùjìn yǒu méiyǒu fànguǎn?",
+       "Is there a restaurant near here?"
+      ]
+     ]
+    },
+    {
+     "heading": "有 or 在?",
+     "text": "有 introduces something unknown at a place: 桌子上有一本书. 在 tells you where a known thing is: 我的书在桌子上 'my book is on the table'. Notice the order flips.",
+     "examples": [
+      [
+       "我的手机在哪儿？在桌子上。",
+       "Wǒ de shǒujī zài nǎr? Zài zhuōzi shang.",
+       "Where's my phone? On the table."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "有一本书在桌子上 is a translation of English and sounds wrong: 桌子上有一本书.",
+    "Don't use 有 for a specific, known thing: 我的书在桌子上, not 桌子上有我的书 (unless you're listing what's there)."
+   ],
+   "tip": "Known thing → 在. New thing → 有."
+  },
+  "g1-56": {
+   "title": "Two verbs in a row: going somewhere to do something",
+   "summary": "Chinese can line up two verb phrases in the order they happen, with no word like 'to' or 'and' between them: 我去商店买东西 'I'm going to the shop to buy things'. The second action is the purpose of the first.",
+   "sections": [
+    {
+     "heading": "去 / 来 + place + purpose",
+     "text": "The first verb is usually 去 or 来 with a place; the second says what you'll do there. The order follows time: you go first, then buy.",
+     "pattern": "subject + 去 / 来 + place + verb + object",
+     "examples": [
+      [
+       "我去商店买东西。",
+       "Wǒ qù shāngdiàn mǎi dōngxi.",
+       "I'm going to the shop to buy some things."
+      ],
+      [
+       "他来中国学习汉语。",
+       "Tā lái Zhōngguó xuéxí Hànyǔ.",
+       "He came to China to study Chinese."
+      ],
+      [
+       "我们去饭馆吃饭吧。",
+       "Wǒmen qù fànguǎn chī fàn ba.",
+       "Let's go to a restaurant to eat."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "我去买东西商店 is wrong: the place goes with 去: 我去商店买东西.",
+    "No 'to' word is needed: don't insert 为了 for simple purposes like these."
+   ],
+   "tip": "Tell it like a little story in order: go (where) → do (what)."
+  },
+  "g1-57": {
+   "title": "Two verbs in a row: how you do something",
+   "summary": "In another kind of verb series, the first verb is the way or means: 我坐飞机去北京 'I'm going to Beijing by plane' (literally 'I sit plane go Beijing').",
+   "sections": [
+    {
+     "heading": "Means + action",
+     "text": "Transport is the classic case: 坐 + vehicle (taking a bus, train, plane, taxi), 开车 (driving), then 去 / 来 + place. The means always comes first.",
+     "pattern": "subject + 坐 + vehicle / 开车 + 去 / 来 + place",
+     "examples": [
+      [
+       "我坐飞机去北京。",
+       "Wǒ zuò fēijī qù Běijīng.",
+       "I'm flying to Beijing."
+      ],
+      [
+       "他每天开车上班。",
+       "Tā měi tiān kāi chē shàng bān.",
+       "He drives to work every day."
+      ],
+      [
+       "我们坐出租车去吧。",
+       "Wǒmen zuò chūzūchē qù ba.",
+       "Let's take a taxi."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "我去北京坐飞机 means 'I'm going to Beijing to take a plane' (purpose), not 'by plane': put the means first.",
+    "Use 坐 (sit), not 开 (drive), for buses, trains, planes and taxis you ride in."
+   ],
+   "tip": "Ask 'how?' with 怎么: 你怎么去？ — 我坐火车去。"
+  },
+  "g1-58": {
+   "title": "Double objects: give someone something",
+   "summary": "A few verbs take two objects: a person and a thing. The person comes first: 我给你一本书 'I give you a book'. The common ones are 给 (give), 教 (teach) and 问 (ask).",
+   "sections": [
+    {
+     "heading": "Verb + person + thing",
+     "text": "The order is fixed: who receives first, what is given second. English also allows 'give a book to you', but Chinese doesn't with these verbs.",
+     "pattern": "subject + 给 / 教 / 问 + person + thing",
+     "examples": [
+      [
+       "我给你一本书。",
+       "Wǒ gěi nǐ yì běn shū.",
+       "I'll give you a book."
+      ],
+      [
+       "王老师教我们汉语。",
+       "Wáng lǎoshī jiāo wǒmen Hànyǔ.",
+       "Teacher Wang teaches us Chinese."
+      ],
+      [
+       "我想问你一个问题。",
+       "Wǒ xiǎng wèn nǐ yí ge wèntí.",
+       "I'd like to ask you a question."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "我给一本书你 is wrong: 我给你一本书.",
+    "教 here is said jiāo (to teach); in 教室 'classroom' it's jiào."
+   ],
+   "tip": "Remember the order as 'to whom, then what': 给 + 他 + 一杯水."
+  },
+  "g1-59": {
+   "title": "Two clauses side by side, no linking word",
+   "summary": "Chinese often puts two clauses next to each other with just a comma and lets the listener work out the connection: 我很忙，没有时间 'I'm busy, (so) I don't have time'. Where English needs 'so', 'and' or 'because', Chinese can say nothing.",
+   "sections": [
+    {
+     "heading": "The comma does the work",
+     "text": "The relationship (cause, sequence, contrast, condition) is clear from meaning. This is normal, natural Chinese, not lazy grammar. Later you'll learn the linking words (因为…所以…, 但是), but everyday speech uses them less than English does.",
+     "pattern": "clause 1，clause 2。",
+     "examples": [
+      [
+       "我很忙，没有时间。",
+       "Wǒ hěn máng, méiyǒu shíjiān.",
+       "I'm busy, so I don't have time."
+      ],
+      [
+       "你去，我也去。",
+       "Nǐ qù, wǒ yě qù.",
+       "If you go, I'll go too."
+      ],
+      [
+       "下雨了，我们不去了。",
+       "Xià yǔ le, wǒmen bú qù le.",
+       "It's raining, so we're not going."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Don't feel you must translate every 'so' or 'because'; two short clauses often sound more natural."
+   ],
+   "tip": "When the second clause has the same subject, drop it: 我很忙，没有时间 (not 我很忙，我没有时间)."
+  },
+  "g1-60": {
+   "title": "…，也…: and also (two similar facts)",
+   "summary": "To say two similar things, put 也 in the second clause, before its verb: 他会说汉语，也会说英语 'he speaks Chinese, and English too'.",
+   "sections": [
+    {
+     "heading": "Clause 1，(subject +) 也 + verb",
+     "text": "也 adds a second fact that parallels the first. If the subject changes, it goes before 也: 我喜欢茶，他也喜欢茶. If it's the same, it's usually dropped.",
+     "pattern": "…，(subject +) 也 + verb…",
+     "examples": [
+      [
+       "他会说汉语，也会说英语。",
+       "Tā huì shuō Hànyǔ, yě huì shuō Yīngyǔ.",
+       "He speaks Chinese, and English too."
+      ],
+      [
+       "我喜欢喝茶，也喜欢喝咖啡。",
+       "Wǒ xǐhuan hē chá, yě xǐhuan hē kāfēi.",
+       "I like tea, and I like coffee too."
+      ],
+      [
+       "今天很冷，明天也很冷。",
+       "Jīntiān hěn lěng, míngtiān yě hěn lěng.",
+       "It's cold today, and cold tomorrow as well."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "也明天很冷 is wrong: 也 comes after the subject (明天也很冷)."
+   ],
+   "tip": "This is how to say 'A and B' when A and B are actions or descriptions, where 和 can't be used."
+  },
+  "g1-61": {
+   "title": "…，还…: and on top of that",
+   "summary": "还 in the second clause adds one more thing, often more than expected: 我买了一本书，还买了一个杯子 'I bought a book, and a cup as well'.",
+   "sections": [
+    {
+     "heading": "Clause 1，还 + verb",
+     "text": "还 goes before the second verb. It's typically the same subject doing an extra thing, and it can sound like 'what's more' or 'as well'.",
+     "pattern": "…，(subject +) 还 + verb…",
+     "examples": [
+      [
+       "我买了一本书，还买了一个杯子。",
+       "Wǒ mǎile yì běn shū, hái mǎile yí ge bēizi.",
+       "I bought a book, and a cup as well."
+      ],
+      [
+       "他会开车，还会做饭。",
+       "Tā huì kāi chē, hái huì zuò fàn.",
+       "He can drive, and he can cook too."
+      ],
+      [
+       "我们吃了饭，还看了电影。",
+       "Wǒmen chīle fàn, hái kànle diànyǐng.",
+       "We had dinner, and saw a film too."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Use 还 for one person doing more; use 也 when another person does the same (他去，我也去)."
+   ],
+   "tip": "还有 at the start of a sentence means 'also / and another thing…': 还有，明天别忘了。"
+  },
+  "g1-62": {
+   "title": "Completed actions with 了 (完成态)",
+   "summary": "了 right after the verb shows an action is finished: 我买了两本书 'I bought two books'. It focuses on the action being complete, and it's most natural when the object has a number or detail.",
+   "sections": [
+    {
+     "heading": "Verb + 了 + number + object",
+     "text": "With a quantity, verb + 了 makes a complete, natural sentence: 我喝了三杯水. With a bare object, verb + 了 + object usually needs something after it: 我吃了饭就去 'I'll go after eating'.",
+     "pattern": "subject + verb + 了 + number + measure word + noun",
+     "examples": [
+      [
+       "我买了两本书。",
+       "Wǒ mǎile liǎng běn shū.",
+       "I bought two books."
+      ],
+      [
+       "他喝了三杯水。",
+       "Tā hēle sān bēi shuǐ.",
+       "He drank three glasses of water."
+      ],
+      [
+       "昨天我给妈妈打了一个电话。",
+       "Zuótiān wǒ gěi māma dǎle yí ge diànhuà.",
+       "Yesterday I phoned my mum."
+      ]
+     ]
+    },
+    {
+     "heading": "Negative and questions",
+     "text": "Negative: 没 + verb, and 了 disappears. Question: …了吗？ or …了没有？ 'Not yet' is 还没 + verb (+ 呢).",
+     "pattern": "没 + verb · …了吗？ · 还没 + verb",
+     "examples": [
+      [
+       "我没看那个电影。",
+       "Wǒ méi kàn nàge diànyǐng.",
+       "I didn't see that film."
+      ],
+      [
+       "你买了没有？还没买呢。",
+       "Nǐ mǎile méiyǒu? Hái méi mǎi ne.",
+       "Have you bought it? Not yet."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "我没买了 is wrong: 我没买.",
+    "了 isn't used with verbs of ongoing states or habits (是, 喜欢, 常常…): 我以前喜欢他, no 了."
+   ],
+   "tip": "Think 'done' rather than 'past': 了 can appear in a future plan once one step is done."
+  },
+  "g1-63": {
+   "title": "Change with 了 at the end (变化态)",
+   "summary": "了 at the end of a sentence marks a new situation, something that's become true: 下雨了 'it's started raining', 我二十岁了 'I'm twenty now', 他不去了 'he's not going any more'.",
+   "sections": [
+    {
+     "heading": "Sentence + 了: it's now the case",
+     "text": "This 了 compares now with before: the weather has changed, someone has reached an age, a plan has changed. With 不, it means 'no longer / not any more'.",
+     "pattern": "statement + 了 · 不 + verb + 了 (no longer)",
+     "examples": [
+      [
+       "下雨了。",
+       "Xià yǔ le.",
+       "It's started raining."
+      ],
+      [
+       "天冷了。",
+       "Tiān lěng le.",
+       "It's got cold."
+      ],
+      [
+       "我儿子八岁了。",
+       "Wǒ érzi bā suì le.",
+       "My son is eight now."
+      ],
+      [
+       "我不去了。",
+       "Wǒ bú qù le.",
+       "I'm not going any more."
+      ]
+     ]
+    },
+    {
+     "heading": "Two 了s in one sentence",
+     "text": "A sentence can have both: one after the verb (completed) and one at the end (up to now): 我学了一年汉语了 'I've been studying Chinese for a year (and still am)'.",
+     "examples": [
+      [
+       "我学了一年汉语了。",
+       "Wǒ xuéle yì nián Hànyǔ le.",
+       "I've been learning Chinese for a year now."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Without 了, 我二十岁 just states your age; with 了 it stresses you've reached it."
+   ],
+   "tip": "下雨了, 好了, 来了, 到了 are all used every day: practise hearing that final 了 as 'now'."
+  },
+  "g1-64": {
+   "title": "Ongoing actions with 在 / 正在 (进行态)",
+   "summary": "To say an action is in progress at a given time, put 在 or 正在 before the verb: 我在吃饭 'I'm eating', 他们正在上课 'they're in class right now'.",
+   "sections": [
+    {
+     "heading": "在 / 正在 + verb",
+     "text": "The verb doesn't change; 在 does the work of English '-ing'. 正在 adds 'right at this moment'. A time word can set the moment: 昨天八点我在看电视 'at eight yesterday I was watching TV'.",
+     "pattern": "subject + (time) + 在 / 正在 + verb",
+     "examples": [
+      [
+       "我在吃饭。",
+       "Wǒ zài chī fàn.",
+       "I'm eating."
+      ],
+      [
+       "他们正在上课。",
+       "Tāmen zhèngzài shàng kè.",
+       "They're in class at the moment."
+      ],
+      [
+       "昨天晚上八点我在看电视。",
+       "Zuótiān wǎnshang bā diǎn wǒ zài kàn diànshì.",
+       "At eight last night I was watching TV."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Negative: 没在 + verb or 没 + verb, not 不在 (which means 'not here')."
+   ],
+   "tip": "The question 你在做什么？ 'what are you doing?' uses exactly this pattern."
+  },
+  "g1-65": {
+   "title": "在 / 正在 + verb … 呢",
+   "summary": "In speech, 呢 is often added at the end of an ongoing action: 他在看电视呢 'he's watching TV (right now)'. It makes the sentence sound natural and conversational.",
+   "sections": [
+    {
+     "heading": "在 + verb + 呢",
+     "text": "在 / 正在 marks the action as ongoing; 呢 at the end reinforces 'at the moment' and softens the tone. Very common when answering what someone is up to.",
+     "pattern": "subject + 在 / 正在 + verb (+ object) + 呢",
+     "examples": [
+      [
+       "他在看电视呢。",
+       "Tā zài kàn diànshì ne.",
+       "He's watching TV."
+      ],
+      [
+       "我正在吃饭呢，一会儿给你打电话。",
+       "Wǒ zhèngzài chī fàn ne, yíhuìr gěi nǐ dǎ diànhuà.",
+       "I'm eating; I'll call you in a bit."
+      ],
+      [
+       "妈妈在做饭呢。",
+       "Māma zài zuò fàn ne.",
+       "Mum's cooking."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Don't use this 呢 with completed actions: 我吃了饭呢 is wrong."
+   ],
+   "tip": "On the phone, 我在开车呢 'I'm driving' is the perfect short reply."
+  },
+  "g1-66": {
+   "title": "… 呢 alone: still going on",
+   "summary": "呢 on its own at the end of a sentence can show that something is ongoing, without 在: 他睡觉呢 'he's asleep', 外边下雨呢 'it's raining outside'.",
+   "sections": [
+    {
+     "heading": "Verb (+ object) + 呢",
+     "text": "In casual speech, 呢 alone is enough to say an action or state is continuing. It often answers 'is he free?' or explains why something can't happen now.",
+     "pattern": "subject + verb (+ object) + 呢",
+     "examples": [
+      [
+       "他睡觉呢，别说话。",
+       "Tā shuì jiào ne, bié shuō huà.",
+       "He's sleeping, don't talk."
+      ],
+      [
+       "外边下雨呢。",
+       "Wàibian xià yǔ ne.",
+       "It's raining outside."
+      ],
+      [
+       "你等一下，我打电话呢。",
+       "Nǐ děng yíxià, wǒ dǎ diànhuà ne.",
+       "Wait a moment, I'm on the phone."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "This is spoken style; in writing, 在 / 正在 is clearer."
+   ],
+   "tip": "Three ways to say 'he's sleeping', from fullest to most casual: 他正在睡觉呢 · 他在睡觉 · 他睡觉呢."
+  },
+  "g1-67": {
+   "title": "Saying amounts of money",
+   "summary": "Chinese money is counted in 元 / 块 (yuan), 角 / 毛 (tenths) and 分 (hundredths). In speech people say 块 and 毛; prices are written with 元. Ask with 多少钱？",
+   "sections": [
+    {
+     "heading": "块 and 元",
+     "text": "Number + 块 (+ 钱) is how prices are said: 十块钱, 一百块. Written prices use 元: 10元. Two is 两块, not 二块.",
+     "pattern": "number + 块 (+ 钱) · number + 元 (written)",
+     "examples": [
+      [
+       "这个苹果三块钱。",
+       "Zhège píngguǒ sān kuài qián.",
+       "This apple is three yuan."
+      ],
+      [
+       "一共二十五块。",
+       "Yígòng èrshíwǔ kuài.",
+       "That's twenty-five yuan altogether."
+      ],
+      [
+       "这件衣服两百块。",
+       "Zhè jiàn yīfu liǎng bǎi kuài.",
+       "This piece of clothing is two hundred yuan."
+      ]
+     ]
+    },
+    {
+     "heading": "Tenths: 毛 / 角",
+     "text": "Ten 毛 (máo, spoken) or 角 (jiǎo, written) make one 块. 5.50 is 五块五 (毛), with the last unit often dropped.",
+     "examples": [
+      [
+       "五块五。",
+       "Wǔ kuài wǔ.",
+       "5.50."
+      ],
+      [
+       "这个多少钱？八块钱。",
+       "Zhège duōshao qián? Bā kuài qián.",
+       "How much is this? Eight yuan."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "二块 is wrong: 两块.",
+    "几块钱 expects a small price (under ten yuan); for any amount, ask 多少钱."
+   ],
+   "tip": "Listen for the number before 块: that's the price. Everything after is small change."
+  },
+  "g1-68": {
+   "title": "Ordinal numbers: 第 + number",
+   "summary": "第 (dì) before a number makes it an ordinal: 第一 'first', 第二 'second'. Before a noun, the measure word stays: 第一个人, 第三本书.",
+   "sections": [
+    {
+     "heading": "第 + number + measure word + noun",
+     "text": "Ordinals rank things in order. The common ones you'll hear daily: 第一次 'the first time', 第二天 'the next day', 第一个 'the first one'.",
+     "pattern": "第 + number (+ measure word + noun)",
+     "examples": [
+      [
+       "这是我第一次吃中国菜。",
+       "Zhè shì wǒ dì yī cì chī Zhōngguó cài.",
+       "This is my first time eating Chinese food."
+      ],
+      [
+       "他是我们班第一个到的。",
+       "Tā shì wǒmen bān dì yī ge dào de.",
+       "He was the first in our class to arrive."
+      ],
+      [
+       "第三本书在哪儿？",
+       "Dì sān běn shū zài nǎr?",
+       "Where's the third book?"
+      ]
+     ]
+    },
+    {
+     "heading": "Where 第 isn't used",
+     "text": "Dates, months and many fixed numbered things don't take 第: 一月 'January', 三号 'the 3rd', 二年级 'second year (of school)'.",
+     "examples": [
+      [
+       "今天三月一号。",
+       "Jīntiān sān yuè yī hào.",
+       "Today is the 1st of March."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "第一月 is wrong for January: 一月.",
+    "'Second' is 第二, never 第两."
+   ],
+   "tip": "第一 also means 'number one / the best': 安全第一 'safety first'."
+  },
+  "g1-69": {
+   "title": "Dates: year, month, day, weekday",
+   "summary": "Chinese dates go from largest to smallest: year, month, day, weekday: 2026年11月12日 星期四. Months and weekdays are just numbered.",
+   "sections": [
+    {
+     "heading": "Year, month, day",
+     "text": "Years are read digit by digit + 年: 二〇二六年 (èr líng èr liù nián). Months are number + 月: 一月 January … 十二月 December. Days are number + 号 (spoken) or 日 (written).",
+     "pattern": "year + 年 · month + 月 · day + 号 / 日",
+     "examples": [
+      [
+       "今天是2026年11月12号。",
+       "Jīntiān shì èr líng èr liù nián shíyī yuè shí'èr hào.",
+       "Today is the 12th of November 2026."
+      ],
+      [
+       "我的生日是五月八号。",
+       "Wǒ de shēngrì shì wǔ yuè bā hào.",
+       "My birthday is the 8th of May."
+      ]
+     ]
+    },
+    {
+     "heading": "Days of the week",
+     "text": "星期 + number from Monday: 星期一 Monday … 星期六 Saturday. Sunday is 星期天 or 星期日 (no seven). 周一, 周二… are a common short form.",
+     "pattern": "星期 + 一 … 六 · 星期天 / 星期日",
+     "examples": [
+      [
+       "今天星期几？今天星期四。",
+       "Jīntiān xīngqī jǐ? Jīntiān xīngqīsì.",
+       "What day is it today? Thursday."
+      ],
+      [
+       "我们星期天去吧。",
+       "Wǒmen xīngqītiān qù ba.",
+       "Let's go on Sunday."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "Years aren't read as a big number: 2026年 is 二〇二六年, not 两千零二十六年.",
+    "Sunday is not 星期七: 星期天 / 星期日.",
+    "Ask the date with 几号 and the weekday with 星期几."
+   ],
+   "tip": "Big to small, always: year → month → day → weekday → time."
+  },
+  "g1-70": {
+   "title": "Telling the time",
+   "summary": "Clock time is number + 点 (o'clock) + number + 分 (minutes): 九点十分 'ten past nine'. Half past is 半, and the part of the day comes first: 下午三点 '3 pm'.",
+   "sections": [
+    {
+     "heading": "点 and 分",
+     "text": "点 (diǎn) is the hour, 分 (fēn) the minutes. Two o'clock is 两点, not 二点. 半 is half past: 八点半. Ask with 现在几点？",
+     "pattern": "hour + 点 + (minutes + 分) · hour + 点半",
+     "examples": [
+      [
+       "现在几点？现在九点十分。",
+       "Xiànzài jǐ diǎn? Xiànzài jiǔ diǎn shí fēn.",
+       "What time is it? Ten past nine."
+      ],
+      [
+       "我八点半上课。",
+       "Wǒ bā diǎn bàn shàng kè.",
+       "My class starts at half past eight."
+      ],
+      [
+       "两点见。",
+       "Liǎng diǎn jiàn.",
+       "See you at two."
+      ]
+     ]
+    },
+    {
+     "heading": "Part of the day first",
+     "text": "早上 / 上午 morning · 中午 midday · 下午 afternoon · 晚上 evening. They come before the clock time: 晚上七点 '7 pm'. The whole time phrase goes before the verb.",
+     "pattern": "part of day + hour + 点 · time + verb",
+     "examples": [
+      [
+       "我晚上七点吃饭。",
+       "Wǒ wǎnshang qī diǎn chī fàn.",
+       "I eat dinner at 7 pm."
+      ],
+      [
+       "明天上午十点我们见面吧。",
+       "Míngtiān shàngwǔ shí diǎn wǒmen jiàn miàn ba.",
+       "Let's meet at 10 am tomorrow."
+      ]
+     ]
+    }
+   ],
+   "mistakes": [
+    "二点 is wrong: 两点.",
+    "Time goes before the verb: 我七点起床, not 我起床七点."
+   ],
+   "tip": "At HSK 2 you'll add 刻 (quarter) and 差 (to): 差五分八点 'five to eight'."
+  }
+ }
+}
