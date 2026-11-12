@@ -307,7 +307,8 @@ export const dueWords = (now = Date.now()) => allWords().filter((w) => isDue(w, 
 // words, saved-but-unstudied ones included, which is how Japanese has always worked) or caps
 // new words and reviews separately (settings.newPerDay and reviewsPerDay: Chinese). Split,
 // a saved band becomes a queue the challenge works through a set number of words a day,
-// and reviews never wait behind new words.
+// and reviews never wait behind new words: the two halves are separate challenges, each
+// started, finished and added to on its own.
 export const CHALLENGE_SIZE = 10;
 
 function limits(lang = current) {
@@ -341,15 +342,21 @@ function pickDue(now, taken) {
   ]);
 }
 
-// What "more" adds once the day's helping is done. Split, the reviews still waiting come
-// first, and only when there are none does another day's worth of new words.
-function nextBatch(now, taken) {
+// One half of a split helping: the reviews still waiting, or the next new words.
+function pickPart(kind, now, taken) {
+  const cap = limits();
+  const words = open(now, taken);
+  return kind === 'new'
+    ? idsOf(words.filter(isNew).slice(0, cap.newWords))
+    : idsOf(words.filter((word) => !isNew(word)).slice(0, cap.reviews));
+}
+
+// What "more" adds once the day's helping is done. Split, each half has its own: another
+// round of the reviews still waiting, or another day's worth of new words.
+function nextBatch(now, taken, kind) {
   const cap = limits();
   if (!cap.split) return { ids: pickDue(now, taken), kind: 'words' };
-  const words = open(now, taken);
-  const reviews = words.filter((word) => !isNew(word)).slice(0, cap.reviews);
-  if (reviews.length) return { ids: idsOf(reviews), kind: 'reviews' };
-  return { ids: idsOf(words.filter(isNew).slice(0, cap.newWords)), kind: 'new' };
+  return { ids: pickPart(kind, now, taken), kind };
 }
 
 // Which of a set of ids are new words right now. Kept with the pick, because a new word
@@ -365,6 +372,15 @@ function unstarted(pick, now) {
 
 const sameIds = (a, b) => a.length === b.length && a.every((id, i) => id === b[i]);
 
+// A split pick's two halves, by what each word was when it was picked.
+function halves(pick) {
+  const wasNew = new Set(pick.newIds || newAmong(pick.ids));
+  return {
+    newIds: pick.ids.filter((id) => wasNew.has(id)),
+    reviewIds: pick.ids.filter((id) => !wasNew.has(id)),
+  };
+}
+
 function todaysPick(now) {
   const day = dayKey(now);
   const { settings } = bucket();
@@ -374,6 +390,19 @@ function todaysPick(now) {
     pick = { day, ids, newIds: newAmong(ids) };
     settings.challenge = pick;
     commit(true);
+  } else if (limits().split) {
+    // Each half can still change until one of its own words is answered, so starting the
+    // reviews doesn't freeze today's new words, or the other way round.
+    let { newIds, reviewIds } = halves(pick);
+    const untouched = (ids) => unstarted({ ids }, now);
+    if (untouched(reviewIds)) reviewIds = pickPart('reviews', now, newIds);
+    if (untouched(newIds)) newIds = pickPart('new', now, reviewIds);
+    const ids = reviewIds.concat(newIds);
+    if (!sameIds(ids, pick.ids)) {
+      pick.ids = ids;
+      pick.newIds = newIds;
+      commit(true);
+    }
   } else if (unstarted(pick, now)) {
     // Saving a band, or changing a limit, before starting shows in today's challenge
     // straight away.
@@ -387,36 +416,52 @@ function todaysPick(now) {
   return pick;
 }
 
-// { words, done, left, more, next, newWords, reviews, queued, split }: today's words, how
-// many are done, the ones still to do, whether more could be added and what that would be,
-// how many of today's are new and how many reviews, and how many saved new words are left
-// for the days after. Never the total number due.
-export function dailyChallenge(now = Date.now()) {
-  const pick = todaysPick(now);
-  const words = pick.ids.map((id) => bucket().words[id]).filter(Boolean);
+// How a set of today's words stands: the words, how many are done, the ones still to do,
+// and — once they are all done — how many more could be added.
+function progress(ids, now, taken, kind) {
+  const words = ids.map((id) => bucket().words[id]).filter(Boolean);
   const left = words.filter((word) => !reviewedToday(word, now));
-  // A pick made before the counts were kept has no newIds; for those, what is new now.
-  const wasNew = new Set(pick.newIds || newAmong(pick.ids));
-  const newWords = words.filter((word) => wasNew.has(word.id)).length;
-  const next = left.length === 0 ? nextBatch(now, pick.ids) : { ids: [], kind: '' };
-  const picked = new Set(pick.ids);
+  const next = left.length === 0 ? nextBatch(now, taken, kind) : { ids: [], kind: '' };
   return {
     words,
     done: words.length - left.length,
     left,
     more: next.ids.length > 0,
     next: { count: next.ids.length, kind: next.kind },
-    newWords,
-    reviews: words.length - newWords,
-    queued: allWords().filter((word) => isNew(word) && !picked.has(word.id)).length,
-    split: limits().split,
-    size: words.length,
   };
 }
 
-export function extendChallenge(now = Date.now()) {
+// { words, done, left, more, next, newWords, reviews, queued, split, parts }: today's words,
+// how many are done, the ones still to do, whether more could be added and what that would
+// be, how many of today's are new and how many reviews, and how many saved new words are
+// left for the days after. Split, parts.new and parts.reviews are the two challenges, each
+// with the same words/done/left/more/next of its own. Never the total number due.
+export function dailyChallenge(now = Date.now()) {
   const pick = todaysPick(now);
-  const batch = nextBatch(now, pick.ids);
+  const split = limits().split;
+  // A pick made before the counts were kept has no newIds; for those, what is new now.
+  const { newIds, reviewIds } = halves(pick);
+  const whole = progress(pick.ids, now, pick.ids, 'reviews');
+  const picked = new Set(pick.ids);
+  const newWords = whole.words.filter((word) => newIds.includes(word.id)).length;
+  return {
+    ...whole,
+    newWords,
+    reviews: whole.words.length - newWords,
+    queued: allWords().filter((word) => isNew(word) && !picked.has(word.id)).length,
+    split,
+    size: whole.words.length,
+    parts: split ? {
+      new: progress(newIds, now, pick.ids, 'new'),
+      reviews: progress(reviewIds, now, pick.ids, 'reviews'),
+    } : null,
+  };
+}
+
+// Adds another batch to today's challenge; split, to the half named ('new' or 'reviews').
+export function extendChallenge(kind = 'reviews', now = Date.now()) {
+  const pick = todaysPick(now);
+  const batch = nextBatch(now, pick.ids, kind);
   pick.ids = pick.ids.concat(batch.ids);
   pick.newIds = (pick.newIds || []).concat(batch.kind === 'new' ? batch.ids : newAmong(batch.ids));
   commit();

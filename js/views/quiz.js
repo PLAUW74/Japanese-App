@@ -72,8 +72,17 @@ function isRightWord(word, answer) {
   return word.kana.some((k) => kataToHira(k) === kana);
 }
 
+// The daily challenge is one source, or — for a language that splits it — two: today's
+// new words and today's reviews, each a challenge of its own.
+const PARTS = { 'challenge-new': 'new', 'challenge-reviews': 'reviews' };
+const isChallengeSource = (source) => source === 'challenge' || source in PARTS;
+
+function challengePart(challenge, source) {
+  return PARTS[source] && challenge.parts ? challenge.parts[PARTS[source]] : challenge;
+}
+
 function sourceWords(source) {
-  if (source === 'challenge') return store.dailyChallenge().left;
+  if (isChallengeSource(source)) return challengePart(store.dailyChallenge(), source).left;
   if (source === 'all') return shuffle(store.allWords());
   return shuffle(store.wordsInList(source));
 }
@@ -102,56 +111,80 @@ export function createQuizView() {
 
     // Today's words; their progress is shown, never how many are due in all.
     const challenge = store.dailyChallenge();
+    const tally = (part) => (part.words.length ? `${part.done}/${part.words.length}` : '—');
+    const challengeSources = challenge.split
+      ? [['challenge-new', 'New words today', tally(challenge.parts.new)],
+        ['challenge-reviews', 'Reviews today', tally(challenge.parts.reviews)]]
+      : [['challenge', 'Daily challenge', tally(challenge)]];
     const sources = [
-      ['challenge', 'Daily challenge', challenge.words.length ? `${challenge.done}/${challenge.words.length}` : '—'],
+      ...challengeSources,
       ['all', 'All words', total],
       ...state.lists.map((list) => [list.id, list.name, store.wordsInList(list.id).length]),
     ];
-    // 'due' was the old name for reviewing; it is the daily challenge now.
-    if (!sources.some(([key]) => key === settings.source)) settings.source = 'challenge';
+    // 'due' was the old name for reviewing; it is the daily challenge now. One challenge
+    // turned into two (or back) lands on the half with something left, reviews first.
+    if (!sources.some(([key]) => key === settings.source)) {
+      settings.source = !challenge.split ? 'challenge'
+        : challenge.parts.reviews.left.length || !challenge.parts.new.left.length ? 'challenge-reviews' : 'challenge-new';
+    }
     const set = (patch, options) => { store.saveSettings(patch, options); renderSetup(); };
-    const isChallenge = settings.source === 'challenge';
-    const available = isChallenge ? challenge.left.length : sourceWords(settings.source).length;
+    const isChallenge = isChallengeSource(settings.source);
+    const kind = PARTS[settings.source] || '';
+    const part = challengePart(challenge, settings.source);
+    const available = isChallenge ? part.left.length : sourceWords(settings.source).length;
     const size = isChallenge || !settings.count ? available : Math.min(settings.count, available);
     const plural = (n) => (n === 1 ? 'word' : 'words');
     const count = (n, one, many) => `${n} ${n === 1 ? one : many}`;
     // What "more" would add, in the words the challenge is made of.
-    const moreLabel = challenge.next.kind === 'new' ? count(challenge.next.count, 'new word', 'new words')
-      : challenge.next.kind === 'reviews' ? count(challenge.next.count, 'review', 'reviews')
-        : count(challenge.next.count, 'word', 'words');
-    // Split, say what today is made of: so many reviews, so many new words, and how many
-    // saved words are still waiting their turn.
-    const makeup = challenge.split
-      ? [challenge.reviews && count(challenge.reviews, 'review', 'reviews'),
-        challenge.newWords && count(challenge.newWords, 'new word', 'new words')].filter(Boolean).join(' and ')
-      : count(challenge.words.length, 'word', 'words');
+    const moreLabel = part.next.kind === 'new' ? count(part.next.count, 'new word', 'new words')
+      : part.next.kind === 'reviews' ? count(part.next.count, 'review', 'reviews')
+        : count(part.next.count, 'word', 'words');
     const waiting = challenge.split && challenge.queued
       ? ` ${count(challenge.queued, 'more saved word is', 'more saved words are')} waiting for the days ahead.`
       : '';
+    const finished = kind === 'new' ? 'Today’s new words are done.'
+      : kind === 'reviews' ? 'Today’s reviews are done.' : 'Today’s challenge is done.';
 
     let note;
     if (!isChallenge) {
       note = available === 0
         ? 'This list has no words yet.'
         : 'Practice mode: wrong answers come back for review, right answers leave the schedule alone unless the word was due.';
-    } else if (challenge.words.length === 0) {
-      note = 'Nothing to review today. Pick “All words” to practise anyway.';
+    } else if (part.words.length === 0) {
+      note = kind === 'new'
+        ? 'No new words waiting. Save words from the dictionary (a whole HSK band is fine) and they come in here a few a day.'
+        : kind === 'reviews'
+          ? 'No reviews due today. Words you have studied come back here when they are due.'
+          : 'Nothing to review today. Pick “All words” to practise anyway.';
     } else if (available === 0) {
-      note = challenge.more
-        ? `Today’s challenge is done. Nice work! Keep going with ${moreLabel}, or come back tomorrow.`
-        : 'Today’s challenge is done. Nice work! A new one is ready tomorrow.';
-    } else if (challenge.split) {
-      note = `Today: ${makeup}. Reviews come first, the most overdue of them; new words come in the order you saved them.${waiting}`;
+      note = part.more
+        ? `${finished} Nice work! Keep going with ${moreLabel}, or come back tomorrow.`
+        : `${finished} Nice work! More tomorrow.`;
+    } else if (kind === 'new') {
+      note = `Today: ${count(part.words.length, 'new word', 'new words')}, in the order you saved them.${waiting}`;
+    } else if (kind === 'reviews') {
+      note = `Today: ${count(part.words.length, 'review', 'reviews')}, the most overdue first. Right answers push a word’s next review further out; wrong answers bring it back sooner.`;
     } else {
-      note = `Today’s ${makeup}, picked from the ones waiting longest. Right answers push a word’s next review further out; wrong answers bring it back sooner.`;
+      note = `Today’s ${count(part.words.length, 'word', 'words')}, picked from the ones waiting longest. Right answers push a word’s next review further out; wrong answers bring it back sooner.`;
     }
 
-    const action = isChallenge && available === 0 && challenge.more
-      ? h('button', { type: 'button', class: 'btn btn-primary btn-large', onclick: () => { store.extendChallenge(); renderSetup(); } }, `Another ${moreLabel}`)
+    // One half done while the other still has words: point there rather than at tomorrow.
+    const other = kind === 'new' ? 'reviews' : kind === 'reviews' ? 'new' : '';
+    const otherLeft = other ? challenge.parts[other].left.length : 0;
+    const otherLabel = other === 'new' ? count(otherLeft, 'new word', 'new words') : count(otherLeft, 'review', 'reviews');
+    if (isChallenge && available === 0 && otherLeft) note = `${note.replace(' More tomorrow.', '')} ${otherLabel} still to do today.`;
+
+    const action = isChallenge && available === 0 && part.more
+      ? h('button', { type: 'button', class: 'btn btn-primary btn-large', onclick: () => { store.extendChallenge(kind || undefined); renderSetup(); } }, `Another ${moreLabel}`)
+      : isChallenge && available === 0 && otherLeft
+        ? h('button', { type: 'button', class: 'btn btn-primary btn-large', onclick: () => set({ source: `challenge-${other}` }) },
+          `Go to ${other === 'new' ? 'new words' : 'reviews'} · ${otherLeft} left`)
       : h('button', { type: 'button', class: 'btn btn-primary btn-large', disabled: available === 0, onclick: start },
         available === 0 ? 'Start quiz'
-          : isChallenge ? `Start daily challenge · ${size} ${plural(size)} left`
-            : `Start quiz · ${size} ${size === 1 ? 'question' : 'questions'}`);
+          : kind === 'new' ? `Start new words · ${size} left`
+            : kind === 'reviews' ? `Start reviews · ${size} left`
+              : isChallenge ? `Start daily challenge · ${size} ${plural(size)} left`
+                : `Start quiz · ${size} ${size === 1 ? 'question' : 'questions'}`);
 
     el.replaceChildren(
       head,
@@ -169,15 +202,17 @@ export function createQuizView() {
         h('div', { class: 'field' }, h('span', { class: 'label' }, 'Direction'), dropdown('Direction', directions(store.getLang(), LANGUAGE_NAME[store.getLang()] || 'Word'), settings.direction, (direction) => set({ direction }))),
         // The challenge sets its own size, so the count only applies to practice.
         !isChallenge && h('div', { class: 'field' }, h('span', { class: 'label' }, 'Questions'), segmented('Questions', COUNTS, settings.count, (n) => set({ count: n }))),
-        isChallenge && challenge.split && h('div', { class: 'field' },
+        kind === 'new' && h('div', { class: 'field' },
           h('span', { class: 'label' }, 'New words a day'),
           segmented('New words a day', NEW_PER_DAY, settings.newPerDay, (n) => set({ newPerDay: n }, { notify: true }))),
-        isChallenge && challenge.split && h('div', { class: 'field' },
+        kind === 'reviews' && h('div', { class: 'field' },
           h('span', { class: 'label' }, 'Reviews a day'),
           segmented('Reviews a day', REVIEWS_PER_DAY, settings.reviewsPerDay, (n) => set({ reviewsPerDay: n }, { notify: true }))),
-        isChallenge && challenge.split && h('p', { class: 'muted small' },
-          'A change applies to today if you have not started yet, otherwise from tomorrow. '
-          + 'Reviews are capped high on purpose: let them pile up and they only get harder.'),
+        kind && h('p', { class: 'muted small' },
+          kind === 'new'
+            ? 'A change applies to today if you have not started today’s new words yet, otherwise from tomorrow.'
+            : 'A change applies to today if you have not started today’s reviews yet, otherwise from tomorrow. '
+              + 'Reviews are capped high on purpose: let them pile up and they only get harder.'),
         h('p', { class: 'muted' }, note),
         action,
       ),
@@ -189,7 +224,7 @@ export function createQuizView() {
   async function start() {
     const { settings } = store.getState();
     let words = sourceWords(settings.source);
-    if (settings.count && settings.source !== 'challenge') words = words.slice(0, settings.count);
+    if (settings.count && !isChallengeSource(settings.source)) words = words.slice(0, settings.count);
     if (!words.length) return;
 
     session = { questions: [], index: 0, right: 0, missed: [], answered: false };
