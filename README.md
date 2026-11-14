@@ -1,6 +1,6 @@
 # Kotoba
 
-A Japanese and Chinese vocab trainer that runs entirely in the browser.
+A Japanese and Chinese vocab trainer that runs entirely in the browser. https://plauw74.github.io/Japanese-App/
 
 The toggle at the top right switches language. Each one keeps its own words, lists, review
 schedule, mistakes and settings, and they sync to the same account; the study streak counts a
