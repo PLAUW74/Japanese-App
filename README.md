@@ -22,6 +22,7 @@ The pages below are the Japanese ones.
 - **Grammar quiz**: about 110 N5–N4 questions (fill the gap, JLPT-style word order) in `js/grammar-data.js`.
 - **Notes**: formatted study notes from textbook pages, each with a photo of the original page.
 - **Reading**: graded N5–N4 passages and folk tales with furigana, translations, word lists and questions.
+- **Battle**: Kotoba Battle, a turn-based word game. Spell hiragana words from a 4×4 grid to attack an enemy; words it is weak to, and words you are due to review, hit hardest. The rules and every balance number are in `js/battle.js`, the topic word lists in `js/battle-words.js`.
 - **Stats**: study streak, accuracy, word progress and upcoming reviews.
 
 ## Run it

@@ -65,6 +65,8 @@ export const search = (query) => call('search', { query });
 export const random = (count, exclude = []) => call('random', { count, exclude });
 export const verbs = (count, minLevel) => call('verbs', { count, minLevel });
 export const get =(ids) => call('get', { ids });
+// One list of entries per kana form, for checking what the battle grid spells.
+export const spell = (forms) => call('spell', { forms });
 // The vocabulary in a sentence written in 漢字{かんじ} markup, in order, without particles.
 export const words = (markup) => call('words', { markup });
 // The same from pieces a page already split ({ text, reading, annotated }).

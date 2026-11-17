@@ -12,6 +12,7 @@ import { createGrammarView } from '../views/grammar.js';
 import { createMistakesView } from '../views/mistakes.js';
 import { createNotesView } from '../views/notes.js';
 import { createStatsView } from '../views/stats.js';
+import { createBattleView } from '../views/battle.js';
 
 export default {
   code: 'ja',
@@ -30,6 +31,7 @@ export default {
     { route: 'quiz', label: 'Quiz', badge: true },
     { route: 'notes', label: 'Notes' },
     { route: 'reading', label: 'Reading' },
+    { route: 'battle', label: 'Battle' },
     { route: 'stats', label: 'Stats' },
   ],
 
@@ -43,6 +45,7 @@ export default {
     mistakes: createMistakesView,
     notes: () => createNotesView(),
     reading: () => createNotesView({ dir: 'reading', title: 'Reading', item: 'passage', newestFirst: false }),
+    battle: createBattleView,
     stats: createStatsView,
   },
 

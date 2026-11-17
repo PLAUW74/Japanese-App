@@ -413,12 +413,30 @@ function segments(parts) {
   return out;
 }
 
+// Which dictionary entries a kana string spells exactly, for the battle grid. Takes a
+// list of forms and answers one list of entries per form, so checking a whole word pool
+// costs a single message. A form nobody spells gets an empty list.
+// Ordered so the entry a learner means comes first: common with a JLPT level, then
+// common, then the rest, and among those the lower JLPT level (N5 before N4).
+function spell(forms) {
+  return forms.map((form) => {
+    const found = exactForms.get(kataToHira(form));
+    if (!found) return [];
+    return [...new Set(found)]
+      .map(decode)
+      .sort((a, b) => rank(b) - rank(a) || (b.jlpt || 0) - (a.jlpt || 0));
+  });
+}
+
+const rank = (word) => (word.common ? 2 : 0) + (word.jlpt ? 1 : 0);
+
 const handlers = {
   words: ({ markup, parts }) => words(parts || markup),
   segments: ({ list }) => list.map(segments),
   verbs: ({ count, minLevel }) => verbs(count, minLevel),
   search: ({ query }) => search(query),
   random: ({ count, exclude }) => random(count, exclude),
+  spell: ({ forms }) => spell(forms),
   get: ({ ids }) => ids.filter((id) => idToRow.has(id)).map((id) => decode(idToRow.get(id))),
 };
 
