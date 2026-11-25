@@ -1,17 +1,17 @@
 // Wrong answers from every quiz, kept until the same question is answered right or dismissed,
 // with a practice round that asks them again.
-import * as dict from '../dict.js';
+import { current as dictFor, ifAvailable } from '../dicts.js';
+import { toneVariants, marked as markedPinyin, syllables, plain as plainPinyin } from '../lang/zh/pinyin.js';
 import * as store from '../store.js';
 import {
   h, icon, speak, shuffle, quizSwitch, setChildren, confirmButton, markupReading,
   headword, reading, meaningText, toMarkup, questionSpeaker, wordSaver,
 } from '../ui.js';
-import { QUESTIONS } from '../grammar-data.js';
-import { sentence, solved, questionId } from './grammar.js';
+import { sentence, solved, questionId, grammarPool } from './grammar.js';
 import { kanaQuestion } from './kana.js';
 import { toQuestion as verbQuestion, options as verbOptions, TARGET_NAMES } from './verbs.js';
 
-const QUIZZES = { words: 'My words', kana: 'Hiragana & katakana', verbs: 'Verb forms', grammar: 'Grammar' };
+const QUIZZES = { words: 'My words', kana: 'Hiragana & katakana', verbs: 'Verb forms', grammar: 'Grammar', writing: 'Writing' };
 const JAPANESE = /[぀-ヿ㐀-鿿]/;
 const PRACTICE_MAX = 20;
 const CHOICES = 4;
@@ -23,9 +23,11 @@ const toSpeech = (text) => markupReading(text.replace(/\[\[|\]\]/g, '').replace(
 // A practice question read aloud with a pause for each gap (（　）, ★ ＿ ＿), so it doesn't
 // say the answer.
 const questionSpeech = (prompt) => toSpeech(prompt.replace(/（[\s　]*）|[★＿](?:\s*[★＿])*/g, '、'));
-// Kana questions ask about the sound itself, and an English prompt is no use to a Japanese
-// voice, so only Japanese prompts from the other quizzes get a speaker.
-const canSpeak = (item) => item.mistake.quiz !== 'kana' && JAPANESE.test(item.prompt);
+// Kana questions ask about the sound itself, and so do Chinese pinyin questions — hearing
+// 半 read aloud is hearing the answer. An English prompt is no use to the voice either. So
+// only the other quizzes' prompts in Japanese or Chinese get a speaker.
+const asksForTheSound = (item) => item.mistake.quiz === 'kana' || item.mistake.key.endsWith(':read');
+const canSpeak = (item) => !asksForTheSound(item) && JAPANESE.test(item.prompt);
 // Quizzes whose answers are made of dictionary words worth collecting.
 const SAVES_WORDS = { grammar: 'Words in this sentence', verbs: 'Save this verb' };
 
@@ -33,12 +35,29 @@ const SAVES_WORDS = { grammar: 'Words in this sentence', verbs: 'Save this verb'
 // Each returns { prompt, options: [{ text, correct }], answer, note, en } in 漢字{かんじ}
 // notation, or null when the question can't be rebuilt (say, a word since deleted).
 
+// A pinyin question again: the characters alone, and the reading among readings that
+// differ from it by a tone, as the quiz asked it.
+async function readingItem(word) {
+  const right = word.kana[0];
+  const texts = [right, ...toneVariants(right, 2)];
+  const other = shuffle(store.allWords()).find((w) => w.id !== word.id
+    && syllables(w.kana[0]).length === syllables(right).length && plainPinyin(w.kana[0]) !== plainPinyin(right));
+  if (other) texts.push(other.kana[0]);
+  return {
+    prompt: headword(word),
+    options: shuffle([...new Set(texts)].slice(0, CHOICES).map((r) => ({ text: markedPinyin(r), correct: r === right }))),
+    answer: markedPinyin(right),
+    note: meaningText(word),
+  };
+}
+
 async function wordItem(mistake, id, direction) {
   const word = store.getState().words[id];
   if (!word) return null;
+  if (direction === 'read') return readingItem(word);
   const label = direction === 'ja-en' ? (w) => meaningText(w) : (w) => toMarkup(headword(w), reading(w));
   let others = shuffle(store.allWords().filter((w) => w.id !== word.id));
-  if (others.length < CHOICES - 1) others = others.concat(await dict.random(6, [word.id]).catch(() => []));
+  if (others.length < CHOICES - 1) others = others.concat(await dictFor().random(6, [word.id]).catch(() => []));
   const seen = new Set([label(word)]);
   const options = [{ text: label(word), correct: true }];
   for (const other of others) {
@@ -63,7 +82,7 @@ function kanaItem(mistake, char, mode) {
 }
 
 async function verbItem(mistake, id, target) {
-  const word = store.getState().words[id] || (await dict.get([id]).catch(() => []))[0];
+  const word = store.getState().words[id] || (await dictFor().get([id]).catch(() => []))[0];
   const question = word && verbQuestion(word, target);
   if (!question) return null;
   return {
@@ -75,8 +94,9 @@ async function verbItem(mistake, id, target) {
   };
 }
 
-function grammarItem(mistake, id) {
-  const question = QUESTIONS.find((q) => questionId(q) === id);
+// Looked up among the notes' questions too: a mistake can come from one of those.
+async function grammarItem(mistake, id) {
+  const question = (await grammarPool()).find((q) => questionId(q) === id);
   if (!question) return null;
   const right = question.type === 'pick' ? question.options[0] : question.order[question.star];
   const choices = question.type === 'pick' ? question.options : question.order;
@@ -89,13 +109,29 @@ function grammarItem(mistake, id) {
   };
 }
 
+// A correction from the writing page: the sentence as written, the mistake marked in it,
+// and a choice between what was written and what it should be. A fix that only takes
+// something out has no right answer to show as a choice, so it stays in the list to read.
+function writingItem(mistake) {
+  const right = mistake.answer;
+  const wrong = mistake.given;
+  if (!wrong || !right || right === '(leave it out)' || wrong === right) return null;
+  return {
+    prompt: mistake.prompt,
+    options: shuffle([{ text: right, correct: true }, { text: wrong, correct: false }]),
+    answer: right,
+    note: mistake.note,
+  };
+}
+
 async function practiceItem(mistake) {
   const [quiz, ...rest] = mistake.key.split(':');
   let item = null;
   if (quiz === 'word') item = await wordItem(mistake, rest[0], rest[1]);
   else if (quiz === 'kana') item = kanaItem(mistake, rest[0], rest[1]);
   else if (quiz === 'verb') item = await verbItem(mistake, Number(rest[0]), rest[1]);
-  else if (quiz === 'grammar') item = grammarItem(mistake, rest[0]);
+  else if (quiz === 'grammar') item = await grammarItem(mistake, rest[0]);
+  else if (quiz === 'writing') item = writingItem(mistake);
   return item && { ...item, mistake };
 }
 
@@ -199,7 +235,7 @@ export function createMistakesView() {
     const [quizKey, id] = mistake.key.split(':');
     if (quizKey === 'word' && store.getState().words[id]) store.recordContext([store.getState().words[id]], option.correct);
     else if (quizKey === 'grammar' || quizKey === 'verb') {
-      dict.words(item.answer.replace(/\[\[|\]\]/g, '')).then((entries) => store.recordContext(entries, option.correct), () => {});
+      Promise.resolve(ifAvailable('words', item.answer.replace(/\[\[|\]\]/g, '')) || []).then((entries) => store.recordContext(entries, option.correct), () => {});
     }
     if (option.correct) {
       practice.right += 1;

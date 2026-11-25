@@ -4,6 +4,7 @@ import * as store from './store.js';
 import { conjugations } from './conjugate.js';
 import { kataToHira } from './kana.js';
 import { createTabMarker } from './pager.js';
+import { toned, marked as markedPinyin, markedSpaced } from './lang/zh/pinyin.js';
 
 export function h(tag, props, ...children) {
   const el = document.createElement(tag);
@@ -42,7 +43,31 @@ export function icon(name) {
   return span;
 }
 
-export const ja = (text, cls) => h('span', { lang: 'ja', class: cls }, text);
+// ---- the language on show ----
+// js/app.js sets this when the language changes. Keeping it here means speak(), ja() and
+// route() work the same in every view, and the views stay unaware of which language they
+// are drawing. It is a plain setter rather than an import of js/lang/*.js, which would be
+// a cycle: those modules import the views, and the views import this one.
+const showing = {
+  code: 'ja', tag: 'ja-JP', match: 'ja', label: 'Japanese',
+  level: { label: (n) => `JLPT N${n}` },   // how a word's level is written on its badge
+  quizPages: [],                          // the pages that share the quiz picker
+};
+
+export function setLanguage({ code, tag, match, label, level, quizPages }) {
+  Object.assign(showing, { code, tag, match, label });
+  if (level) showing.level = level;
+  if (quizPages) showing.quizPages = quizPages;
+}
+
+// A hash address inside the language on show: route('notes', id) -> '#/ja/notes/<id>'.
+export const route = (...parts) => `#/${[showing.code, ...parts.filter((p) => p != null)].join('/')}`;
+
+// The BCP 47 tag of the language on show, for marking an input or a block of its text.
+export const scriptTag = () => showing.tag;
+
+// Text in the language on show, so the browser picks the right font and voice for it.
+export const ja = (text, cls) => h('span', { lang: showing.tag, class: cls }, text);
 
 let toastTimer;
 export function toast(message) {
@@ -76,9 +101,9 @@ export function speak(text, { onend } = {}) {
     return false;
   }
   const voices = speechSynthesis.getVoices();
-  const voice = voices.find((v) => v.lang.replace('_', '-').toLowerCase().startsWith('ja'));
+  const voice = voices.find((v) => v.lang.replace('_', '-').toLowerCase().startsWith(showing.match));
   if (voices.length && !voice) {
-    toast('No Japanese voice is installed on this device');
+    toast(`No ${showing.label} voice is installed on this device`);
     return false;
   }
   const chunks = String(text).match(/[^。！？!?]+[。！？!?」]*/g)?.map((s) => s.trim()).filter(Boolean) || [];
@@ -90,7 +115,7 @@ export function speak(text, { onend } = {}) {
   const done = () => { if (speaking === session) finishSpeaking(); };
   chunks.forEach((chunk, i) => {
     const utterance = new SpeechSynthesisUtterance(chunk);
-    utterance.lang = 'ja-JP';
+    utterance.lang = showing.tag;
     utterance.rate = 0.9;
     if (voice) utterance.voice = voice;
     if (i === chunks.length - 1) utterance.onend = done;
@@ -129,8 +154,8 @@ export function speakButton(word) {
     type: 'button',
     class: 'icon-btn',
     title: 'Play pronunciation',
-    'aria-label': `Play pronunciation of ${word.kana[0]}`,
-    onclick: (event) => { event.stopPropagation(); speak(word.kana[0]); },
+    'aria-label': `Play pronunciation of ${headword(word)}`,
+    onclick: (event) => { event.stopPropagation(); speak(spokenForm(word)); },
   }, icon('speaker'));
 }
 
@@ -186,7 +211,7 @@ export function wordSaver(source, label = 'Words in this sentence', { hideSaved 
         },
       },
         icon(saved ? 'check' : 'plus'),
-        furigana(headword(entry), reading(entry)),
+        wordRuby(entry),
         h('span', { class: 'word-chip-meaning' }, entry.senses[0].gloss[0]),
       );
     }));
@@ -233,7 +258,18 @@ export function confirmButton(label, onConfirm, cls = 'btn btn-quiet danger') {
 // Words marked "usually kana" (コーヒー, ありがとう) are shown in kana, not their rare kanji.
 const usuallyKana = (word) => word.senses[0].tags.includes('uk');
 export const headword = (word) => (word.kanji.length && !usuallyKana(word) ? word.kanji[0] : word.kana[0]);
-export const reading = (word) => (headword(word) === word.kana[0] ? '' : word.kana[0]);
+
+// A word's reading as it is read: kana for Japanese, and for Chinese the stored tone
+// numbers written out with their marks, since ai4 hao4 is data and àihào is the word.
+export const reading = (word) => {
+  if (headword(word) === word.kana[0]) return '';
+  return showing.code === 'zh' ? markedPinyin(word.kana[0]) : word.kana[0];
+};
+
+// What to read aloud. Kana already spell a Japanese word out; pinyin would be read as
+// letters, so Chinese is spoken from its characters.
+export const spokenForm = (word) => (showing.code === 'zh' ? headword(word) : word.kana[0]);
+
 export const meaningText = (word, max = 3) => word.senses[0].gloss.slice(0, max).join('; ');
 
 const KANA = /[぀-ヿ]/;
@@ -258,8 +294,11 @@ function alignReading(written, wordReading) {
 }
 
 // The same word in 漢字{かんじ} notation, for storing text that rubyMarkup can show later.
-export const toMarkup = (written, wordReading) =>
-  alignReading(written, wordReading).map(({ text, rt }) => (rt ? `${text}{${rt}}` : text)).join('');
+// One hanzi is one syllable, so a Chinese word needs no lining up: 爱好{àihào}.
+export const toMarkup = (written, wordReading) => {
+  if (showing.code === 'zh') return wordReading ? `${written}{${wordReading}}` : written;
+  return alignReading(written, wordReading).map(({ text, rt }) => (rt ? `${text}{${rt}}` : text)).join('');
+};
 
 // Writes the reading above the kanji only: 乗る gets の over 乗, and る is left alone.
 export function furigana(written, wordReading, cls) {
@@ -274,8 +313,11 @@ export function furigana(written, wordReading, cls) {
 // above its kanji.
 const MARKED = /([㐀-鿿々〆ヶ]+)\{([^}]+)\}/g;
 
+// Tagged as the language on show: the same markup carries Japanese notes and Chinese
+// mistakes, and a Chinese sentence tagged Japanese is drawn in a Japanese font that lacks
+// the simplified characters (买, 东, 济), which then fall back to another font mid-line.
 export function rubyMarkup(text, cls) {
-  const el = h('span', { lang: 'ja', class: cls });
+  const el = h('span', { lang: showing.tag, class: cls });
   let at = 0;
   for (const match of text.matchAll(MARKED)) {
     el.append(text.slice(at, match.index), h('ruby', null, match[1], h('rt', null, match[2])));
@@ -288,8 +330,46 @@ export function rubyMarkup(text, cls) {
 // The same text as kana only, for reading aloud: 勉強{べんきょう} → べんきょう.
 export const markupReading = (text) => text.replace(MARKED, '$2');
 
-// A word's headline: the headword with furigana.
-export const wordTitle = (word) => furigana(headword(word), reading(word), 'entry-headword');
+// Pinyin above the hanzi, each syllable coloured by its tone. One character is one
+// syllable, so they line up directly; anything that doesn't line up (a word written with
+// an ellipsis, say) puts the whole reading over the whole word instead.
+function pinyinRuby(hanzi, pinyin, cls) {
+  const el = h('span', { lang: showing.tag, class: cls });
+  const chars = [...String(hanzi)];
+  const parts = toned(pinyin);
+  if (!pinyin) {
+    el.append(hanzi);
+  } else if (parts.length === chars.length) {
+    chars.forEach((ch, i) => el.append(
+      h('ruby', null, ch, h('rt', { class: `tone tone${parts[i].tone}` }, parts[i].text))));
+  } else {
+    el.append(h('ruby', null, hanzi, h('rt', { class: 'tone' }, markedSpaced(pinyin))));
+  }
+  return el;
+}
+
+// Pinyin on its own, each syllable coloured by its tone, from the stored tone numbers:
+// for when the reading is the answer rather than a gloss above the characters.
+export function tonedPinyin(stored, cls) {
+  const el = h('span', { class: cls });
+  toned(stored).forEach(({ text, tone }, i) => {
+    if (i) el.append(' ');
+    el.append(h('span', { class: `tone tone${tone}` }, text));
+  });
+  return el;
+}
+
+// A word with its reading above it, however the language on show writes it. This takes the
+// word rather than two strings because it needs the reading as stored — Chinese tone
+// numbers, which say what colour each syllable is — and not the marks reading() prints.
+export function wordRuby(word, cls) {
+  const written = headword(word);
+  const stored = written === word.kana[0] ? '' : word.kana[0];
+  return showing.code === 'zh' ? pinyinRuby(written, stored, cls) : furigana(written, stored, cls);
+}
+
+// A word's headline: the headword with its reading above it.
+export const wordTitle = (word) => wordRuby(word, 'entry-headword');
 
 const POS = {
   n: 'noun', pn: 'pronoun', v1: 'ichidan verb', vs: 'suru verb', 'vs-i': 'suru verb', 'vs-s': 'suru verb',
@@ -315,7 +395,7 @@ export const posText = (sense) => [...new Set(sense.pos.map(tagLabel))].join(', 
 export function badges(word) {
   return [
     word.common && h('span', { class: 'badge badge-common' }, 'common'),
-    word.jlpt > 0 && h('span', { class: `badge badge-jlpt n${word.jlpt}` }, `JLPT N${word.jlpt}`),
+    word.jlpt > 0 && h('span', { class: `badge badge-jlpt` }, showing.level.label(word.jlpt)),
   ];
 }
 
@@ -342,6 +422,7 @@ export function sensesList(word, limit = Infinity) {
 
 // Conjugation table for a verb or adjective; null for words that don't conjugate.
 export function formsPanel(word) {
+  if (showing.code !== 'ja') return null;
   const table = conjugations(word, headword(word), reading(word));
   if (!table) return null;
   return h('div', { class: 'detail-block' },
@@ -436,13 +517,13 @@ export function segmented(name, options, value, onChange) {
 // marker (js/pager.js) slides on the one that was clicked while app.js fades only the page
 // below it; the next page's picker then appears with its marker already in place.
 export function quizSwitch(active) {
-  const links = [['quiz', 'My words'], ['kana', 'Hiragana & katakana'], ['verbs', 'Verb forms'], ['grammar', 'Grammar'], ['mistakes', 'Mistakes']]
-    .map(([route, label]) => {
-      const count = route === 'mistakes' ? store.openMistakes().length : 0;
+  const links = showing.quizPages
+    .map(([page, label]) => {
+      const count = page === 'mistakes' ? store.openMistakes().length : 0;
       return h('a', {
-        href: `#/${route}`,
-        class: route === active ? 'on' : '',
-        'aria-current': route === active ? 'page' : null,
+        href: route(page),
+        class: page === active ? 'on' : '',
+        'aria-current': page === active ? 'page' : null,
       }, label, count > 0 && h('span', { class: 'count' }, ` ${count}`));
     });
   const nav = h('nav', { class: 'segmented quiz-switch', 'aria-label': 'Quiz type' }, links);

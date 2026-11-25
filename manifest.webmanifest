@@ -1,7 +1,7 @@
 {
-  "name": "Kotoba · Japanese dictionary and vocab trainer",
+  "name": "Kotoba · Japanese and Chinese vocab trainer",
   "short_name": "Kotoba",
-  "description": "Look up Japanese words, collect them, and quiz yourself with spaced repetition.",
+  "description": "Look up Japanese and Chinese words, collect them, and quiz yourself with spaced repetition.",
   "start_url": ".",
   "display": "standalone",
   "background_color": "#f4f4f6",

@@ -59,5 +59,12 @@
     "source": "Reference",
     "added": "2026-11-09",
     "tags": ["particles", "grammar", "reference"]
+  },
+  {
+    "id": "question-words",
+    "title": "Question words for N5",
+    "source": "Reference",
+    "added": "2026-11-25",
+    "tags": ["question words", "grammar", "reference", "N5"]
   }
 ]

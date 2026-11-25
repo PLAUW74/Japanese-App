@@ -3,12 +3,25 @@
 // users/{uid}/words/{wordId}, users/{uid}/meta/lists, users/{uid}/devices/{deviceId}
 // and users/{uid}/answers/{page} (what was typed into a note's blanks).
 // The app works the same without it; the Firebase SDK only loads once configured.
+//
+// Japanese keeps the paths above, the ones it has always used, so nothing already in the
+// account has to move and a device still running an older copy of the app keeps syncing.
+// Every other language gets its own collections beside them, named with its code.
 import config from './firebase-config.js';
 import * as store from './store.js';
 
 const SDK = 'https://www.gstatic.com/firebasejs/10.14.1';
 const FLUSH_DELAY = 1200;
 const BATCH_LIMIT = 450;
+
+// The KEYED collections (marks, the journal) follow the same rule: plain for Japanese,
+// prefixed with the language code for the rest.
+const paths = (lang) => ({
+  ...(lang === 'ja'
+    ? { words: ['words'], lists: ['meta', 'lists'], answers: ['answers'] }
+    : { words: [`${lang}_words`], lists: ['meta', `${lang}_lists`], answers: [`${lang}_answers`] }),
+  ...Object.fromEntries(store.KEYED.map((name) => [name, [lang === 'ja' ? name : `${lang}_${name}`]])),
+});
 
 // state: 'unconfigured' | 'loading' | 'signed-out' | 'connecting' | 'synced' | 'saving' | 'offline' | 'error'
 export const status = { state: config ? 'loading' : 'unconfigured', email: '', error: '' };
@@ -91,50 +104,78 @@ export async function signOut() {
 function start(user) {
   const { db, collection, doc, onSnapshot } = fb;
   const base = ['users', user.uid];
-  const first = { words: null, lists: undefined, answers: null };
+  // One of these per language; the first snapshot of each has to arrive before this device
+  // can tell what the account is missing.
+  const first = Object.fromEntries(store.LANGS.map((lang) =>
+    [lang, { words: null, lists: undefined, answers: null, ...Object.fromEntries(store.KEYED.map((n) => [n, null])) }]));
   session = { uid: user.uid, unsubscribers: [], ready: false };
   setStatus({ state: 'connecting', email: user.email || '', error: '' });
 
-  // Once both the words and the lists have arrived, upload what this device has that the account lacks.
+  const arrived = (part) => part.words !== null && part.lists !== undefined
+    && part.answers !== null && store.KEYED.every((name) => part[name] !== null);
+
+  // Once every language's words and lists have arrived, upload what this device has that
+  // the account lacks.
   const maybeReady = () => {
-    if (session.ready || first.words === null || first.lists === undefined || first.answers === null) return;
+    if (session.ready || !store.LANGS.every((lang) => arrived(first[lang]))) return;
     session.ready = true;
-    store.queueNewerThan(first.words, first.lists);
-    store.queueAnswersNewerThan(first.answers);
+    for (const lang of store.LANGS) {
+      store.queueNewerThan(lang, first[lang].words, first[lang].lists);
+      store.queueAnswersNewerThan(lang, first[lang].answers);
+      for (const name of store.KEYED) store.queueKeyedNewerThan(lang, name, first[lang][name]);
+    }
     flush();
   };
   const failed = (err) => setStatus({ state: 'error', error: describe(err) });
 
-  session.unsubscribers.push(onSnapshot(collection(db, ...base, 'words'), (snap) => {
-    store.applyRemote({ words: snap.docChanges().map((change) => change.doc.data()) });
-    if (first.words === null) {
-      first.words = Object.fromEntries(snap.docs.map((d) => [d.id, d.data().updatedAt || 0]));
-      maybeReady();
-    }
-  }, failed));
+  for (const lang of store.LANGS) {
+    const where = paths(lang);
+    const part = first[lang];
 
-  session.unsubscribers.push(onSnapshot(doc(db, ...base, 'meta', 'lists'), (snap) => {
-    const data = snap.data();
-    if (data) store.applyRemote({ lists: data });
-    if (first.lists === undefined) {
-      first.lists = data ? data.updatedAt || 0 : null;
-      maybeReady();
-    }
-  }, failed));
+    session.unsubscribers.push(onSnapshot(collection(db, ...base, ...where.words), (snap) => {
+      store.applyRemote(lang, { words: snap.docChanges().map((change) => change.doc.data()) });
+      if (part.words === null) {
+        part.words = Object.fromEntries(snap.docs.map((d) => [d.id, d.data().updatedAt || 0]));
+        maybeReady();
+      }
+    }, failed));
 
-  // What was typed into the blanks of each note page.
-  session.unsubscribers.push(onSnapshot(collection(db, ...base, 'answers'), (snap) => {
-    store.applyRemote({ answers: snap.docChanges().map((change) => change.doc.data()) });
-    if (first.answers === null) {
-      first.answers = Object.fromEntries(snap.docs.map((d) => [d.id, d.data().updatedAt || 0]));
-      maybeReady();
-    }
-  }, failed));
+    session.unsubscribers.push(onSnapshot(doc(db, ...base, ...where.lists), (snap) => {
+      const data = snap.data();
+      if (data) store.applyRemote(lang, { lists: data });
+      if (part.lists === undefined) {
+        part.lists = data ? data.updatedAt || 0 : null;
+        maybeReady();
+      }
+    }, failed));
 
+    // What was typed into the blanks of each note page.
+    session.unsubscribers.push(onSnapshot(collection(db, ...base, ...where.answers), (snap) => {
+      store.applyRemote(lang, { answers: snap.docChanges().map((change) => change.doc.data()) });
+      if (part.answers === null) {
+        part.answers = Object.fromEntries(snap.docs.map((d) => [d.id, d.data().updatedAt || 0]));
+        maybeReady();
+      }
+    }, failed));
+
+    // Marks (how each grammar point is going) and the writing journal: documents kept by
+    // id. The id is the document's name, so it is put back on what arrives.
+    for (const name of store.KEYED) {
+      session.unsubscribers.push(onSnapshot(collection(db, ...base, ...where[name]), (snap) => {
+        store.applyRemote(lang, { [name]: snap.docChanges().map((change) => ({ id: change.doc.id, ...change.doc.data() })) });
+        if (part[name] === null) {
+          part[name] = Object.fromEntries(snap.docs.map((d) => [d.id, d.data().updatedAt || 0]));
+          maybeReady();
+        }
+      }, failed));
+    }
+  }
+
+  // One document per device, holding every language; the store splits it up on arrival.
   session.unsubscribers.push(onSnapshot(collection(db, ...base, 'devices'), (snap) => {
     const others = {};
     for (const d of snap.docs) if (d.id !== store.deviceId) others[d.id] = d.data();
-    store.applyRemote({ others });
+    store.applyRemote(store.getLang(), { others });
   }, failed));
 }
 
@@ -155,12 +196,16 @@ const clean = (value) => JSON.parse(JSON.stringify(value));
 async function flush() {
   if (!session || !session.ready || flushing) return;
   const changes = store.takeDirty();
-  const writes = [
-    ...changes.words.map((word) => [['words', String(word.id)], word]),
-    ...(changes.lists ? [[['meta', 'lists'], changes.lists]] : []),
-    ...(changes.device ? [[['devices', store.deviceId], changes.device]] : []),
-    ...changes.answers.map((entry) => [['answers', entry.page], entry]),
-  ];
+  const writes = changes.device ? [[['devices', store.deviceId], changes.device]] : [];
+  for (const [lang, part] of Object.entries(changes.langs)) {
+    const where = paths(lang);
+    writes.push(
+      ...part.words.map((word) => [[...where.words, String(word.id)], word]),
+      ...(part.lists ? [[where.lists, part.lists]] : []),
+      ...part.answers.map((entry) => [[...where.answers, entry.page], entry]),
+      ...store.KEYED.flatMap((name) => (part[name] || []).map((entry) => [[...where[name], String(entry.id)], entry])),
+    );
+  }
   if (!writes.length) return;
 
   flushing = true;

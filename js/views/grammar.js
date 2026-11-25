@@ -1,17 +1,42 @@
-// Grammar quiz: fill-the-gap and JLPT-style word order questions from js/grammar-data.js.
+// Grammar quiz: fill-the-gap and JLPT-style word order questions from js/grammar-data.js,
+// and every answered question in the study notes (js/note-questions.js).
 import * as dict from '../dict.js';
 import * as store from '../store.js';
 import { QUESTIONS, TOPICS } from '../grammar-data.js';
-import { h, speak, icon, shuffle, segmented, quizSwitch, setChildren, rubyMarkup, markupReading, questionSpeaker, wordSaver } from '../ui.js';
+import { h, speak, icon, shuffle, segmented, quizSwitch, setChildren, rubyMarkup, markupReading, questionSpeaker, wordSaver, scriptTag } from '../ui.js';
 import { dropdown } from '../dropdown.js';
 import { wordOrder } from '../word-order.js';
+import { noteQuestions } from '../note-questions.js';
 
 const LEVELS = [['both', 'N5 + N4'], [5, 'N5'], [4, 'N4']];
 const COUNTS = [[1, '1'], [5, '5'], [10, '10'], [20, '20'], [0, 'All']];
 const GAP = '（　）';
 
-const matches = ({ grammarLevel, grammarTopic }) => QUESTIONS.filter((q) =>
+// The written questions, joined by the notes' once they have been read. They are read when
+// the grammar quiz is first opened, not when the app starts.
+let pool = QUESTIONS;
+let poolLoading = null;
+export function grammarPool() {
+  if (!poolLoading) {
+    poolLoading = noteQuestions().then((fromNotes) => {
+      pool = [...QUESTIONS, ...fromNotes];
+      return pool;
+    }, () => pool);
+  }
+  return poolLoading;
+}
+
+const matches = ({ grammarLevel, grammarTopic }) => pool.filter((q) =>
   (grammarLevel === 'both' || q.level === grammarLevel) && (grammarTopic === 'all' || q.topic === grammarTopic));
+
+// When each question was last asked, on this device. A quiz takes the questions asked
+// longest ago (or never) first, so it works through everything before it repeats any.
+const lastAsked = () => store.getState().settings.grammarSeen || {};
+const leastRecent = (questions) => {
+  const seen = lastAsked();
+  // Shuffled first, so questions asked equally long ago come in a random order.
+  return shuffle(questions).sort((a, b) => (seen[questionId(a)] || 0) - (seen[questionId(b)] || 0));
+};
 
 // The finished sentence as marked-up text, with the answer wrapped in [[ ]] for highlighting.
 export function solved(question) {
@@ -21,8 +46,10 @@ export function solved(question) {
 }
 
 // Renders text that may contain a [[highlighted]] part and the （　） gap.
+// It is shared with the mistakes list, which shows Chinese too, so it takes the language
+// on show rather than assuming Japanese.
 export function sentence(text, cls) {
-  const el = h('span', { lang: 'ja', class: cls });
+  const el = h('span', { lang: scriptTag(), class: cls });
   for (const [i, part] of text.split(/\[\[|\]\]/).entries()) {
     const pieces = part.split(GAP);
     pieces.forEach((piece, j) => {
@@ -67,8 +94,11 @@ export function createGrammarView() {
   function renderSetup() {
     const { settings } = store.getState();
     const set = (patch) => { store.saveSettings(patch); renderSetup(); };
-    const available = matches(settings).length;
+    const matching = matches(settings);
+    const available = matching.length;
     const size = settings.grammarCount ? Math.min(settings.grammarCount, available) : available;
+    const seen = lastAsked();
+    const fresh = matching.filter((q) => !seen[questionId(q)]).length;
     const topics = [['all', 'All topics'], ...Object.entries(TOPICS)];
 
     setChildren(el,
@@ -79,6 +109,9 @@ export function createGrammarView() {
         h('div', { class: 'field' }, h('span', { class: 'label' }, 'Topic'), dropdown('Topic', topics, settings.grammarTopic, (grammarTopic) => set({ grammarTopic }))),
         h('div', { class: 'field' }, h('span', { class: 'label' }, 'Questions'), segmented('Questions', COUNTS, settings.grammarCount, (grammarCount) => set({ grammarCount }))),
         available === 0 && h('p', { class: 'muted' }, 'No questions for that level and topic yet. Try another combination.'),
+        available > 0 && h('p', { class: 'muted small' }, fresh
+          ? `${available} questions here, ${fresh} of them not asked yet. Unasked questions come first, then the ones asked longest ago.`
+          : `${available} questions here, all asked at least once. The ones asked longest ago come first.`),
         h('button', { type: 'button', class: 'btn btn-primary btn-large', disabled: available === 0, onclick: start },
           available === 0 ? 'Start quiz' : `Start quiz · ${size} ${size === 1 ? 'question' : 'questions'}`),
       ),
@@ -89,7 +122,7 @@ export function createGrammarView() {
 
   function start() {
     const { settings } = store.getState();
-    let questions = shuffle(matches(settings));
+    let questions = leastRecent(matches(settings));
     if (settings.grammarCount) questions = questions.slice(0, settings.grammarCount);
     if (!questions.length) return;
     session = {
@@ -126,6 +159,7 @@ export function createGrammarView() {
     if (correct) session.right += 1;
     else session.missed.push(question);
     store.recordDrill(correct);
+    store.saveSettings({ grammarSeen: { ...lastAsked(), [questionId(question)]: Date.now() } });
     // Every word in the sentence shares the result (for Most missed words on the Stats page).
     dict.words(solved(question).replace(/\[\[|\]\]/g, '')).then((entries) => store.recordContext(entries, correct), () => {});
 
@@ -264,6 +298,8 @@ export function createGrammarView() {
   });
 
   renderSetup();
+  // The notes' questions arrive a moment later; the counts change when they do.
+  grammarPool().then(() => { if (!session) renderSetup(); });
   return {
     el,
     onShow: () => { if (!session) renderSetup(); },

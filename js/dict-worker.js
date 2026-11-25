@@ -413,6 +413,8 @@ function segments(parts) {
   return out;
 }
 
+const rank = (word) => (word.common ? 2 : 0) + (word.jlpt ? 1 : 0);
+
 const handlers = {
   words: ({ markup, parts }) => words(parts || markup),
   segments: ({ list }) => list.map(segments),

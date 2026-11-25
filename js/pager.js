@@ -99,5 +99,12 @@ export function createTabMarker(nav) {
   sizes.observe(nav);
   for (const tab of tabs) sizes.observe(tab);
 
-  return { moveTo };
+  // The topbar's tabs are rebuilt when the language changes, so its marker is replaced too.
+  function destroy() {
+    cancelAnimationFrame(frame);
+    sizes.disconnect();
+    marker.remove();
+  }
+
+  return { moveTo, destroy };
 }
